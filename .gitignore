@@ -1,0 +1,14 @@
+# Local generated evidence and temporary files
+output/
+tmp/
+
+# Python/Odoo local cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
