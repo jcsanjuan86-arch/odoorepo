@@ -26,7 +26,7 @@ The source archive is `prime-auto-boutique.dump.zip` from Odoo Online SaaS 19.4.
 | `x_material_request_for` | `autoboutique.mrf` | 1 | Header mapped; item lines are a corrected 19.0 design |
 | `x_vehicle_detailing_jo` | `autoboutique.detailing` | 1 | Core fields mapped |
 
-The remaining custom models (sales application, commission, release, documents, registration, insurance, dashboard and stage lookup tables) are not implemented in this first increment. There are 515 custom fields across 24 custom models in the source. The first increment preserves the critical entity links but not every old field or view layout.
+The following operational models are now rebuilt in Python: Sales Application, Vehicle Release, Vehicle Registration, Vehicle Insurance, Document Tracking, Sales Commission, and Management KPI Snapshot. They include company isolation, their main approval gates, and guided actions. There are 515 custom fields across 24 custom models in the source, so not every legacy field, view layout, report, attachment, calendar, chatter feature, or Salesforce integration is yet replicated.
 
 ## Migration order
 

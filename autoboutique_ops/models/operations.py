@@ -27,13 +27,20 @@ class Bid(models.Model):
     total_bid = fields.Monetary(currency_field="currency_id")
     currency_id = fields.Many2one("res.currency", related="company_id.currency_id")
     line_ids = fields.One2many("autoboutique.bid.line", "bid_id", string="Cars in Lot")
+    submitted_by = fields.Many2one("res.users", readonly=True)
+    submitted_on = fields.Datetime(readonly=True)
+    reviewed_by = fields.Many2one("res.users", readonly=True)
+    reviewed_on = fields.Datetime(readonly=True)
+    approved_by = fields.Many2one("res.users", readonly=True)
+    approved_on = fields.Datetime(readonly=True)
+    rejection_reason = fields.Text()
     notes = fields.Text()
 
     def action_approve_bid(self):
         for bid in self:
             if not bid.line_ids.filtered("selected"):
                 raise ValidationError("Select at least one car in the lot before approving the bid.")
-        self.write({"state": "won"})
+        self.write({"state": "won", "approved_by": self.env.user.id, "approved_on": fields.Datetime.now()})
 
 
 class BidLine(models.Model):
@@ -87,6 +94,8 @@ class Receiving(models.Model):
         for receiving in self:
             if receiving.state not in ("received", "verified"):
                 raise ValidationError("Mark the car received before creating its Vehicle Master record.")
+            if not receiving.receipt_id or receiving.receipt_id.state != "done":
+                raise ValidationError("Link a validated Inventory Receipt before creating the Vehicle Master.")
             if receiving.vehicle_id:
                 continue
             bid_line = receiving.bid_line_id
@@ -277,6 +286,26 @@ class QC(models.Model):
     )
     findings = fields.Text()
     repair_id = fields.Many2one("autoboutique.repair")
+    inspector_id = fields.Many2one("res.users", default=lambda self: self.env.user)
+    mileage = fields.Integer()
+    repair_required = fields.Boolean()
+
+    def action_process_result(self):
+        for qc in self:
+            if qc.result == "pending":
+                raise ValidationError("Record a QC result before processing the inspection.")
+            if qc.result == "pass":
+                qc.vehicle_id.state = "qc"
+                continue
+            qc.repair_required = True
+            qc.vehicle_id.state = "repair"
+            if not qc.repair_id:
+                qc.repair_id = self.env["autoboutique.repair"].create({
+                    "name": "Repair - %s" % qc.vehicle_id.name,
+                    "vehicle_id": qc.vehicle_id.id,
+                    "qc_id": qc.id,
+                    "company_id": qc.company_id.id,
+                })
 
 
 class Repair(models.Model):
@@ -294,6 +323,15 @@ class Repair(models.Model):
     )
     line_ids = fields.One2many("autoboutique.repair.line", "repair_id")
     notes = fields.Text()
+    estimated_total = fields.Monetary(compute="_compute_cost_totals", currency_field="currency_id")
+    actual_total = fields.Monetary(compute="_compute_cost_totals", currency_field="currency_id")
+    currency_id = fields.Many2one("res.currency", related="company_id.currency_id")
+
+    @api.depends("line_ids.estimated_cost", "line_ids.actual_cost")
+    def _compute_cost_totals(self):
+        for repair in self:
+            repair.estimated_total = sum(repair.line_ids.mapped("estimated_cost"))
+            repair.actual_total = sum(repair.line_ids.mapped("actual_cost"))
 
 
 class RepairLine(models.Model):
@@ -337,6 +375,8 @@ class MRF(models.Model):
         default="draft", required=True
     )
     item_ids = fields.One2many("autoboutique.mrf.line", "mrf_id", string="Items")
+    vendor_id = fields.Many2one("res.partner")
+    purchase_order_id = fields.Many2one("purchase.order", readonly=True)
     notes = fields.Text()
 
     @api.constrains("vehicle_id", "repair_id")
@@ -344,6 +384,29 @@ class MRF(models.Model):
         for mrf in self:
             if mrf.repair_id.vehicle_id != mrf.vehicle_id:
                 raise ValidationError("The MRF and repair must reference the same vehicle.")
+
+    def action_approve_request(self):
+        for mrf in self:
+            if not mrf.item_ids:
+                raise ValidationError("Add at least one requested part.")
+            mrf.approved_by = self.env.user
+            mrf.state = "approved"
+            purchase_items = mrf.item_ids.filtered(lambda line: line.source == "purchase")
+            if purchase_items:
+                if not mrf.vendor_id:
+                    raise ValidationError("Select a vendor before creating a draft RFQ for purchase items.")
+                order = self.env["purchase.order"].create({
+                    "partner_id": mrf.vendor_id.id,
+                    "company_id": mrf.company_id.id,
+                    "origin": "%s / %s" % (mrf.name, mrf.vehicle_id.name),
+                    "order_line": [(0, 0, {
+                        "product_id": line.product_id.id,
+                        "product_qty": line.quantity,
+                        "price_unit": line.product_id.standard_price,
+                        "name": line.product_id.display_name,
+                    }) for line in purchase_items],
+                })
+                mrf.purchase_order_id = order
 
 
 class MRFLine(models.Model):

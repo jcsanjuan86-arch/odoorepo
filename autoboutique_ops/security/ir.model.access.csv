@@ -9,3 +9,10 @@ access_autoboutique_repair_line_user,autoboutique.repair.line.user,model_autobou
 access_autoboutique_mrf_user,autoboutique.mrf.user,model_autoboutique_mrf,base.group_user,1,1,1,0
 access_autoboutique_mrf_line_user,autoboutique.mrf.line.user,model_autoboutique_mrf_line,base.group_user,1,1,1,0
 access_autoboutique_detailing_user,autoboutique.detailing.user,model_autoboutique_detailing,base.group_user,1,1,1,0
+access_autoboutique_sales_application_user,autoboutique.sales.application.user,model_autoboutique_sales_application,base.group_user,1,1,1,0
+access_autoboutique_vehicle_release_user,autoboutique.vehicle.release.user,model_autoboutique_vehicle_release,base.group_user,1,1,1,0
+access_autoboutique_registration_user,autoboutique.registration.user,model_autoboutique_registration,base.group_user,1,1,1,0
+access_autoboutique_insurance_user,autoboutique.insurance.user,model_autoboutique_insurance,base.group_user,1,1,1,0
+access_autoboutique_document_user,autoboutique.document.user,model_autoboutique_document,base.group_user,1,1,1,0
+access_autoboutique_commission_user,autoboutique.commission.user,model_autoboutique_commission,base.group_user,1,1,1,0
+access_autoboutique_dashboard_user,autoboutique.dashboard.user,model_autoboutique_dashboard,base.group_user,1,1,1,0
