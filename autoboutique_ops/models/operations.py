@@ -29,6 +29,12 @@ class Bid(models.Model):
     line_ids = fields.One2many("autoboutique.bid.line", "bid_id", string="Cars in Lot")
     notes = fields.Text()
 
+    def action_approve_bid(self):
+        for bid in self:
+            if not bid.line_ids.filtered("selected"):
+                raise ValidationError("Select at least one car in the lot before approving the bid.")
+        self.write({"state": "won"})
+
 
 class BidLine(models.Model):
     _name = "autoboutique.bid.line"
@@ -74,6 +80,38 @@ class Receiving(models.Model):
     )
     vehicle_id = fields.Many2one("autoboutique.vehicle")
 
+    def action_mark_received(self):
+        self.write({"state": "received"})
+
+    def action_create_vehicle_master(self):
+        for receiving in self:
+            if receiving.state not in ("received", "verified"):
+                raise ValidationError("Mark the car received before creating its Vehicle Master record.")
+            if receiving.vehicle_id:
+                continue
+            bid_line = receiving.bid_line_id
+            if not bid_line.vin:
+                raise ValidationError("Enter the VIN / chassis number on the bid-line first.")
+            vehicle = self.env["autoboutique.vehicle"].create({
+                "name": " ".join(filter(None, [bid_line.make, bid_line.model, bid_line.vin])),
+                "vin": bid_line.vin,
+                "make": bid_line.make,
+                "model": bid_line.model,
+                "model_year": bid_line.model_year,
+                "mileage": receiving.actual_mileage,
+                "supplier_id": receiving.bid_line_id.bid_id.supplier_id.id,
+                "bid_id": bid_line.bid_id.id,
+                "bid_line_id": bid_line.id,
+                "receiving_id": receiving.id,
+                "purchase_order_id": receiving.purchase_order_id.id,
+                "product_id": receiving.product_id.id,
+                "lot_id": receiving.lot_id.id,
+                "acquisition_cost": bid_line.allocated_cost,
+                "company_id": receiving.company_id.id,
+            })
+            receiving.vehicle_id = vehicle
+            bid_line.vehicle_id = vehicle
+
 
 class Vehicle(models.Model):
     _name = "autoboutique.vehicle"
@@ -97,11 +135,26 @@ class Vehicle(models.Model):
     purchase_order_line_id = fields.Many2one("purchase.order.line")
     product_id = fields.Many2one("product.product", string="Inventory Product")
     lot_id = fields.Many2one("stock.lot", string="VIN Serial / Lot")
+    sale_order_id = fields.Many2one("sale.order", string="Sales Order")
+    invoice_id = fields.Many2one("account.move", string="Customer Invoice")
+    payment_received = fields.Boolean(readonly=True)
+    release_date = fields.Date(readonly=True)
+    registration_complete = fields.Boolean()
+    insurance_complete = fields.Boolean()
     qc_ids = fields.One2many("autoboutique.qc", "vehicle_id")
     repair_ids = fields.One2many("autoboutique.repair", "vehicle_id")
     mrf_ids = fields.One2many("autoboutique.mrf", "vehicle_id")
     detailing_ids = fields.One2many("autoboutique.detailing", "vehicle_id")
     acquisition_cost = fields.Monetary(currency_field="currency_id")
+    repair_actual_cost = fields.Monetary(
+        string="Actual Repair Cost", compute="_compute_actual_costs", currency_field="currency_id"
+    )
+    detailing_actual_cost = fields.Monetary(
+        string="Actual Detailing Cost", compute="_compute_actual_costs", currency_field="currency_id"
+    )
+    actual_vehicle_cost = fields.Monetary(
+        string="Actual Vehicle Cost", compute="_compute_actual_costs", currency_field="currency_id"
+    )
     currency_id = fields.Many2one("res.currency", related="company_id.currency_id")
     documents_verified = fields.Boolean()
     ready_for_sale_approved = fields.Boolean()
@@ -109,9 +162,74 @@ class Vehicle(models.Model):
         [("receiving", "Receiving"), ("qc", "QC"),
          ("repair", "Repair"), ("detailing", "Detailing"),
          ("ready", "Ready for Sale"), ("reserved", "Reserved"),
-         ("sold", "Sold"), ("released", "Released")],
+         ("sold", "Sold"), ("payment", "Payment Received"),
+         ("released", "Released"), ("documents", "Documents Complete")],
         default="receiving", required=True
     )
+
+    @api.depends("acquisition_cost", "repair_ids.line_ids.actual_cost", "detailing_ids.actual_cost")
+    def _compute_actual_costs(self):
+        for vehicle in self:
+            repair_cost = sum(vehicle.repair_ids.mapped("line_ids.actual_cost"))
+            detailing_cost = sum(vehicle.detailing_ids.mapped("actual_cost"))
+            vehicle.repair_actual_cost = repair_cost
+            vehicle.detailing_actual_cost = detailing_cost
+            vehicle.actual_vehicle_cost = vehicle.acquisition_cost + repair_cost + detailing_cost
+
+    def _require_initial_qc(self):
+        if not self.qc_ids.filtered(lambda q: q.inspection_type == "initial" and q.result == "pass"):
+            raise ValidationError("Record a passing initial QC before moving to repair.")
+
+    def _require_final_qc(self):
+        if not self.qc_ids.filtered(lambda q: q.inspection_type == "final" and q.result == "pass"):
+            raise ValidationError("Record a passing final QC before continuing.")
+
+    def action_start_qc(self):
+        self.write({"state": "qc"})
+
+    def action_start_repair(self):
+        self._require_initial_qc()
+        self.write({"state": "repair"})
+
+    def action_start_detailing(self):
+        self._require_final_qc()
+        if self.repair_ids.filtered(lambda r: r.state != "done"):
+            raise ValidationError("Complete all repair assessments first.")
+        if self.mrf_ids.filtered(lambda m: m.state != "closed"):
+            raise ValidationError("Close all material requests first.")
+        self.write({"state": "detailing"})
+
+    def action_mark_ready_for_sale(self):
+        self.write({"state": "ready"})
+
+    def action_mark_reserved(self):
+        if not self.sale_order_id:
+            raise ValidationError("Link the confirmed Sales Order before reserving this vehicle.")
+        self.write({"state": "reserved"})
+
+    def action_mark_sold(self):
+        if not self.sale_order_id:
+            raise ValidationError("Link the Sales Order before marking this vehicle sold.")
+        self.write({"state": "sold"})
+
+    def action_confirm_payment(self):
+        if not self.invoice_id or self.invoice_id.state != "posted":
+            raise ValidationError("Link a posted customer invoice before recording payment.")
+        if self.invoice_id.payment_state not in ("in_payment", "paid"):
+            raise ValidationError("The linked invoice has not received payment yet.")
+        self.write({"payment_received": True, "state": "payment"})
+
+    def action_release_vehicle(self):
+        if not self.payment_received:
+            raise ValidationError("Record customer payment before releasing the vehicle.")
+        self.write({"release_date": fields.Date.context_today(self), "state": "released"})
+
+    def action_complete_documents(self):
+        if not self.release_date:
+            raise ValidationError("Release the vehicle before completing handover documents.")
+        if not self.registration_complete or not self.insurance_complete or not self.documents_verified:
+            raise ValidationError("Complete registration, insurance, and required documents first.")
+        self.write({"state": "documents"})
 
     @api.constrains("vin", "company_id")
     def _check_unique_vin(self):

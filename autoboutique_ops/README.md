@@ -4,7 +4,9 @@ This is the first, deliberately bounded rebuild of the SaaS 19.4 Studio workflow
 
 ## Workflow
 
-Bid lot (many cars) → receiving → Vehicle Master → initial QC → repair assessment → multi-item MRF → repair completion → final QC → detailing approval → ready for sale.
+Bid lot (many cars) → approval and native purchase order → receiving → Vehicle Master/VIN → initial QC → repair assessment → multi-item MRF → stock issue or approved purchase → repair completion → final QC → detailing approval → ready for sale → sales order → payment → vehicle release → registration, insurance, and documents.
+
+The Vehicle Master has guided workflow buttons for the stage changes from QC through handover. They only update the workflow status after the user has created and verified the required linked records. They deliberately do not create or validate a Purchase Order, stock move, customer invoice, payment, or release automatically.
 
 The Vehicle Master checks the final QC, completed repairs, closed MRFs, approved detailing, verified documents, and sale readiness approval before the `Ready for Sale` stage can be saved. Users must validate actual inventory movements and accounting entries in native Odoo apps. MRF item lines record the related purchase line or stock move and issued quantity.
 
