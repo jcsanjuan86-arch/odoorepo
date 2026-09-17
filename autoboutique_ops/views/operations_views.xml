@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bid_list" model="ir.ui.view">
+        <field name="name">autoboutique.bid.list</field>
+        <field name="model">autoboutique.bid</field>
+        <field name="arch" type="xml">
+            <list><field name="name"/><field name="supplier_id"/><field name="bid_date"/><field name="total_bid"/><field name="state"/><field name="company_id" groups="base.group_multi_company"/></list>
+        </field>
+    </record>
+    <record id="view_bid_form" model="ir.ui.view">
+        <field name="name">autoboutique.bid.form</field>
+        <field name="model">autoboutique.bid</field>
+        <field name="arch" type="xml">
+            <form string="Vehicle Bid Lot"><sheet>
+                <group><group><field name="name"/><field name="supplier_id"/><field name="bid_date"/></group><group><field name="state"/><field name="total_bid"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+                <notebook><page string="Cars in Lot"><field name="line_ids"><list editable="bottom"><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="allocated_cost"/><field name="selected"/></list></field></page><page string="Notes"><field name="notes"/></page></notebook>
+            </sheet></form>
+        </field>
+    </record>
+    <record id="view_receiving_list" model="ir.ui.view">
+        <field name="name">autoboutique.receiving.list</field><field name="model">autoboutique.receiving</field>
+        <field name="arch" type="xml"><list><field name="name"/><field name="bid_line_id"/><field name="purchase_order_id"/><field name="receipt_id"/><field name="vehicle_id"/><field name="state"/></list></field>
+    </record>
+    <record id="view_receiving_form" model="ir.ui.view">
+        <field name="name">autoboutique.receiving.form</field><field name="model">autoboutique.receiving</field>
+        <field name="arch" type="xml"><form><sheet><group><group><field name="name"/><field name="bid_line_id"/><field name="received_date"/><field name="state"/></group><group><field name="purchase_order_id"/><field name="receipt_id"/><field name="product_id"/><field name="lot_id"/><field name="vehicle_id"/></group></group><group><field name="actual_mileage"/><field name="condition"/></group></sheet></form></field>
+    </record>
+    <record id="view_vehicle_list" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.list</field><field name="model">autoboutique.vehicle</field>
+        <field name="arch" type="xml"><list><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="state"/><field name="product_id"/><field name="lot_id"/></list></field>
+    </record>
+    <record id="view_vehicle_form" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form</field><field name="model">autoboutique.vehicle</field>
+        <field name="arch" type="xml"><form string="Vehicle Master"><sheet><group><group><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="variant"/><field name="plate_number"/><field name="mileage"/></group><group><field name="state"/><field name="supplier_id"/><field name="acquisition_cost"/><field name="documents_verified"/><field name="ready_for_sale_approved"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+            <notebook><page string="Acquisition"><group><field name="bid_id"/><field name="bid_line_id"/><field name="receiving_id"/><field name="purchase_order_id"/><field name="purchase_order_line_id"/><field name="product_id"/><field name="lot_id"/></group></page>
+            <page string="QC"><field name="qc_ids"><list><field name="name"/><field name="inspection_date"/><field name="inspection_type"/><field name="result"/><field name="repair_id"/></list></field></page>
+            <page string="Repair"><field name="repair_ids"><list><field name="name"/><field name="qc_id"/><field name="state"/></list></field></page>
+            <page string="Materials"><field name="mrf_ids"><list><field name="name"/><field name="repair_id"/><field name="state"/></list></field></page>
+            <page string="Detailing"><field name="detailing_ids"><list><field name="name"/><field name="state"/><field name="supervisor_id"/><field name="actual_cost"/></list></field></page></notebook>
+        </sheet></form></field>
+    </record>
+    <record id="view_qc_list" model="ir.ui.view"><field name="name">autoboutique.qc.list</field><field name="model">autoboutique.qc</field><field name="arch" type="xml"><list><field name="name"/><field name="vehicle_id"/><field name="inspection_type"/><field name="inspection_date"/><field name="result"/></list></field></record>
+    <record id="view_qc_form" model="ir.ui.view"><field name="name">autoboutique.qc.form</field><field name="model">autoboutique.qc</field><field name="arch" type="xml"><form><sheet><group><field name="name"/><field name="vehicle_id"/><field name="inspection_type"/><field name="inspection_date"/><field name="result"/><field name="repair_id"/><field name="findings"/></group></sheet></form></field></record>
+    <record id="view_repair_list" model="ir.ui.view"><field name="name">autoboutique.repair.list</field><field name="model">autoboutique.repair</field><field name="arch" type="xml"><list><field name="name"/><field name="vehicle_id"/><field name="qc_id"/><field name="state"/></list></field></record>
+    <record id="view_repair_form" model="ir.ui.view"><field name="name">autoboutique.repair.form</field><field name="model">autoboutique.repair</field><field name="arch" type="xml"><form><sheet><group><field name="name"/><field name="vehicle_id"/><field name="qc_id"/><field name="state"/></group><notebook><page string="Cost Lines"><field name="line_ids"><list editable="bottom"><field name="name"/><field name="cost_type"/><field name="product_id"/><field name="quantity"/><field name="estimated_cost"/><field name="actual_cost"/><field name="consumed"/></list></field></page><page string="Notes"><field name="notes"/></page></notebook></sheet></form></field></record>
+    <record id="view_mrf_list" model="ir.ui.view"><field name="name">autoboutique.mrf.list</field><field name="model">autoboutique.mrf</field><field name="arch" type="xml"><list><field name="name"/><field name="vehicle_id"/><field name="repair_id"/><field name="requested_by"/><field name="state"/></list></field></record>
+    <record id="view_mrf_form" model="ir.ui.view"><field name="name">autoboutique.mrf.form</field><field name="model">autoboutique.mrf</field><field name="arch" type="xml"><form><sheet><group><field name="name"/><field name="vehicle_id"/><field name="repair_id"/><field name="requested_by"/><field name="approved_by"/><field name="state"/></group><notebook><page string="Items"><field name="item_ids"><list editable="bottom"><field name="product_id"/><field name="repair_line_id"/><field name="quantity"/><field name="source"/><field name="issued_quantity"/><field name="purchase_order_line_id"/><field name="stock_move_id"/></list></field></page><page string="Notes"><field name="notes"/></page></notebook></sheet></form></field></record>
+    <record id="view_detailing_list" model="ir.ui.view"><field name="name">autoboutique.detailing.list</field><field name="model">autoboutique.detailing</field><field name="arch" type="xml"><list><field name="name"/><field name="vehicle_id"/><field name="state"/><field name="supervisor_id"/><field name="actual_cost"/></list></field></record>
+    <record id="view_detailing_form" model="ir.ui.view"><field name="name">autoboutique.detailing.form</field><field name="model">autoboutique.detailing</field><field name="arch" type="xml"><form><sheet><group><field name="name"/><field name="vehicle_id"/><field name="state"/><field name="supervisor_id"/><field name="actual_cost"/></group><group><field name="exterior_done"/><field name="interior_done"/><field name="engine_bay_done"/><field name="paint_done"/></group><field name="notes"/></sheet></form></field></record>
+
+    <record id="action_bids" model="ir.actions.act_window"><field name="name">Bid Lots</field><field name="res_model">autoboutique.bid</field><field name="view_mode">list,form</field></record>
+    <record id="action_receiving" model="ir.actions.act_window"><field name="name">Vehicle Receiving</field><field name="res_model">autoboutique.receiving</field><field name="view_mode">list,form</field></record>
+    <record id="action_vehicles" model="ir.actions.act_window"><field name="name">Vehicle Master</field><field name="res_model">autoboutique.vehicle</field><field name="view_mode">list,form</field></record>
+    <record id="action_qc" model="ir.actions.act_window"><field name="name">QC Inspections</field><field name="res_model">autoboutique.qc</field><field name="view_mode">list,form</field></record>
+    <record id="action_repairs" model="ir.actions.act_window"><field name="name">Repair Assessments</field><field name="res_model">autoboutique.repair</field><field name="view_mode">list,form</field></record>
+    <record id="action_mrfs" model="ir.actions.act_window"><field name="name">Material Requests</field><field name="res_model">autoboutique.mrf</field><field name="view_mode">list,form</field></record>
+    <record id="action_detailing" model="ir.actions.act_window"><field name="name">Detailing Jobs</field><field name="res_model">autoboutique.detailing</field><field name="view_mode">list,form</field></record>
+    <menuitem id="menu_root" name="Autoboutique" sequence="45"/>
+    <menuitem id="menu_bids" name="Bid Lots" parent="menu_root" action="action_bids" sequence="10"/>
+    <menuitem id="menu_receiving" name="Vehicle Receiving" parent="menu_root" action="action_receiving" sequence="20"/>
+    <menuitem id="menu_vehicles" name="Vehicle Master" parent="menu_root" action="action_vehicles" sequence="30"/>
+    <menuitem id="menu_qc" name="QC Inspections" parent="menu_root" action="action_qc" sequence="40"/>
+    <menuitem id="menu_repairs" name="Repair Assessments" parent="menu_root" action="action_repairs" sequence="50"/>
+    <menuitem id="menu_mrfs" name="Material Requests" parent="menu_root" action="action_mrfs" sequence="60"/>
+    <menuitem id="menu_detailing" name="Detailing Jobs" parent="menu_root" action="action_detailing" sequence="70"/>
+</odoo>
