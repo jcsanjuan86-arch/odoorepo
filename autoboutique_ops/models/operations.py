@@ -40,6 +40,19 @@ class Bid(models.Model):
         for bid in self:
             if not bid.line_ids.filtered("selected"):
                 raise ValidationError("Select at least one car in the lot before approving the bid.")
+            for line in bid.line_ids.filtered("selected"):
+                receiving = self.env["autoboutique.receiving"].search([
+                    ("bid_line_id", "=", line.id),
+                    ("company_id", "=", bid.company_id.id),
+                ], limit=1)
+                if not receiving:
+                    self.env["autoboutique.receiving"].create({
+                        "name": "Expected Receipt - %s" % line.name,
+                        "bid_line_id": line.id,
+                        "product_id": line.vehicle_id.product_id.id if line.vehicle_id else False,
+                        "state": "expected",
+                        "company_id": bid.company_id.id,
+                    })
         self.write({"state": "won", "approved_by": self.env.user.id, "approved_on": fields.Datetime.now()})
 
 
@@ -82,12 +95,18 @@ class Receiving(models.Model):
     actual_mileage = fields.Integer()
     condition = fields.Text()
     state = fields.Selection(
-        [("draft", "Draft"), ("received", "Received"),
-         ("verified", "Verified")], default="draft", required=True
+        [("draft", "Draft"), ("expected", "Expected"),
+         ("arrived", "Arrived"), ("checking", "Physical Checking"),
+         ("confirmed", "Information Confirmed"),
+         ("received", "Received / For Initial QC"),
+         ("verified", "Verified"), ("rejected", "Rejected / Returned"),
+         ("cancelled", "Cancelled")], default="draft", required=True
     )
     vehicle_id = fields.Many2one("autoboutique.vehicle")
 
     def action_mark_received(self):
+        if not self.receipt_id or self.receipt_id.state != "done":
+            raise ValidationError("Link a validated Inventory Receipt before marking this vehicle received.")
         self.write({"state": "received"})
 
     def action_create_vehicle_master(self):
