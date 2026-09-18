@@ -1,10 +1,24 @@
-from odoo import api, models
+from odoo import api, models, tools
 
 
 class IrUiMenu(models.Model):
     """Keep the vehicle-operation app out of non-vehicle companies."""
 
     _inherit = "ir.ui.menu"
+
+    @api.model
+    @tools.ormcache(
+        "self.env.uid", "debug", "self.env.lang", "self.env.company.id"
+    )
+    def load_menus(self, debug):
+        """Cache the menu payload separately for each active company."""
+        return super().load_menus.__wrapped__(self, debug)
+
+    @api.model
+    @tools.ormcache("self.env.uid", "self.env.lang", "self.env.company.id")
+    def load_menus_root(self):
+        """Cache the app-launcher roots separately for each active company."""
+        return super().load_menus_root.__wrapped__(self)
 
     @api.model
     def _visible_menu_ids(self, debug=False):
