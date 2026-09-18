@@ -1,6 +1,6 @@
 {
     "name": "Autoboutique Vehicle Operations",
-    "version": "19.0.1.3.1",
+    "version": "19.0.1.3.2",
     "summary": "Vehicle acquisition, inspection, repair, materials, and detailing",
     "author": "Prime Auto Boutique",
     "category": "Inventory",
@@ -12,6 +12,11 @@
         "views/operations_views.xml",
         "views/extended_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "autoboutique_ops/static/src/js/company_switch_reload.js",
+        ],
+    },
     "application": True,
     "installable": True,
 }
