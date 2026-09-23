@@ -47,6 +47,16 @@
 #top .navbar-brand.logo { background: url("/trendy_overruns_website/static/src/img/trendy-overruns-logo.png") left center / contain no-repeat; height: 44px; min-width: 185px; }
 #top .navbar-brand.logo > span { display: none; }
 
+.to-branches-page { background: var(--to-cream); color: var(--to-ink); }
+.to-branches-hero { background: var(--to-stone); padding: 6rem 0 5rem; }
+.to-branches-hero h1, .to-branch-card h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.04em; }
+.to-branches-hero h1 { font-size: clamp(2.8rem, 5vw, 5rem); margin: 0 0 1rem; }
+.to-branches-hero p:last-child { font-size: 1.1rem; margin: 0; }
+.to-branches-list { padding-bottom: 6rem; padding-top: 4rem; }
+.to-branch-card { background: #fff; border-top: 3px solid var(--to-gold); box-shadow: 0 8px 25px rgba(31,26,25,.06); height: 100%; padding: 2rem; }
+.to-branch-card h2 { font-size: 2rem; margin: 0 0 1rem; }
+.to-branch-card p { color: #625b57; line-height: 1.7; margin: 0; }
+
 .to-lead { font-size: 1.08rem; line-height: 1.7; max-width: 460px; }
 .to-btn-primary { background: var(--to-ink); border: 1px solid var(--to-ink); border-radius: 0; color: #fff; font-weight: 700; padding: .85rem 1.35rem; text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
 .to-btn-primary:hover { background: var(--to-rose); border-color: var(--to-rose); color: #fff; }

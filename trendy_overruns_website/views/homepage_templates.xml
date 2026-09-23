@@ -68,4 +68,43 @@
         </xpath>
     </template>
 
+    <record id="page_branches" model="website.page">
+        <field name="name">Branches</field>
+        <field name="url">/branches</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">trendy_overruns_website.page_branches</field>
+        <field name="arch" type="xml">
+            <t t-name="trendy_overruns_website.page_branches">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure to-branches-page">
+                        <section class="to-branches-hero">
+                            <div class="container">
+                                <p class="to-eyebrow">TRENDY OVERRUNS BOUTIQUE</p>
+                                <h1>Visit a branch near you.</h1>
+                                <p>Find us across Metro Manila for your next overrun find.</p>
+                            </div>
+                        </section>
+                        <section class="container to-branches-list">
+                            <div class="row g-4">
+                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Fairview</h2><p>Lot 8, Blk 11, Dahlia Ave,<br/>West Fairview, Quezon City,<br/>Metro Manila</p></article></div>
+                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Katipunan</h2><p>Ext, 226 Katipunan Ave,<br/>Project 4, Quezon City,<br/>1800 Metro Manila</p></article></div>
+                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Lilac, Marikina City</h2><p>106 Lilac St, Concepcion Dos,<br/>Marikina City,<br/>1811 Metro Manila</p></article></div>
+                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Tomas Morato</h2><p>Corner Tomas Morato Ave,<br/>Diliman, Quezon City,<br/>Metro Manila</p></article></div>
+                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Valenzuela</h2><p>Unit 17-B, 2/F Valtown Center,<br/>Valenzuela</p></article></div>
+                            </div>
+                        </section>
+                    </div>
+                </t>
+            </t>
+        </field>
+    </record>
+
+    <record id="menu_branches" model="website.menu">
+        <field name="name">Branches</field>
+        <field name="url">/branches</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="35"/>
+    </record>
+
 </odoo>
