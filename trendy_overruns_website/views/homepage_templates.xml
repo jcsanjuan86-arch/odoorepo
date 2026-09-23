@@ -10,6 +10,7 @@
                 <section class="to-hero">
                     <div class="container to-hero__inner">
                         <div class="to-hero__copy">
+                            <img class="to-brand-logo" src="/trendy_overruns_website/static/src/img/trendy-overruns-logo.png" alt="Trendy Overruns Boutique"/>
                             <p class="to-eyebrow">TRENDY OVERRUNS BOUTIQUE</p>
                             <h1>Curated fashion,<br/>within reach.</h1>
                             <p class="to-lead">Fresh overrun finds, activewear, and everyday pieces selected for your style.</p>
