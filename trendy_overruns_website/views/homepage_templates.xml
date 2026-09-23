@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        The homepage uses normal Odoo shop URLs. Products, prices, variants,
+        inventory, cart, checkout, and payment remain managed by website_sale.
+    -->
+    <template id="homepage" inherit_id="website.homepage" name="Trendy Overruns Homepage">
+        <xpath expr="//main" position="replace">
+            <main id="wrap" class="oe_structure trendy-overruns-homepage">
+                <section class="to-hero">
+                    <div class="container to-hero__inner">
+                        <div class="to-hero__copy">
+                            <p class="to-eyebrow">TRENDY OVERRUNS BOUTIQUE</p>
+                            <h1>Curated fashion,<br/>within reach.</h1>
+                            <p class="to-lead">Fresh overrun finds, activewear, and everyday pieces selected for your style.</p>
+                            <div class="to-hero__actions">
+                                <a class="btn to-btn-primary" href="/shop">Shop new arrivals</a>
+                                <a class="to-text-link" href="/shop">View all pieces <span aria-hidden="true">→</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="to-assurances" aria-label="Shop benefits">
+                    <div class="container">
+                        <div class="row g-4">
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>01</span><div><strong>Curated finds</strong><small>Pieces selected with care</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>02</span><div><strong>Style made easy</strong><small>Everyday looks, one shop</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>03</span><div><strong>Affordable picks</strong><small>Fashion within reach</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>04</span><div><strong>Shop with ease</strong><small>Order securely online</small></div></div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="to-collection container">
+                    <div class="to-section-heading">
+                        <div>
+                            <p class="to-eyebrow">THE EDIT</p>
+                            <h2>Made for every day.</h2>
+                        </div>
+                        <a class="to-text-link" href="/shop">Shop the collection <span aria-hidden="true">→</span></a>
+                    </div>
+                    <div class="to-mosaic">
+                        <a class="to-card to-card--colors" href="/shop" aria-label="Shop color collections">
+                            <img src="/trendy_overruns_website/static/src/img/athletic-colors-collection.png" alt="Four activewear color options" loading="lazy"/>
+                            <span>Color stories</span>
+                        </a>
+                        <a class="to-card to-card--active" href="/shop" aria-label="Shop activewear">
+                            <img src="/trendy_overruns_website/static/src/img/activewear-collection.png" alt="Sage green activewear collection" loading="lazy"/>
+                            <span>Activewear edit</span>
+                        </a>
+                        <a class="to-card to-card--flatlay" href="/shop" aria-label="Shop new arrivals">
+                            <img src="/trendy_overruns_website/static/src/img/trendy-overruns-hero.png" alt="Curated neutral fashion pieces" loading="lazy"/>
+                            <span>New arrivals</span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="to-shop-cta">
+                    <div class="container text-center">
+                        <p class="to-eyebrow">YOUR NEXT LOOK STARTS HERE</p>
+                        <h2>Find something you will love.</h2>
+                        <a class="btn to-btn-primary" href="/shop">Shop Trendy Overruns</a>
+                    </div>
+                </section>
+            </main>
+        </xpath>
+    </template>
+</odoo>
