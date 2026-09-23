@@ -68,7 +68,7 @@
     <record id="action_repairs" model="ir.actions.act_window"><field name="name">Repair Assessments</field><field name="res_model">autoboutique.repair</field><field name="view_mode">list,form</field></record>
     <record id="action_mrfs" model="ir.actions.act_window"><field name="name">Material Requests</field><field name="res_model">autoboutique.mrf</field><field name="view_mode">list,form</field></record>
     <record id="action_detailing" model="ir.actions.act_window"><field name="name">Detailing Jobs</field><field name="res_model">autoboutique.detailing</field><field name="view_mode">list,form</field></record>
-    <menuitem id="menu_root" name="Autoboutique" sequence="45"/>
+    <menuitem id="menu_root" name="Autoboutique" action="action_vehicles" web_icon="autoboutique_ops,static/description/icon.svg" sequence="45"/>
     <menuitem id="menu_bids" name="Bid Lots" parent="menu_root" action="action_bids" sequence="10"/>
     <menuitem id="menu_receiving" name="Vehicle Receiving" parent="menu_root" action="action_receiving" sequence="20"/>
     <menuitem id="menu_vehicles" name="Vehicle Master" parent="menu_root" action="action_vehicles" sequence="30"/>
