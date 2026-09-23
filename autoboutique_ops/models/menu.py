@@ -21,19 +21,6 @@ class IrUiMenu(models.Model):
         return super().load_menus_root.__wrapped__(self)
 
     @api.model
-    @tools.ormcache(
-        "self.env.uid", "debug", "self.env.lang", "self.env.company.id"
-    )
-    def load_web_menus(self, debug):
-        """Odoo 19 web clients load their launcher from this menu payload.
-
-        The active company must be part of the cache key, otherwise a user who
-        first opens Overruns keeps its filtered app list after switching to
-        Autoboutique.
-        """
-        return super().load_web_menus.__wrapped__(self, debug)
-
-    @api.model
     def _visible_menu_ids(self, debug=False):
         """Hide the complete Autoboutique menu tree outside Autoboutique.
 
