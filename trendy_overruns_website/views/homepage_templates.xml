@@ -68,11 +68,4 @@
         </xpath>
     </template>
 
-    <template id="layout_branding" inherit_id="website.layout" name="Trendy Overruns Website Branding">
-        <xpath expr="//a[@data-name='Navbar Logo']//span[@role='img']" position="replace">
-            <span role="img" aria-label="Trendy Overruns Boutique" title="Trendy Overruns Boutique">
-                <img src="/trendy_overruns_website/static/src/img/trendy-overruns-logo.png" class="img img-fluid to-navbar-logo" alt="Trendy Overruns Boutique" loading="lazy"/>
-            </span>
-        </xpath>
-    </template>
 </odoo>
