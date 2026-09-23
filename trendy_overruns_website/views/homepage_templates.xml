@@ -5,8 +5,8 @@
         inventory, cart, checkout, and payment remain managed by website_sale.
     -->
     <template id="homepage" inherit_id="website.homepage" name="Trendy Overruns Homepage">
-        <xpath expr="//main" position="replace">
-            <main id="wrap" class="oe_structure trendy-overruns-homepage">
+    <xpath expr="//div[@id='wrap']" position="replace">
+        <div id="wrap" class="oe_structure trendy-overruns-homepage">
                 <section class="to-hero">
                     <div class="container to-hero__inner">
                         <div class="to-hero__copy">
@@ -63,7 +63,7 @@
                         <a class="btn to-btn-primary" href="/shop">Shop Trendy Overruns</a>
                     </div>
                 </section>
-            </main>
+        </div>
         </xpath>
     </template>
 </odoo>
