@@ -34,7 +34,7 @@
     align-items: center;
     background: linear-gradient(90deg, rgba(251,249,245,.98) 0%, rgba(251,249,245,.83) 38%, rgba(251,249,245,.08) 67%), url("/trendy_overruns_website/static/src/img/trendy-overruns-hero.png") center / cover no-repeat;
     display: flex;
-    min-height: min(690px, 82vh);
+    min-height: 690px;
 
     &__inner { width: 100%; }
     &__copy { max-width: 580px; padding: 5rem 0; }
