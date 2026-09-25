@@ -68,6 +68,11 @@ class Website(models.Model):
         overruns_pages.write({
             "website_id": overruns_site.id, "is_published": True,
         })
+        overruns_home = self.env.ref(
+            "trendy_overruns_website.page_home", raise_if_not_found=False
+        )
+        if overruns_home:
+            overruns_home.write({"url": "/"})
 
         branches_page = self.env.ref(
             "trendy_overruns_website.page_branches", raise_if_not_found=False

@@ -73,7 +73,8 @@
 
     <record id="page_home" model="website.page">
         <field name="name">Trendy Overruns Home</field>
-        <field name="url">/</field>
+        <!-- The setup hook changes this to / after assigning the page to Overruns. -->
+        <field name="url">/trendy-overruns-home</field>
         <field name="type">qweb</field>
         <field name="is_published" eval="True"/>
         <field name="key">trendy_overruns_website.home</field>
