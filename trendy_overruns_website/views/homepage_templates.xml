@@ -4,9 +4,8 @@
         The homepage uses normal Odoo shop URLs. Products, prices, variants,
         inventory, cart, checkout, and payment remain managed by website_sale.
     -->
-    <template id="homepage" inherit_id="website.homepage" name="Trendy Overruns Homepage">
-    <xpath expr="//div[@id='wrap']" position="replace">
-        <div id="wrap" t-if="website.company_id.name == 'Overruns'" class="oe_structure trendy-overruns-homepage">
+    <template id="homepage_content" name="Trendy Overruns Homepage Content">
+        <div id="wrap" class="oe_structure trendy-overruns-homepage">
                 <section class="to-hero">
                     <div class="container to-hero__inner">
                         <div class="to-hero__copy">
@@ -65,8 +64,27 @@
                     </div>
                 </section>
         </div>
-        </xpath>
     </template>
+
+    <!-- Disable the former global homepage override on module upgrade. -->
+    <record id="homepage" model="ir.ui.view">
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="page_home" model="website.page">
+        <field name="name">Trendy Overruns Home</field>
+        <field name="url">/</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">trendy_overruns_website.home</field>
+        <field name="arch" type="xml">
+            <t t-name="trendy_overruns_website.home">
+                <t t-call="website.layout">
+                    <t t-call="trendy_overruns_website.homepage_content"/>
+                </t>
+            </t>
+        </field>
+    </record>
 
     <record id="page_branches" model="website.page">
         <field name="name">Branches</field>

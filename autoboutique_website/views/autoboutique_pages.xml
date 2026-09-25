@@ -23,8 +23,10 @@
             </div>
         </xpath>
     </template>
+    <!-- The public homepage is the website-specific page below, not a global override. -->
+    <record id="homepage" model="ir.ui.view"><field name="active" eval="False"/></record>
     <record id="page_home" model="website.page">
-        <field name="name">Autoboutique Home</field><field name="url">/autoboutique-home</field><field name="type">qweb</field>
+        <field name="name">Autoboutique Home</field><field name="url">/</field><field name="type">qweb</field>
         <field name="is_published" eval="True"/><field name="key">autoboutique_website.home</field>
         <field name="arch" type="xml"><t t-name="autoboutique_website.home"><t t-call="website.layout">
             <div id="wrap" class="ab-site">

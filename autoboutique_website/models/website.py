@@ -60,6 +60,15 @@ class Website(models.Model):
             "parent_id": autoboutique_site.menu_id.id,
         })
 
+        overruns_pages = self.env["website.page"]
+        for xmlid in ("page_home", "page_branches"):
+            overruns_pages |= self.env.ref(
+                f"trendy_overruns_website.{xmlid}", raise_if_not_found=False
+            )
+        overruns_pages.write({
+            "website_id": overruns_site.id, "is_published": True,
+        })
+
         branches_page = self.env.ref(
             "trendy_overruns_website.page_branches", raise_if_not_found=False
         )
