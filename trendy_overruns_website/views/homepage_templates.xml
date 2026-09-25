@@ -6,7 +6,7 @@
     -->
     <template id="homepage" inherit_id="website.homepage" name="Trendy Overruns Homepage">
     <xpath expr="//div[@id='wrap']" position="replace">
-        <div id="wrap" class="oe_structure trendy-overruns-homepage">
+        <div id="wrap" t-if="website.company_id.name == 'Overruns'" class="oe_structure trendy-overruns-homepage">
                 <section class="to-hero">
                     <div class="container to-hero__inner">
                         <div class="to-hero__copy">

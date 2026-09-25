@@ -1,11 +1,11 @@
 {
     "name": "Autoboutique Website",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.0.2",
     "summary": "Dedicated premium vehicle storefront for Autoboutique",
     "author": "Autoboutique",
     "category": "Website",
     "license": "LGPL-3",
-    "depends": ["website_sale", "autoboutique_ops"],
+    "depends": ["website_sale", "autoboutique_ops", "trendy_overruns_website"],
     "data": [
         "views/autoboutique_pages.xml",
     ],
