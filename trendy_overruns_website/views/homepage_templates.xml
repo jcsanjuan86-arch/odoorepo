@@ -68,6 +68,11 @@
 
     <!-- Disable the former global homepage override on module upgrade. -->
     <record id="homepage" model="ir.ui.view">
+        <field name="name">Deprecated Trendy Overruns Global Homepage</field>
+        <field name="type">qweb</field>
+        <field name="key">trendy_overruns_website.homepage</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml"><t t-name="trendy_overruns_website.homepage"/></field>
         <field name="active" eval="False"/>
     </record>
 
