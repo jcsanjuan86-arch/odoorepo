@@ -56,11 +56,14 @@ APPLICATION_FIELDS = [
     "Application_Date__c", "Borrower_First_Name__c", "Borrower_Middle_Name__c", "Borrower_Last_Name__c",
     "Borrower_Email__c", "Borrower_Mobile_Number__c", "Client__c", "Vehicle_Price__c",
     "Selected_Vehicle__c", "Selected_Vehicle__r.VIN__c", "Selected_Vehicle__r.Odoo_Vehicle_ID__c",
-    "Assigned_Agent__r.Email",
+    "Assigned_Agent__r.Email", "Final_Reviewer__r.Name",
 ]
 # Salesforce loan statuses that mean the agent has submitted the file.
 SUBMITTED_STATUSES = {"Submitted", "Under Review", "Final Review", "Approved"}
 REJECTED_STATUSES = {"Rejected"}
+# Salesforce only allows "Approved" once Final Review is Complete, so it counts
+# as requirements complete and reserves the car in Odoo (never sells it).
+APPROVED_STATUSES = {"Approved"}
 
 
 class SalesforceSync(models.AbstractModel):
@@ -354,10 +357,46 @@ class SalesforceSync(models.AbstractModel):
             application.write(values)
             message = "Updated sales application."
 
+        if sf_status in APPROVED_STATUSES and application.state in ("draft", "approval"):
+            message += " " + self._reserve_approved_application(application, data)
         if settings["create_quotation"]:
             self._ensure_quotation(application)
         self._log_inbound("success", message, sf_id, job=job, application=application)
         return application
+
+    @api.model
+    def _reserve_approved_application(self, application, data):
+        """Salesforce final review approved the loan: reserve the car in Odoo.
+
+        Runs the normal Odoo Approve & Reserve (which drafts the quotation and
+        assigns the sales agent a to-do). Selling stays in Odoo: only confirming
+        the sales order marks the car Sold. A car already reserved for another
+        buyer is never taken over; the operations manager decides instead.
+        """
+        vehicle = application.vehicle_id
+        reviewer = (data.get("Final_Reviewer__r") or {}).get("Name") or "Salesforce"
+        holder = application.search([
+            ("vehicle_id", "=", vehicle.id), ("state", "=", "reserved"), ("id", "!=", application.id),
+        ], limit=1)
+        if holder or vehicle.state != "ready":
+            reason = ("already reserved for %s" % holder.customer_id.name) if holder else (
+                "in stage %s" % dict(vehicle._fields["state"].selection).get(vehicle.state))
+            application._ab_todo("manager", "Salesforce approved a buyer for an unavailable car",
+                                 note="%s approved this loan, but %s is %s. Decide whether this buyer replaces "
+                                      "the current one or is kept as a backup." % (reviewer, vehicle.name, reason))
+            return "Approved in Salesforce, but the car is %s; manager notified." % reason
+        try:
+            with self.env.cr.savepoint():
+                application.write({"requirements_complete": True})
+                application.action_approve_and_reserve()
+        except Exception as exc:  # noqa: BLE001 - reported to the manager, the pull itself succeeds
+            _logger.warning("salesforce_auto_reserve_failed application=%s: %s", application.id, exc)
+            self.env.invalidate_all()
+            application._ab_todo("manager", "Reserve the car approved in Salesforce",
+                                 note="Automatic reservation failed: %s" % exc)
+            return "Approved in Salesforce; automatic reservation failed, manager notified."
+        application.message_post(body="Approved in Salesforce by %s; car reserved automatically." % reviewer)
+        return "Approved in Salesforce; car reserved and quotation drafted."
 
     @api.model
     def _find_vehicle_for_application(self, data, company):

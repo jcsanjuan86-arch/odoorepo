@@ -98,12 +98,43 @@ class TestDuplicatePrevention(SalesforceCase):
         self.assertEqual(applications.sales_agent_id, self.agent)
         self.assertEqual(len(self.env["res.partner"].search([("salesforce_contact_id", "=", "003d5000000CLNTAAA")])), 1)
 
-    def test_salesforce_cannot_reserve_or_sell_the_vehicle(self):
+    def test_documents_pending_does_not_reserve(self):
         vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))
         self._run_jobs()
-        self.env["autoboutique.salesforce.sync"]._apply_loan_application(
-            loan_application(vehicle.salesforce_vehicle_id, status="Approved"))
-        self.assertEqual(vehicle.state, "ready", "Only the Odoo approval flow may reserve a vehicle")
+        application = self.env["autoboutique.salesforce.sync"]._apply_loan_application(
+            loan_application(vehicle.salesforce_vehicle_id, status="Documents Pending"))
+        self.assertEqual(application.state, "draft")
+        self.assertEqual(vehicle.state, "ready")
+
+    def test_salesforce_approval_reserves_but_never_sells(self):
+        vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))
+        self._run_jobs()
+        sync = self.env["autoboutique.salesforce.sync"]
+        sync._apply_loan_application(loan_application(vehicle.salesforce_vehicle_id))
+        application = sync._apply_loan_application(loan_application(
+            vehicle.salesforce_vehicle_id, modstamp="2026-09-03T01:00:00.000+0000", status="Approved"))
+        self.assertEqual(application.state, "reserved")
+        self.assertTrue(application.requirements_complete)
+        self.assertEqual(vehicle.state, "reserved", "Salesforce final approval reserves the car in Odoo")
+        self.assertEqual(vehicle.customer_id, application.customer_id)
+        self.assertNotIn(vehicle.sale_order_id.state, ("sale", "done"), "Selling still needs an Odoo confirmation")
+        self._run_jobs()
+        self.assertEqual(self.fake.vehicles[vehicle.salesforce_vehicle_id]["Inventory_Status__c"], "Reserved")
+
+    def test_second_approved_buyer_does_not_take_over_a_reserved_car(self):
+        vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))
+        self._run_jobs()
+        sync = self.env["autoboutique.salesforce.sync"]
+        first = sync._apply_loan_application(loan_application(vehicle.salesforce_vehicle_id, status="Approved"))
+        self.assertEqual(first.state, "reserved")
+        second_data = dict(loan_application(vehicle.salesforce_vehicle_id, status="Approved"),
+                           Id="a0Ad5000009XYZ2EAA", Application_Number__c="ALA-000050",
+                           Client__c="003d5000000CLN2AAA", Borrower_Email__c="second.buyer@example.com")
+        second = sync._apply_loan_application(second_data)
+        self.assertEqual(second.state, "approval", "The backup buyer waits for the manager")
+        self.assertEqual(vehicle.customer_id, first.customer_id)
+        self.assertTrue(second.activity_ids.filtered(
+            lambda a: a.summary == "Salesforce approved a buyer for an unavailable car"))
 
     def test_webhook_duplicates_queue_one_pull(self):
         sync = self.env["autoboutique.salesforce.sync"]

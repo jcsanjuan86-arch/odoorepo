@@ -39,7 +39,7 @@ overwrites it. Pressing **Sync to Salesforce** forces that push immediately.
 | --- | --- | --- | --- |
 | `Id` | `salesforce_application_id` | Salesforce | Unique per company; prevents duplicates |
 | `Application_Number__c` | `salesforce_application_number`, name | Salesforce | |
-| `Status__c` | `salesforce_status`; drives `state` only before Odoo approval | Salesforce until approval | Draft / Documents Pending → Draft; Submitted / Under Review / Final Review / Approved → For Approval; Rejected → Rejected |
+| `Status__c` | `salesforce_status`; drives `state` only before Odoo approval | Salesforce until approval | Draft / Documents Pending → Draft; Submitted / Under Review / Final Review → For Approval; **Approved → Approve & Reserve in Odoo** (car Reserved, quotation drafted) when the car is Ready for Sale and not reserved for another buyer, otherwise a manager to-do; Rejected → Rejected |
 | `Final_Review_Status__c` | `salesforce_final_review_status` | Salesforce | Display only |
 | Borrower name, email, mobile; `Client__c` | `customer_id` (`res.partner`, `salesforce_contact_id`) | Salesforce on creation | Matched by Contact ID, then email; new partners belong to Autoboutique only |
 | `Assigned_Agent__r.Email` | `sales_agent_id` | Salesforce on creation | Matched to an Odoo user; otherwise the configured fallback agent |
@@ -51,10 +51,13 @@ and other sensitive loan fields. They stay in Salesforce.
 
 ## States that only Odoo can change
 
-* Vehicle `reserved`, `sold`, `payment`, `released`, `documents`, inventory
-  moves, invoices, and payments. A Salesforce "Approved" or "Released" loan status
-  **never** reserves, sells, or releases a vehicle. Staff do that with the Odoo
-  buttons (*Approve & Reserve*, release flow), which apply the existing checks.
+* Vehicle `sold`, `payment`, `released`, `documents`, inventory moves, invoices,
+  and payments. A Salesforce **Approved** loan runs Odoo's own *Approve & Reserve*
+  (same checks, quotation only drafted); it never confirms the sale. Only confirming
+  the sales order in Odoo marks the car Sold. A Salesforce **Released** status is
+  display only: releasing needs a paid invoice and the Odoo handover checklist.
+* A car already reserved for another buyer is never taken over by a Salesforce
+  approval; the operations manager gets a to-do to decide.
 * Once a sales application is approved, reserved, or sold in Odoo, later
   Salesforce changes update only the `salesforce_*` display fields.
 * Optional draft quotations (Settings → *Create Draft Quotations*) are drafts
