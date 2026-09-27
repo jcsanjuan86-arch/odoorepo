@@ -89,3 +89,22 @@ class Website(models.Model):
                 "website_id": overruns_site.id,
                 "parent_id": overruns_site.menu_id.id,
             })
+
+        # Older setup attempts attached these Autoboutique entries to the
+        # shared Overruns root menu. Remove only those vehicle-specific links;
+        # pages and the Autoboutique menu remain untouched.
+        autoboutique_urls = {
+            "/vehicles", "/financing", "/services", "/unit-release",
+            "/faqs", "/about",
+        }
+        overruns_root_items = overruns_site.menu_id.child_id
+        overruns_root_items.filtered(
+            lambda menu: menu.url in autoboutique_urls
+        ).unlink()
+
+        # Keep a single Overruns Branches link in the public header.
+        branch_items = overruns_site.menu_id.child_id.filtered(
+            lambda menu: menu.url == "/branches"
+        ).sorted("id")
+        if len(branch_items) > 1:
+            branch_items[1:].unlink()

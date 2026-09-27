@@ -1,6 +1,6 @@
 {
     "name": "Autoboutique Website",
-    "version": "19.0.1.0.3",
+    "version": "19.0.1.0.4",
     "summary": "Dedicated premium vehicle storefront for Autoboutique",
     "author": "Autoboutique",
     "category": "Website",
