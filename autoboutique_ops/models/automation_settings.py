@@ -16,24 +16,24 @@ AUTOMATION_ROLES = {
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    ab_purchase_user_id = fields.Many2one("res.users", string="Purchasing")
-    ab_warehouse_user_id = fields.Many2one("res.users", string="Warehouse")
-    ab_inspector_user_id = fields.Many2one("res.users", string="QC Inspector")
-    ab_repair_user_id = fields.Many2one("res.users", string="Repair Lead")
-    ab_detailing_user_id = fields.Many2one("res.users", string="Detailing Supervisor")
-    ab_manager_user_id = fields.Many2one("res.users", string="Operations Manager")
-    ab_accounting_user_id = fields.Many2one("res.users", string="Accounting")
-    ab_documents_user_id = fields.Many2one("res.users", string="Documents Officer")
+    ab_purchase_user_id = fields.Many2one("res.users", string="Purchasing To-dos")
+    ab_warehouse_user_id = fields.Many2one("res.users", string="Warehouse To-dos")
+    ab_inspector_user_id = fields.Many2one("res.users", string="QC Inspector To-dos")
+    ab_repair_user_id = fields.Many2one("res.users", string="Repair Lead To-dos")
+    ab_detailing_user_id = fields.Many2one("res.users", string="Detailing Supervisor To-dos")
+    ab_manager_user_id = fields.Many2one("res.users", string="Operations Manager To-dos")
+    ab_accounting_user_id = fields.Many2one("res.users", string="Accounting To-dos")
+    ab_documents_user_id = fields.Many2one("res.users", string="Documents Officer To-dos")
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    ab_purchase_user_id = fields.Many2one(related="company_id.ab_purchase_user_id", readonly=False)
-    ab_warehouse_user_id = fields.Many2one(related="company_id.ab_warehouse_user_id", readonly=False)
+    ab_purchase_user_id = fields.Many2one(related="company_id.ab_purchase_user_id", readonly=False, string="Purchasing To-dos")
+    ab_warehouse_user_id = fields.Many2one(related="company_id.ab_warehouse_user_id", readonly=False, string="Warehouse To-dos")
     ab_inspector_user_id = fields.Many2one(related="company_id.ab_inspector_user_id", readonly=False)
     ab_repair_user_id = fields.Many2one(related="company_id.ab_repair_user_id", readonly=False)
     ab_detailing_user_id = fields.Many2one(related="company_id.ab_detailing_user_id", readonly=False)
     ab_manager_user_id = fields.Many2one(related="company_id.ab_manager_user_id", readonly=False)
-    ab_accounting_user_id = fields.Many2one(related="company_id.ab_accounting_user_id", readonly=False)
+    ab_accounting_user_id = fields.Many2one(related="company_id.ab_accounting_user_id", readonly=False, string="Accounting To-dos")
     ab_documents_user_id = fields.Many2one(related="company_id.ab_documents_user_id", readonly=False)
