@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_salesforce" model="res.groups.privilege">
+        <field name="name">Salesforce Sync</field>
+        <field name="sequence">90</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <!-- Can see the Salesforce tab, publish vehicles and run a manual sync. -->
+    <record id="group_salesforce_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_salesforce"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Can also retry or cancel queued jobs. Connection settings stay with Settings administrators. -->
+    <record id="group_salesforce_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_salesforce"/>
+        <field name="implied_ids" eval="[(4, ref('group_salesforce_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="rule_salesforce_job_company" model="ir.rule">
+        <field name="name">Salesforce job: allowed companies</field>
+        <field name="model_id" ref="model_autoboutique_salesforce_job"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_salesforce_log_company" model="ir.rule">
+        <field name="name">Salesforce history: allowed companies</field>
+        <field name="model_id" ref="model_autoboutique_salesforce_log"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

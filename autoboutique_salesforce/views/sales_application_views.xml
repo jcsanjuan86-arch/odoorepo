@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sales_application_form_salesforce" model="ir.ui.view">
+        <field name="name">autoboutique.sales.application.form.salesforce</field>
+        <field name="model">autoboutique.sales.application</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_sales_application_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Salesforce" invisible="not salesforce_application_id"
+                       groups="autoboutique_salesforce.group_salesforce_user">
+                    <group>
+                        <field name="salesforce_application_number"/>
+                        <field name="salesforce_application_id"/>
+                    </group>
+                    <group>
+                        <field name="salesforce_status"/>
+                        <field name="salesforce_final_review_status"/>
+                        <field name="salesforce_last_sync_at"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sales_application_list_salesforce" model="ir.ui.view">
+        <field name="name">autoboutique.sales.application.list.salesforce</field>
+        <field name="model">autoboutique.sales.application</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_sales_application_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="salesforce_application_number" optional="show"
+                       groups="autoboutique_salesforce.group_salesforce_user"/>
+                <field name="salesforce_status" optional="hide"
+                       groups="autoboutique_salesforce.group_salesforce_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

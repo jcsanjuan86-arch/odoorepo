@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_salesforce_process_jobs" model="ir.cron">
+        <field name="name">Salesforce: process sync queue</field>
+        <field name="model_id" ref="model_autoboutique_salesforce_job"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_jobs()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+    </record>
+
+    <!-- Interval is editable in Settings > Salesforce. -->
+    <record id="ir_cron_salesforce_sweep" model="ir.cron">
+        <field name="name">Salesforce: scheduled sync</field>
+        <field name="model_id" ref="model_autoboutique_salesforce_job"/>
+        <field name="state">code</field>
+        <field name="code">env["autoboutique.salesforce.sync"]._cron_sweep()</field>
+        <field name="interval_number">60</field>
+        <field name="interval_type">minutes</field>
+    </record>
+</odoo>

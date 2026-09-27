@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Listing_URL__c</fullName>
+    <label>Listing URL</label>
+    <description>Public listing page for the vehicle, maintained in Odoo.</description>
+    <type>Url</type>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+</CustomField>

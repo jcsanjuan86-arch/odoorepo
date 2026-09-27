@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_vehicle_form_salesforce" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.salesforce</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="salesforce_is_sync_company" invisible="1"/>
+                <button name="action_salesforce_sync" type="object" string="Sync to Salesforce"
+                        groups="autoboutique_salesforce.group_salesforce_user"
+                        invisible="not salesforce_is_sync_company or not (publish_to_salesforce or salesforce_vehicle_id)"/>
+            </xpath>
+            <xpath expr="//field[@name='mileage']" position="after">
+                <field name="color"/>
+                <field name="condition"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Salesforce" name="salesforce"
+                      groups="autoboutique_salesforce.group_salesforce_user"
+                      invisible="not salesforce_is_sync_company">
+                    <group>
+                        <group string="Publishing">
+                            <field name="publish_to_salesforce" widget="boolean_toggle"/>
+                            <field name="listing_url" widget="url"/>
+                            <field name="ready_for_sale_date"/>
+                            <field name="salesforce_listing_status"/>
+                        </group>
+                        <group string="Sync">
+                            <field name="salesforce_sync_status" widget="badge"
+                                   decoration-success="salesforce_sync_status == 'synced'"
+                                   decoration-info="salesforce_sync_status == 'queued'"
+                                   decoration-danger="salesforce_sync_status == 'error'"/>
+                            <field name="salesforce_vehicle_id"/>
+                            <field name="salesforce_vehicle_url" widget="url" string="Open in Salesforce"
+                                   invisible="not salesforce_vehicle_url"/>
+                            <field name="salesforce_last_sync_at"/>
+                        </group>
+                    </group>
+                    <group string="Last Error" invisible="not salesforce_last_error">
+                        <field name="salesforce_last_error" nolabel="1" colspan="2"/>
+                    </group>
+                    <separator string="Salesforce Loan Applications"/>
+                    <field name="salesforce_application_ids" readonly="1">
+                        <list>
+                            <field name="salesforce_application_number"/>
+                            <field name="customer_id"/>
+                            <field name="sales_agent_id"/>
+                            <field name="salesforce_status"/>
+                            <field name="state"/>
+                            <field name="salesforce_last_sync_at"/>
+                        </list>
+                    </field>
+                    <separator string="Sync History"/>
+                    <field name="salesforce_log_ids" readonly="1">
+                        <list limit="20" decoration-danger="status == 'error'" decoration-muted="status == 'skipped'">
+                            <field name="create_date" string="When"/>
+                            <field name="direction"/>
+                            <field name="operation"/>
+                            <field name="status"/>
+                            <field name="message"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_vehicle_list_salesforce" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.list.salesforce</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_vehicle_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="salesforce_sync_status" optional="hide"
+                       groups="autoboutique_salesforce.group_salesforce_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_vehicle_search_salesforce" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.search.salesforce</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="vin"/>
+                <field name="salesforce_vehicle_id" groups="autoboutique_salesforce.group_salesforce_user"/>
+                <filter name="sf_published" string="Published to Salesforce"
+                        domain="[('publish_to_salesforce', '=', True)]"
+                        groups="autoboutique_salesforce.group_salesforce_user"/>
+                <filter name="sf_error" string="Salesforce Sync Errors"
+                        domain="[('salesforce_sync_status', '=', 'error')]"
+                        groups="autoboutique_salesforce.group_salesforce_user"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

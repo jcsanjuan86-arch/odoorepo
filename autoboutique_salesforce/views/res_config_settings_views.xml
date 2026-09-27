@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.autoboutique.salesforce</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Salesforce" string="Salesforce" name="autoboutique_salesforce"
+                     groups="base.group_system">
+                    <block title="Connection" name="salesforce_connection">
+                        <setting id="salesforce_enabled_setting"
+                                 help="Sync only runs when enabled and a Salesforce company is set.">
+                            <field name="salesforce_enabled"/>
+                            <div class="content-group mt16">
+                                <div class="row"><label for="salesforce_company_id" class="col-lg-4 o_light_label"/><field name="salesforce_company_id"/></div>
+                                <div class="row"><label for="salesforce_login_url" class="col-lg-4 o_light_label"/><field name="salesforce_login_url" placeholder="https://your-domain.my.salesforce.com"/></div>
+                                <div class="row"><label for="salesforce_api_version" class="col-lg-4 o_light_label"/><field name="salesforce_api_version"/></div>
+                            </div>
+                        </setting>
+                        <setting id="salesforce_credentials_setting"
+                                 help="Connected App using the OAuth 2.0 client credentials flow.">
+                            <div class="content-group">
+                                <div class="row"><label for="salesforce_client_id" class="col-lg-4 o_light_label"/><field name="salesforce_client_id"/></div>
+                                <div class="row"><label for="salesforce_client_secret" class="col-lg-4 o_light_label"/><field name="salesforce_client_secret" password="True"/></div>
+                                <div class="row"><label for="salesforce_webhook_secret" class="col-lg-4 o_light_label"/><field name="salesforce_webhook_secret" password="True"/></div>
+                            </div>
+                            <button name="action_salesforce_test_connection" type="object" string="Test Connection"
+                                    icon="oi-arrow-right" class="btn-link"/>
+                        </setting>
+                    </block>
+                    <block title="Sync Rules" name="salesforce_rules">
+                        <setting id="salesforce_publish_setting"
+                                 help="Vehicles are otherwise published automatically when they reach Ready for Sale.">
+                            <field name="salesforce_manual_publish_only"/>
+                        </setting>
+                        <setting id="salesforce_poll_setting"
+                                 help="Also fetch recently changed loan applications on every scheduled sync.">
+                            <field name="salesforce_poll_enabled"/>
+                        </setting>
+                        <setting id="salesforce_quotation_setting"
+                                 help="Draft quotations never reserve or move stock.">
+                            <field name="salesforce_create_quotation"/>
+                        </setting>
+                        <setting id="salesforce_agent_setting"
+                                 help="Assigned to loan applications whose Salesforce agent has no Odoo user.">
+                            <field name="salesforce_default_agent_id"/>
+                        </setting>
+                        <setting id="salesforce_schedule_setting" help="Retry and schedule limits.">
+                            <div class="content-group">
+                                <div class="row"><label for="salesforce_sweep_interval" class="col-lg-4 o_light_label"/><field name="salesforce_sweep_interval"/></div>
+                                <div class="row"><label for="salesforce_max_attempts" class="col-lg-4 o_light_label"/><field name="salesforce_max_attempts"/></div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,21 @@
+{
+    "name": "Autoboutique Salesforce Integration",
+    "version": "19.0.1.0.0",
+    "summary": "Sync the Autoboutique Vehicle Master with Salesforce inventory and loan applications",
+    "author": "Prime Auto Boutique",
+    "category": "Inventory",
+    "license": "LGPL-3",
+    "depends": ["autoboutique_ops", "sale_management"],
+    "external_dependencies": {"python": ["requests"]},
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "data/ir_cron.xml",
+        "views/vehicle_views.xml",
+        "views/sales_application_views.xml",
+        "views/sync_views.xml",
+        "views/res_config_settings_views.xml",
+    ],
+    "installable": True,
+    "application": False,
+}

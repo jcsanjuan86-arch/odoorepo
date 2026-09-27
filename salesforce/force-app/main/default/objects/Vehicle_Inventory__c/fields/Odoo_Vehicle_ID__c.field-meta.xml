@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Odoo_Vehicle_ID__c</fullName>
+    <label>Odoo Vehicle ID</label>
+    <description>Odoo Vehicle Master record ID. Upsert key for the Odoo integration; do not edit.</description>
+    <type>Text</type>
+    <length>40</length>
+    <externalId>true</externalId>
+    <unique>true</unique>
+    <caseSensitive>false</caseSensitive>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+</CustomField>

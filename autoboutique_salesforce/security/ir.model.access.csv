@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_salesforce_job_user,autoboutique.salesforce.job.user,model_autoboutique_salesforce_job,group_salesforce_user,1,0,0,0
+access_salesforce_job_manager,autoboutique.salesforce.job.manager,model_autoboutique_salesforce_job,group_salesforce_manager,1,1,0,0
+access_salesforce_job_system,autoboutique.salesforce.job.system,model_autoboutique_salesforce_job,base.group_system,1,1,1,1
+access_salesforce_log_user,autoboutique.salesforce.log.user,model_autoboutique_salesforce_log,group_salesforce_user,1,0,0,0
+access_salesforce_log_system,autoboutique.salesforce.log.system,model_autoboutique_salesforce_log,base.group_system,1,0,0,1
