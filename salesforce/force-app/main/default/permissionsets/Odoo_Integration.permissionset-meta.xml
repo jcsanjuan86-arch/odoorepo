@@ -28,7 +28,6 @@
     <fieldPermissions><field>Vehicle_Inventory__c.Plate_Number__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Selling_Price_PHP__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Vehicle_Inventory__c.Inventory_Status__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Available_Date__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Listing_URL__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Application_Number__c</field><editable>false</editable><readable>true</readable></fieldPermissions>

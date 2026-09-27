@@ -3,6 +3,6 @@
     <label>Odoo Integration Settings</label>
     <description>Webhook endpoint and shared secret used to notify Odoo of loan application changes.</description>
     <customSettingsType>Hierarchy</customSettingsType>
-    <visibility>Protected</visibility>
+    <visibility>Public</visibility>
     <enableFeeds>false</enableFeeds>
 </CustomObject>
