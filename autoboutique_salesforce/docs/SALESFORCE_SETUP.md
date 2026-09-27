@@ -63,7 +63,14 @@ existing profiles, and without it the first push fails with
 | Loan Application | New applications get the required-document checklist for their applicant type | Flow `Create_Application_Documents` (activated) |
 | Follow-ups | *Overdue Follow-Ups (All Agents)* and *My Follow-Ups Due Today or Overdue* list views; report *Overdue Follow-Ups by Agent* | `listViews/`, `reports/Autobotique_Loan_Reports/` |
 
-The draft flows `Populate_Vehicle_Details_From_Inventory` and
+| Requirements | *Requirements* tab (and the checklist on each Loan Application page): agents upload a file per requirement, see Missing / Uploaded / Checked / Needs Correction and the checker's notes, and can send the customer upload link | LWC `applicationRequirements`, `ApplicationRequirementsController`, flexipage `Requirements` |
+| Requirements | A new file (agent or customer link) marks the requirement Submitted and resets the checker's verdict. When all required documents are uploaded the application moves to Final Review; if a validation rule blocks that, the agent gets a task listing what is missing | `RequirementsAutomation`, trigger `ApplicationDocumentAutomation` |
+| Requirements | A document marked Needs Correction on Final Applications returns the application to the agent with a high-priority task containing the checker's note; re-uploading sends it back to Final Review | same |
+| Navigation | Callcenter Modules shows Home, Facebook Leads, Inquiries, Loan Applications, Requirements, Final Applications, Vehicle Inventory, Cases, Omni Supervisor, Omni Inventory, Reports. Other objects stay reachable from the App Launcher | `applications/Test_Callcenter` |
+
+Flow activation is deployed through `flowDefinitions/` because this org deploys
+flows as inactive: `Create_Application_Documents` is active (version 1) and
+`Populate_Vehicle_Details_From_Inventory` is deactivated. That flow and
 `Assign_Autobotique_Agent` are superseded by the Apex above and must stay
 inactive.
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Superseded by AutobotiqueRecordDefaults: the flow overwrote agent input on every save
+     and filled monthly amortization at zero interest. Keep it inactive. -->
+<FlowDefinition xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionNumber>0</activeVersionNumber>
+</FlowDefinition>

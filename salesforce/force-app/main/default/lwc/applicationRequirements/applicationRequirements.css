@@ -1,0 +1,27 @@
+.queue {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.queue-item {
+    cursor: pointer;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+}
+
+.queue-item:hover {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+}
+
+.queue-item.selected {
+    border-color: var(--slds-g-color-brand-base-50, #0176d3);
+    background: var(--slds-g-color-brand-base-95, #eef4ff);
+}
+
+.requirement {
+    padding: 0.5rem 0;
+}
+
+.customer-link {
+    word-break: break-all;
+}

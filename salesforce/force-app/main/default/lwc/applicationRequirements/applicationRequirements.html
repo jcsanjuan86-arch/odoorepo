@@ -1,0 +1,104 @@
+<template>
+    <lightning-card title="Requirements" icon-name="standard:document">
+        <div slot="actions">
+            <lightning-button-group>
+                <template lwc:if={isAppPage}>
+                    <lightning-button label={scopeLabel} onclick={handleScope}></lightning-button>
+                </template>
+                <lightning-button label="Refresh" icon-name="utility:refresh" onclick={handleRefresh}></lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <template lwc:if={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <div class="slds-grid slds-wrap slds-gutters_x-small slds-p-horizontal_small">
+            <template lwc:if={isAppPage}>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                    <template lwc:if={hasQueue}>
+                        <ul class="queue">
+                            <template for:each={queueItems} for:item="row">
+                                <li key={row.id} class={row.cssClass} data-id={row.id} onclick={handleSelect}>
+                                    <p class="slds-text-title_bold">{row.name}</p>
+                                    <p class="slds-text-body_small">{row.applicationNumber} · {row.status}</p>
+                                    <p class="slds-text-body_small">{row.clientName} {row.vehicleName}</p>
+                                    <p class="slds-text-body_small">
+                                        {row.progress}
+                                        <template lwc:if={row.flag}>
+                                            <span class="slds-badge slds-theme_error slds-m-left_x-small">{row.flag}</span>
+                                        </template>
+                                    </p>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template lwc:else>
+                        <p class="slds-p-around_small slds-text-color_weak">No applications need documents.</p>
+                    </template>
+                </div>
+            </template>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                <template lwc:if={application}>
+                    <div class="slds-p-vertical_small">
+                        <template lwc:if={isAppPage}>
+                            <p class="slds-text-heading_small">{application.name}</p>
+                            <p class="slds-text-body_small slds-m-bottom_x-small">
+                                {application.applicationNumber} · {application.status} · Agent: {application.agentName}
+                            </p>
+                        </template>
+                        <lightning-progress-bar value={progressValue} size="large"></lightning-progress-bar>
+                        <p class="slds-text-body_small slds-m-top_xx-small">{progressText}</p>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">{statusHint}</p>
+                        <template lwc:if={checklist.reviewNotes}>
+                            <div class="slds-box slds-box_x-small slds-theme_warning slds-m-top_x-small">
+                                <p class="slds-text-body_small"><b>Final checker:</b> {checklist.reviewNotes}</p>
+                            </div>
+                        </template>
+                        <div class="slds-m-top_small">
+                            <lightning-button label="Send customer upload link" icon-name="utility:link"
+                                              onclick={handleCustomerLink}></lightning-button>
+                            <template lwc:if={customerLink}>
+                                <p class="slds-text-body_small slds-m-top_xx-small customer-link">{customerLink}</p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <ul class="slds-has-dividers_bottom-space">
+                        <template for:each={requirements} for:item="row">
+                            <li key={row.id} class="slds-item requirement">
+                                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                        <p class="slds-text-title_bold">
+                                            {row.documentType}
+                                            <span class={row.badgeClass}>{row.label}</span>
+                                        </p>
+                                        <template lwc:if={row.needsFix}>
+                                            <p class="slds-text-color_error slds-text-body_small">{row.checkerNotes}</p>
+                                        </template>
+                                        <template lwc:if={row.fileUrl}>
+                                            <a href={row.fileUrl} target="_blank" class="slds-text-body_small">View uploaded file</a>
+                                        </template>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                        <template lwc:if={row.canUpload}>
+                                            <lightning-file-upload label={row.uploadLabel} name="requirementFile"
+                                                                   accept={acceptedFormats} record-id={row.id}
+                                                                   data-id={row.id}
+                                                                   onuploadfinished={handleUploadFinished}>
+                                            </lightning-file-upload>
+                                        </template>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+                <template lwc:else>
+                    <p class="slds-p-around_small slds-text-color_weak">Choose an application to see its requirements.</p>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

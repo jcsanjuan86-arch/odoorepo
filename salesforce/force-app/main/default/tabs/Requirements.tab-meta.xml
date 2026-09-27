@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Agent workspace: upload loan application requirements per checklist item and see the final checker's notes.</description>
+    <flexiPage>Requirements</flexiPage>
+    <label>Requirements</label>
+    <motif>Custom18: Form</motif>
+</CustomTab>
