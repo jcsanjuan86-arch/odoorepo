@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Chatter (history, messages, to-dos) on every workflow record -->
+    <record id="view_bid_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.bid.form.automation</field>
+        <field name="model">autoboutique.bid</field>
+        <field name="inherit_id" ref="view_bid_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='total_bid']" position="after">
+                <field name="purchase_order_id"/>
+            </xpath>
+            <xpath expr="//sheet" position="after"><chatter/></xpath>
+        </field>
+    </record>
+    <record id="view_receiving_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.receiving.form.automation</field>
+        <field name="model">autoboutique.receiving</field>
+        <field name="inherit_id" ref="view_receiving_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_vehicle_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.automation</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="view_vehicle_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_qc_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.qc.form.automation</field>
+        <field name="model">autoboutique.qc</field>
+        <field name="inherit_id" ref="view_qc_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_process_result']" position="attributes">
+                <attribute name="invisible">processed or result == 'pending'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='result']" position="after">
+                <field name="processed"/>
+            </xpath>
+            <xpath expr="//sheet" position="after"><chatter/></xpath>
+        </field>
+    </record>
+    <record id="view_repair_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.repair.form.automation</field>
+        <field name="model">autoboutique.repair</field>
+        <field name="inherit_id" ref="view_repair_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_mrf_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.mrf.form.automation</field>
+        <field name="model">autoboutique.mrf</field>
+        <field name="inherit_id" ref="view_mrf_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_detailing_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.detailing.form.automation</field>
+        <field name="model">autoboutique.detailing</field>
+        <field name="inherit_id" ref="view_detailing_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_sales_application_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.sales.application.form.automation</field>
+        <field name="model">autoboutique.sales.application</field>
+        <field name="inherit_id" ref="view_sales_application_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_release_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.release.form.automation</field>
+        <field name="model">autoboutique.vehicle.release</field>
+        <field name="inherit_id" ref="view_release_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+    <record id="view_registration_form_automation" model="ir.ui.view">
+        <field name="name">autoboutique.registration.form.automation</field>
+        <field name="model">autoboutique.registration</field>
+        <field name="inherit_id" ref="view_registration_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="after"><chatter/></xpath></field>
+    </record>
+
+    <!-- Settings: who receives each automatic to-do -->
+    <record id="res_config_settings_view_form_automation" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.autoboutique.automation</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Autoboutique" string="Autoboutique" name="autoboutique_ops" groups="base.group_system">
+                    <block title="Automation: who receives each to-do" name="autoboutique_automation_roles">
+                        <setting id="ab_roles_setting" company_dependent="1"
+                                 help="Each step of the vehicle workflow creates the next record automatically and assigns a to-do. Empty roles go to whoever triggered the step.">
+                            <div class="content-group">
+                                <div class="row"><label for="ab_purchase_user_id" class="col-lg-4 o_light_label"/><field name="ab_purchase_user_id"/></div>
+                                <div class="row"><label for="ab_warehouse_user_id" class="col-lg-4 o_light_label"/><field name="ab_warehouse_user_id"/></div>
+                                <div class="row"><label for="ab_inspector_user_id" class="col-lg-4 o_light_label"/><field name="ab_inspector_user_id"/></div>
+                                <div class="row"><label for="ab_repair_user_id" class="col-lg-4 o_light_label"/><field name="ab_repair_user_id"/></div>
+                                <div class="row"><label for="ab_detailing_user_id" class="col-lg-4 o_light_label"/><field name="ab_detailing_user_id"/></div>
+                                <div class="row"><label for="ab_manager_user_id" class="col-lg-4 o_light_label"/><field name="ab_manager_user_id"/></div>
+                                <div class="row"><label for="ab_accounting_user_id" class="col-lg-4 o_light_label"/><field name="ab_accounting_user_id"/></div>
+                                <div class="row"><label for="ab_documents_user_id" class="col-lg-4 o_light_label"/><field name="ab_documents_user_id"/></div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

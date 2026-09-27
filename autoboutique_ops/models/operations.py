@@ -223,7 +223,7 @@ class Vehicle(models.Model):
         self._require_final_qc()
         if self.repair_ids.filtered(lambda r: r.state != "done"):
             raise ValidationError("Complete all repair assessments first.")
-        if self.mrf_ids.filtered(lambda m: m.state != "closed"):
+        if self.mrf_ids.filtered(lambda m: m.state not in ("closed", "rejected")):
             raise ValidationError("Close all material requests first.")
         self.write({"state": "detailing"})
 
@@ -282,7 +282,7 @@ class Vehicle(models.Model):
                 raise ValidationError("A passing final QC is required.")
             if vehicle.repair_ids.filtered(lambda r: r.state != "done"):
                 raise ValidationError("Complete all repair assessments first.")
-            if vehicle.mrf_ids.filtered(lambda m: m.state != "closed"):
+            if vehicle.mrf_ids.filtered(lambda m: m.state not in ("closed", "rejected")):
                 raise ValidationError("Close all material requests first.")
             if not vehicle.detailing_ids.filtered(lambda d: d.state == "approved"):
                 raise ValidationError("Approved detailing is required.")

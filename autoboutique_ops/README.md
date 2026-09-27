@@ -1,12 +1,31 @@
 # Autoboutique vehicle operations for Odoo 19.0
 
-This is the first, deliberately bounded rebuild of the SaaS 19.4 Studio workflow. It stores linked records and allows staff to advance stages manually. It does **not** create purchase orders, inventory movements, vendor bills, sales orders, or journal entries automatically. Links to these native records are references, not proof that stock or costs were posted.
+Python rebuild of the SaaS 19.4 Studio workflow, with the whole vehicle chain automated. Every step creates the next record and assigns a to-do to the responsible person. Documents that post stock or accounting entries (purchase orders, receipts, sales orders, invoices, payments) are only **drafted**: a person confirms, validates, posts or pays them, and the vehicle then advances by itself.
 
 ## Workflow
 
 Bid lot (many cars) → approval and native purchase order → receiving → Vehicle Master/VIN → initial QC → repair assessment → multi-item MRF → stock issue or approved purchase → repair completion → final QC → detailing approval → ready for sale → sales order → payment → vehicle release → registration, insurance, and documents.
 
-The Vehicle Master has guided workflow buttons for the stage changes from QC through handover. They only update the workflow status after the user has created and verified the required linked records. They deliberately do not create or validate a Purchase Order, stock move, customer invoice, payment, or release automatically.
+## Automation (`models/automation.py`)
+
+| When a person… | Odoo automatically… | To-do for |
+| --- | --- | --- |
+| approves a bid lot | drafts one RFQ for the selected cars (one serial-tracked product per year/make/model) and links the receivings | Purchasing: confirm RFQ |
+| confirms the RFQ | links the receipt to each receiving and prefills each VIN as the serial number | Warehouse: validate receipt |
+| validates the receipt | marks the car received, creates the Vehicle Master and the initial QC | QC Inspector |
+| enters a QC result | initial QC or failed QC: creates the repair assessment; passed final QC: creates the detailing job | Repair Lead / Detailing |
+| approves a repair assessment | creates a material request from cost lines with products | Repair Lead |
+| finishes repairs and closes (or rejects) material requests | creates the final QC | QC Inspector |
+| approves detailing and ticks Documents Verified + Ready For Sale Approved | moves the car to Ready for Sale (and Salesforce) | Operations Manager until both are ticked |
+| approves and reserves a sales application | drafts the quotation | Sales agent: send and confirm |
+| confirms the sales order | marks the car Sold and drafts the invoice | Accounting: post and collect |
+| registers the payment | records the payment and creates the vehicle release | Operations Manager |
+| approves the release | creates the registration | Documents Officer; also insurance to-do |
+| completes registration and activates insurance, with no missing required documents | moves the car to Documents Complete | – |
+
+Roles are set per company in **Settings → Autoboutique**; an empty role sends the to-do to whoever triggered the step. Automation that runs inside a native action (receipt validation, sales order confirmation, payment registration) never blocks that action: a failing step is rolled back, written to the record's chatter, and assigned to the Operations Manager.
+
+The Vehicle Master still has guided workflow buttons for every stage, so staff can advance a car by hand when needed.
 
 The Vehicle Master checks the final QC, completed repairs, closed MRFs, approved detailing, verified documents, and sale readiness approval before the `Ready for Sale` stage can be saved. Users must validate actual inventory movements and accounting entries in native Odoo apps. MRF item lines record the related purchase line or stock move and issued quantity.
 
