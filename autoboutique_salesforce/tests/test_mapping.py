@@ -1,4 +1,5 @@
 from odoo.tests.common import tagged
+from odoo.tools import mute_logger
 
 from .common import SAMPLE_VIN, SalesforceCase
 
@@ -59,6 +60,7 @@ class TestVehicleMapping(SalesforceCase):
         self.assertEqual(vehicle.salesforce_listing_status, "Available")
         self.assertTrue(vehicle.salesforce_log_ids.filtered(lambda log: log.status == "success"))
 
+    @mute_logger("odoo.addons.autoboutique_salesforce.models.salesforce_log")
     def test_missing_required_salesforce_fields_fail_clearly(self):
         vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN, selling_price=0))
         self._run_jobs()

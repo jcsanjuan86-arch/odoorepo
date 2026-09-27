@@ -1,4 +1,5 @@
 from odoo.tests.common import TransactionCase, tagged
+from odoo.tools import mute_logger
 
 from odoo.addons.autoboutique_salesforce.models.salesforce_client import (
     SalesforceClient, SalesforceError, soql_quote,
@@ -49,6 +50,7 @@ class TestSalesforceClient(TransactionCase):
         self.assertEqual(session.tokens_issued, 2)
         self.assertEqual(session.requests[1][2], "Bearer token-2")
 
+    @mute_logger("odoo.addons.autoboutique_salesforce.models.salesforce_client")
     def test_throttling_is_retryable_validation_is_not(self):
         client, _session = self._client(FakeResponse(503, [{"errorCode": "SERVER_UNAVAILABLE"}]))
         with self.assertRaises(SalesforceError) as outage:

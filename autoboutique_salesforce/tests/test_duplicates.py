@@ -1,4 +1,5 @@
 from odoo.tests.common import tagged
+from odoo.tools import mute_logger
 
 from .common import SAMPLE_SF_APPLICATION_ID, SAMPLE_SF_VEHICLE_ID, SAMPLE_VIN, SalesforceCase
 
@@ -69,6 +70,7 @@ class TestDuplicatePrevention(SalesforceCase):
         self.assertEqual(len(self.fake.vehicles), 1)
         self.assertEqual(vehicle.salesforce_vehicle_id, next(iter(self.fake.vehicles)))
 
+    @mute_logger("odoo.addons.autoboutique_salesforce.models.salesforce_log")
     def test_vin_linked_to_other_odoo_vehicle_is_an_error_not_a_duplicate(self):
         self.fake.vehicles[SAMPLE_SF_VEHICLE_ID] = {"VIN__c": SAMPLE_VIN, "Odoo_Vehicle_ID__c": "999999"}
         vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))

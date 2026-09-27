@@ -4,6 +4,7 @@ import json
 import time
 
 from odoo.tests.common import HttpCase, tagged
+from odoo.tools import mute_logger
 
 from .common import SAMPLE_SF_APPLICATION_ID, SalesforceCase
 
@@ -75,6 +76,7 @@ class TestWebhookEndpoint(HttpCase):
         self.assertEqual(len(job), 1)
         self.assertEqual(job.company_id, self.company)
 
+    @mute_logger("odoo.addons.autoboutique_salesforce.controllers.webhook")
     def test_unsigned_notification_is_rejected(self):
         body = json.dumps({"object": "Auto_Loan_Application__c", "ids": [SAMPLE_SF_APPLICATION_ID]}).encode()
         response = self._post(body, signature="0" * 64)
