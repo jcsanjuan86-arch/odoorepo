@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Odoo_Owned_Fields_Locked</fullName>
+    <active>true</active>
+    <description>On vehicles published from Odoo, the fields Odoo owns can only be changed in Odoo. Branch, images, notes, default terms and suggested downpayment stay editable.</description>
+    <errorConditionFormula>AND(
+    NOT(ISNEW()),
+    NOT($Permission.Odoo_Integration),
+    OR(
+        NOT(ISBLANK(PRIORVALUE(Odoo_Vehicle_ID__c))),
+        ISCHANGED(Odoo_Vehicle_ID__c)
+    ),
+    OR(
+        ISCHANGED(Odoo_Vehicle_ID__c),
+        ISCHANGED(VIN__c),
+        ISCHANGED(Vehicle_Name__c),
+        ISCHANGED(Brand__c),
+        ISCHANGED(Model__c),
+        ISCHANGED(Year__c),
+        ISCHANGED(Condition__c),
+        ISCHANGED(Odometer__c),
+        ISCHANGED(Plate_Number__c),
+        ISCHANGED(Color__c),
+        ISCHANGED(Selling_Price__c),
+        ISCHANGED(Selling_Price_PHP__c),
+        ISCHANGED(Inventory_Status__c),
+        ISCHANGED(Available_Date__c),
+        ISCHANGED(Listing_URL__c)
+    )
+)</errorConditionFormula>
+    <errorMessage>This vehicle is managed in Odoo. Change its VIN, specs, price or status in the Odoo Vehicle Master; the update syncs here automatically.</errorMessage>
+</ValidationRule>

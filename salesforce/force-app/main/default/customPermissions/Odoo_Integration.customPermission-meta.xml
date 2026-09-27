@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Odoo Integration</label>
+    <description>Held by the Odoo integration (Run As) user. Allows changing Odoo-owned fields on vehicles published from Odoo (validation rule Odoo_Owned_Fields_Locked). Creating vehicles is limited by object permissions: agents (Autobotique Staff) have no Create.</description>
+    <isLicensed>false</isLicensed>
+</CustomPermission>

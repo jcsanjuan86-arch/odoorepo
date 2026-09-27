@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Overdue_Follow_Ups</fullName>
+    <columns>NAME</columns>
+    <columns>Application_Number__c</columns>
+    <columns>Next_Follow_Up_Date__c</columns>
+    <columns>Assigned_Agent__c</columns>
+    <columns>Status__c</columns>
+    <columns>Call_Disposition__c</columns>
+    <columns>Best_Time_To_Call__c</columns>
+    <columns>Selected_Vehicle__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Next_Follow_Up_Date__c</field>
+        <operation>lessThan</operation>
+        <value>TODAY</value>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>notEqual</operation>
+        <value>Approved,Rejected,Released</value>
+    </filters>
+    <label>Overdue Follow-Ups (All Agents)</label>
+</ListView>

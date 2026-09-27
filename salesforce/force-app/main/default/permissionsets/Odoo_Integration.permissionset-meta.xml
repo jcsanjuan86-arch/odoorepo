@@ -3,6 +3,10 @@
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>Odoo Integration</label>
     <description>Lets the Odoo integration user publish Vehicle Inventory and read Auto Loan Applications.</description>
+    <customPermissions>
+        <enabled>true</enabled>
+        <name>Odoo_Integration</name>
+    </customPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <objectPermissions>
         <object>Vehicle_Inventory__c</object>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Selected_Vehicle_Not_Sold</fullName>
+    <active>true</active>
+    <description>A car stays open to more applicants (Available or Reserved) until it is Sold. Sold and Inactive cars cannot be newly selected.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Selected_Vehicle__c)),
+    OR(ISNEW(), ISCHANGED(Selected_Vehicle__c)),
+    OR(
+        ISPICKVAL(Selected_Vehicle__r.Inventory_Status__c, "Sold"),
+        ISPICKVAL(Selected_Vehicle__r.Inventory_Status__c, "Inactive")
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Selected_Vehicle__c</errorDisplayField>
+    <errorMessage>This car is already sold or no longer listed. Choose an Available or Reserved car.</errorMessage>
+</ValidationRule>

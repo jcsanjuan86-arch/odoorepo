@@ -34,15 +34,38 @@ car cannot be recognised.
 **`Auto_Loan_Application__c`**: read only; no new fields. It must have
 `Selected_Vehicle__c` set to reach Odoo.
 
-**`Odoo_Integration_Settings__c`** (protected hierarchy custom setting): webhook
-endpoint URL, shared secret, and an on/off switch.
+**`Odoo_Integration_Settings__c`** (public hierarchy custom setting; production
+orgs do not allow Protected for unmanaged metadata): webhook endpoint URL,
+shared secret, and an on/off switch. Keep the org preference *Restrict access to
+custom settings* on so only admins can read the secret.
 
 **Apex**: `OdooWebhookNotifier` (queueable callout),
 `AutoLoanApplicationOdooSync` (after insert/update trigger), and
 `OdooWebhookNotifierTest`.
 
 **`Odoo_Integration` permission set**: least-privilege access for the
-integration user (create/edit Vehicle Inventory; read Auto Loan Applications).
+integration user (create/edit Vehicle Inventory; read Auto Loan Applications)
+plus the `Odoo_Integration` custom permission. **Assign it to whichever user is
+the app's Run As user**, even a System Administrator: new fields are hidden from
+existing profiles, and without it the first push fails with
+`No such column 'Odoo_Vehicle_ID__c'`.
+
+## 1a. Process rules deployed with the integration
+
+| Area | Rule | Metadata |
+| --- | --- | --- |
+| Vehicle Inventory | Agents cannot create vehicles; cars come from Odoo | `Autobotique_Staff` permission set has no Create |
+| Vehicle Inventory | On cars published from Odoo, only the integration can change VIN, specs, price, status, dates and listing URL. Branch, images, notes, default terms and suggested downpayment stay editable | Validation rule `Odoo_Owned_Fields_Locked`, custom permission `Odoo_Integration` |
+| Vehicle Inventory, Loan Application | Each currency field and its "(PHP)" twin are kept equal | `AutobotiqueRecordDefaults`, triggers `VehicleInventoryDefaults`, `AutoLoanApplicationDefaults` |
+| Loan Application | Picking a car copies its details and price, fills a blank downpayment (full price for Cash, suggested downpayment otherwise) and derives Loan = Price - Downpayment. Monthly amortization is left to the agent | same Apex |
+| Loan Application | Assigned Agent defaults to the owner when the owner is a user | same Apex |
+| Loan Application | Available and Reserved cars stay open to more applicants; Sold and Inactive cars cannot be selected | Validation rule `Selected_Vehicle_Not_Sold` |
+| Loan Application | New applications get the required-document checklist for their applicant type | Flow `Create_Application_Documents` (activated) |
+| Follow-ups | *Overdue Follow-Ups (All Agents)* and *My Follow-Ups Due Today or Overdue* list views; report *Overdue Follow-Ups by Agent* | `listViews/`, `reports/Autobotique_Loan_Reports/` |
+
+The draft flows `Populate_Vehicle_Details_From_Inventory` and
+`Assign_Autobotique_Agent` are superseded by the Apex above and must stay
+inactive.
 
 ## 2. Deploy the metadata
 
