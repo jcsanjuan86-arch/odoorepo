@@ -525,13 +525,42 @@ class AccountMove(models.Model):
 
     def _invoice_paid_hook(self):
         result = super()._invoice_paid_hook()
+        self._ab_advance_paid_vehicles()
+        return result
+
+    def _ab_advance_paid_vehicles(self):
+        """Advance Sold cars whose invoice is paid or in payment. Idempotent."""
+        paid = self.filtered(lambda move: move.payment_state in ("in_payment", "paid"))
+        if not paid:
+            return
         vehicles = self.env["autoboutique.vehicle"].sudo().search([
-            ("invoice_id", "in", self.ids), ("state", "=", "sold"),
+            ("invoice_id", "in", paid.ids), ("state", "=", "sold"),
         ])
         for vehicle in vehicles:
             vehicle = vehicle.sudo(False).with_company(vehicle.company_id)
             run_safely(vehicle, "record the payment", vehicle._ab_on_invoice_paid)
+
+
+class AccountPayment(models.Model):
+    _inherit = "account.payment"
+
+    def action_post(self):
+        # Journals without an outstanding payments account register payments
+        # without a journal entry: the invoice becomes "In Payment" by matching,
+        # and _invoice_paid_hook never fires. Advance the vehicles here instead.
+        result = super().action_post()
+        (self.invoice_ids | self.reconciled_invoice_ids)._ab_advance_paid_vehicles()
         return result
+
+
+class VehiclePaymentSweep(models.Model):
+    _inherit = "autoboutique.vehicle"
+
+    @api.model
+    def _cron_advance_paid_vehicles(self):
+        """Safety net for payments recorded any other way (bank statements, imports...)."""
+        invoices = self.sudo().search([("state", "=", "sold"), ("invoice_id", "!=", False)]).invoice_id
+        invoices._ab_advance_paid_vehicles()
 
 
 class VehicleRelease(models.Model):
