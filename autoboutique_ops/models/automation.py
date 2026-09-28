@@ -553,6 +553,17 @@ class AccountPayment(models.Model):
         return result
 
 
+class AccountPaymentRegister(models.TransientModel):
+    _inherit = "account.payment.register"
+
+    def _create_payments(self):
+        # The Register Payment wizard links invoice and payment only after
+        # posting, so action_post above sees no invoice. Advance here as well.
+        payments = super()._create_payments()
+        self.line_ids.move_id._ab_advance_paid_vehicles()
+        return payments
+
+
 class VehiclePaymentSweep(models.Model):
     _inherit = "autoboutique.vehicle"
 
