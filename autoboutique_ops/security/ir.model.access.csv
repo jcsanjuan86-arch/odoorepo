@@ -15,4 +15,7 @@ access_autoboutique_registration_user,autoboutique.registration.user,model_autob
 access_autoboutique_insurance_user,autoboutique.insurance.user,model_autoboutique_insurance,base.group_user,1,1,1,0
 access_autoboutique_document_user,autoboutique.document.user,model_autoboutique_document,base.group_user,1,1,1,0
 access_autoboutique_commission_user,autoboutique.commission.user,model_autoboutique_commission,base.group_user,1,1,1,0
+access_autoboutique_qc_line_user,autoboutique.qc.line.user,model_autoboutique_qc_line,base.group_user,1,1,1,1
+access_autoboutique_qc_checklist_item_user,autoboutique.qc.checklist.item.user,model_autoboutique_qc_checklist_item,base.group_user,1,0,0,0
+access_autoboutique_qc_checklist_item_admin,autoboutique.qc.checklist.item.admin,model_autoboutique_qc_checklist_item,base.group_system,1,1,1,1
 access_autoboutique_dashboard_user,autoboutique.dashboard.user,model_autoboutique_dashboard,base.group_user,1,1,1,0

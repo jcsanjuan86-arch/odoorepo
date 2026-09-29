@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_qc_checklist" model="ir.actions.report">
+        <field name="name">Vehicle Acceptance Checklist</field>
+        <field name="model">autoboutique.qc</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">autoboutique_ops.report_qc_checklist</field>
+        <field name="report_file">autoboutique_ops.report_qc_checklist</field>
+        <field name="print_report_name">'Acceptance Checklist - %s' % (object.vehicle_id.vin or object.name)</field>
+        <field name="binding_model_id" ref="model_autoboutique_qc"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_qc_checklist_document">
+        <t t-call="web.external_layout">
+            <div class="page ab-qc">
+                <style>
+                    .ab-qc h2 { font-size: 20px; margin-bottom: 0; }
+                    .ab-qc .ab-sub { color: #666; font-size: 12px; margin-bottom: 12px; }
+                    .ab-qc .ab-heading { font-size: 16px; margin: 16px 0 2px; border-bottom: 2px solid #333; padding-bottom: 2px; }
+                    .ab-qc .ab-section { font-size: 14px; margin: 12px 0 2px; }
+                    .ab-qc .ab-note { color: #666; font-size: 11px; font-style: italic; margin-bottom: 4px; }
+                    .ab-qc table.ab-lines { font-size: 11px; margin-bottom: 6px; }
+                    .ab-qc table.ab-lines th { background: #eee; }
+                    .ab-qc table.ab-lines tr { page-break-inside: avoid; }
+                    .ab-qc .ab-attn { background: #fdeaea; }
+                    .ab-qc .ab-ok { color: #1e7b3c; }
+                    .ab-qc .ab-bad { color: #b3261e; }
+                    .ab-qc table.ab-info td { font-size: 12px; padding: 3px 6px; }
+                    .ab-qc table.ab-info td.ab-k { color: #666; width: 14%; }
+                    .ab-qc .ab-sign td { padding-top: 36px; font-size: 12px; }
+                </style>
+                <h2>Used Vehicle Acceptance Checklist</h2>
+                <div class="ab-sub">Second-Hand Vehicle Evaluation · <span t-field="o.name"/></div>
+
+                <table class="table table-sm table-bordered ab-info">
+                    <tr>
+                        <td class="ab-k">Vehicle</td><td><span t-field="o.vehicle_id.name"/></td>
+                        <td class="ab-k">VIN / Chassis</td><td><span t-field="o.vehicle_id.vin"/></td>
+                    </tr>
+                    <tr>
+                        <td class="ab-k">Make / Model</td>
+                        <td><span t-field="o.vehicle_id.make"/> <span t-field="o.vehicle_id.model"/> <span t-if="o.vehicle_id.model_year" t-esc="o.vehicle_id.model_year"/></td>
+                        <td class="ab-k">Plate No.</td><td><span t-field="o.vehicle_id.plate_number"/></td>
+                    </tr>
+                    <tr>
+                        <td class="ab-k">Inspection</td><td><span t-field="o.inspection_type"/> · <span t-field="o.inspection_date"/></td>
+                        <td class="ab-k">Mileage</td><td><span t-esc="'{:,}'.format(o.mileage or o.vehicle_id.mileage or 0)"/> km</td>
+                    </tr>
+                    <tr>
+                        <td class="ab-k">Inspector</td><td><span t-field="o.inspector_id.name"/></td>
+                        <td class="ab-k">Result</td>
+                        <td><strong t-att-class="'ab-ok' if o.result == 'pass' else ('ab-bad' if o.result == 'fail' else '')" t-field="o.result"/></td>
+                    </tr>
+                    <tr>
+                        <td class="ab-k">Summary</td>
+                        <td colspan="3">
+                            OK: <strong t-esc="o.checklist_ok_count"/> ·
+                            Needs Attention: <strong t-esc="o.checklist_attention_count"/> ·
+                            N/A: <strong t-esc="o.checklist_na_count"/> ·
+                            Not Checked: <strong t-esc="o.checklist_unchecked_count"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <t t-foreach="o._ab_report_sections()" t-as="section">
+                    <div t-if="section['heading']" class="ab-heading" t-esc="section['heading']"/>
+                    <div t-if="section['heading_note']" class="ab-note" t-esc="section['heading_note']"/>
+                    <div class="ab-section"><strong t-esc="section['label']"/></div>
+                    <div t-if="section['note']" class="ab-note" t-esc="section['note']"/>
+                    <table class="table table-sm table-bordered ab-lines">
+                        <thead>
+                            <tr>
+                                <th>Inspection Item</th>
+                                <th class="text-center" style="width: 7%;">OK</th>
+                                <th class="text-center" style="width: 11%;">Needs Attention</th>
+                                <th style="width: 28%;">Remarks / Notes</th>
+                                <th class="text-center" style="width: 11%;">Photo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="section['lines']" t-as="line" t-att-class="'ab-attn' if line.status == 'attention' else ''">
+                                <td t-esc="line.name"/>
+                                <td class="text-center">
+                                    <i t-if="line.status == 'ok'" class="fa fa-check ab-ok"/>
+                                    <span t-if="line.status == 'na'">N/A</span>
+                                </td>
+                                <td class="text-center"><i t-if="line.status == 'attention'" class="fa fa-exclamation-triangle ab-bad"/></td>
+                                <td t-esc="line.remarks"/>
+                                <td class="text-center">
+                                    <img t-if="line.photo_512" t-att-src="image_data_uri(line.photo_512)" style="max-height: 44px; max-width: 64px;"/>
+                                    <span t-if="line.attachment_ids" class="text-muted"> +<t t-esc="len(line.attachment_ids)"/></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+
+                <div t-if="o.findings" style="page-break-inside: avoid;">
+                    <div class="ab-heading">Findings</div>
+                    <p style="white-space: pre-line; font-size: 12px;" t-esc="o.findings"/>
+                </div>
+
+                <t t-set="photo_lines" t-value="o._ab_report_photo_lines()"/>
+                <div t-if="photo_lines" style="page-break-before: always;">
+                    <div class="ab-heading">Photos</div>
+                    <t t-foreach="photo_lines" t-as="line">
+                        <div style="page-break-inside: avoid; margin-top: 10px;">
+                            <div style="font-size: 12px;">
+                                <strong t-esc="line.name"/>
+                                <span t-if="line.status == 'attention'" class="ab-bad"> · Needs Attention</span>
+                                <span t-if="line.remarks"> · <t t-esc="line.remarks"/></span>
+                            </div>
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td t-if="line.photo_512" style="width: 50%; padding: 4px; vertical-align: top;">
+                                        <img t-att-src="image_data_uri(line.photo_512)" style="max-width: 100%; max-height: 260px;"/>
+                                    </td>
+                                    <td t-foreach="line._ab_image_attachments()" t-as="attachment" style="width: 50%; padding: 4px; vertical-align: top;">
+                                        <img t-att-src="image_data_uri(attachment.datas)" style="max-width: 100%; max-height: 260px;"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </div>
+
+                <table class="ab-sign" style="width: 100%; page-break-inside: avoid;">
+                    <tr>
+                        <td style="width: 50%;">______________________________<br/>Inspected by: <span t-field="o.inspector_id.name"/></td>
+                        <td style="width: 50%;">______________________________<br/>Reviewed / Approved by</td>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_qc_checklist">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="autoboutique_ops.report_qc_checklist_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

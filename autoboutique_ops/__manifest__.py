@@ -1,6 +1,6 @@
 {
     "name": "Autoboutique Vehicle Operations",
-    "version": "19.0.1.4.1",
+    "version": "19.0.1.5.0",
     "summary": "Vehicle acquisition, inspection, repair, materials, and detailing",
     "author": "Prime Auto Boutique",
     "category": "Inventory",
@@ -10,9 +10,12 @@
         "security/ir.model.access.csv",
         "security/company_rules.xml",
         "data/ir_cron.xml",
+        "data/qc_checklist_data.xml",
         "views/operations_views.xml",
         "views/extended_views.xml",
         "views/automation_views.xml",
+        "views/qc_checklist_views.xml",
+        "report/qc_checklist_report.xml",
     ],
     "assets": {
         "web.assets_backend": [

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Used Vehicle Acceptance Checklist. noupdate: managers can edit, add or archive items. -->
+<odoo noupdate="1">
+    <!-- 1. PMS -->
+    <record id="qc_item_pms_01" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">10</field><field name="name">Confirm latest PMS record and mileage interval (oil change, filters)</field></record>
+    <record id="qc_item_pms_02" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">20</field><field name="name">Service/maintenance booklet or invoices available and consistent with odometer</field></record>
+    <record id="qc_item_pms_03" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">30</field><field name="name">Oil change interval adherence (check oil life/condition vs. mileage claimed)</field></record>
+    <record id="qc_item_pms_04" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">40</field><field name="name">Cabin filter replacement history</field></record>
+    <record id="qc_item_pms_05" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">50</field><field name="name">Spark plug condition/replacement record (gasoline units)</field></record>
+    <record id="qc_item_pms_06" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">60</field><field name="name">Brake pad/rotor replacement history and current thickness</field></record>
+    <record id="qc_item_pms_07" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">70</field><field name="name">Coolant flush and belt replacement intervals</field></record>
+    <record id="qc_item_pms_08" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">80</field><field name="name">Tire rotation and alignment history</field></record>
+    <record id="qc_item_pms_09" model="autoboutique.qc.checklist.item"><field name="section">pms</field><field name="sequence">90</field><field name="name">Battery replacement date</field></record>
+
+    <!-- 2.1 Engine -->
+    <record id="qc_item_engine_01" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">10</field><field name="name">Engine start-up (cold start, listen for knocking/ticking)</field></record>
+    <record id="qc_item_engine_02" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">20</field><field name="name">Idle stability (rough, hunting, or stalling idle)</field></record>
+    <record id="qc_item_engine_03" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">30</field><field name="name">Exhaust smoke color (white = coolant burn, blue = oil burn, black = rich mixture)</field></record>
+    <record id="qc_item_engine_04" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">40</field><field name="name">Engine oil level, color, and smell (milky = coolant contamination)</field></record>
+    <record id="qc_item_engine_05" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">50</field><field name="name">Coolant level and condition (rust, oil sheen)</field></record>
+    <record id="qc_item_engine_06" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">60</field><field name="name">Timing belt/chain noise and last replacement record</field></record>
+    <record id="qc_item_engine_07" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">70</field><field name="name">Drive belts (cracks, fraying, tension)</field></record>
+    <record id="qc_item_engine_08" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">80</field><field name="name">Radiator and hoses (leaks, swelling, brittleness)</field></record>
+    <record id="qc_item_engine_09" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">90</field><field name="name">Battery condition, terminals, and date code</field></record>
+    <record id="qc_item_engine_10" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">100</field><field name="name">Engine mounts (excessive vibration at idle/rev)</field></record>
+    <record id="qc_item_engine_11" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">110</field><field name="name">Fluid leaks under engine bay (oil, coolant, power steering)</field></record>
+    <record id="qc_item_engine_12" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">120</field><field name="name">Throttle response on rev-up (hesitation, black smoke)</field></record>
+    <record id="qc_item_engine_13" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">130</field><field name="name">Check engine / warning lights on dashboard</field></record>
+    <record id="qc_item_engine_14" model="autoboutique.qc.checklist.item"><field name="section">engine</field><field name="sequence">140</field><field name="name">Air filter and intake condition</field></record>
+
+    <!-- 2.2 Underchassis -->
+    <record id="qc_item_under_01" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">10</field><field name="name">Frame/chassis rails for rust, corrosion, or repair welds</field></record>
+    <record id="qc_item_under_02" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">20</field><field name="name">Signs of flood damage (silt, rust lines, corrosion in odd areas)</field></record>
+    <record id="qc_item_under_03" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">30</field><field name="name">Signs of major collision repair (uneven welds, overspray, misaligned panels)</field></record>
+    <record id="qc_item_under_04" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">40</field><field name="name">Suspension bushings and control arms (wear, cracks, play)</field></record>
+    <record id="qc_item_under_05" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">50</field><field name="name">Shock absorbers/struts (leaks, bounce test)</field></record>
+    <record id="qc_item_under_06" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">60</field><field name="name">CV joints and boots (tears, grease leakage, clicking on turns)</field></record>
+    <record id="qc_item_under_07" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">70</field><field name="name">Brake lines and fuel lines (rust, damage, leaks)</field></record>
+    <record id="qc_item_under_08" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">80</field><field name="name">Exhaust system (rust-through, hangers, leaks, loose muffler)</field></record>
+    <record id="qc_item_under_09" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">90</field><field name="name">Differential/transfer case (leaks, noise)</field></record>
+    <record id="qc_item_under_10" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">100</field><field name="name">Steering rack and tie rods (play, leaks)</field></record>
+    <record id="qc_item_under_11" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">110</field><field name="name">Tire wear pattern (uneven wear indicates alignment/suspension issues)</field></record>
+    <record id="qc_item_under_12" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">120</field><field name="name">Tire brand match and age (DOT date code) across all four</field></record>
+    <record id="qc_item_under_13" model="autoboutique.qc.checklist.item"><field name="section">underchassis</field><field name="sequence">130</field><field name="name">Spare tire, jack, and tools present and functional</field></record>
+
+    <!-- 2.3 Transmission -->
+    <record id="qc_item_trans_01" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">10</field><field name="name">Shift quality (manual: clutch engagement point, slipping; automatic: shift smoothness, hesitation)</field></record>
+    <record id="qc_item_trans_02" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">20</field><field name="name">Transmission fluid level, color, and smell (burnt smell = trouble)</field></record>
+    <record id="qc_item_trans_03" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">30</field><field name="name">Clutch pedal feel and biting point (manual)</field></record>
+    <record id="qc_item_trans_04" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">40</field><field name="name">Unusual noise in neutral or during gear changes</field></record>
+    <record id="qc_item_trans_05" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">50</field><field name="name">Slippage under load (test drive on incline)</field></record>
+    <record id="qc_item_trans_06" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">60</field><field name="name">CVT shudder or whine (if equipped)</field></record>
+    <record id="qc_item_trans_07" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">70</field><field name="name">Transmission mounts and leaks</field></record>
+    <record id="qc_item_trans_08" model="autoboutique.qc.checklist.item"><field name="section">transmission</field><field name="sequence">80</field><field name="name">4WD/AWD engagement (if equipped)</field></record>
+
+    <!-- 3. Electrical -->
+    <record id="qc_item_elec_01" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">10</field><field name="name">Battery charging system (voltage at idle and rev, alternator output)</field></record>
+    <record id="qc_item_elec_02" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">20</field><field name="name">Headlights, taillights, signal lights, brake lights, reverse lights</field></record>
+    <record id="qc_item_elec_03" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">30</field><field name="name">Dashboard instrument cluster (all gauges and warning lights functioning)</field></record>
+    <record id="qc_item_elec_04" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">40</field><field name="name">Power windows, door locks, and central locking</field></record>
+    <record id="qc_item_elec_05" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">50</field><field name="name">Horn, wipers, and washer fluid pump</field></record>
+    <record id="qc_item_elec_06" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">60</field><field name="name">Air conditioning electrical controls (blower speeds, fan)</field></record>
+    <record id="qc_item_elec_07" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">70</field><field name="name">Infotainment/head unit, speakers, and USB/aux ports</field></record>
+    <record id="qc_item_elec_08" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">80</field><field name="name">Power outlets and cigarette lighter socket</field></record>
+    <record id="qc_item_elec_09" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">90</field><field name="name">Wiring harness condition (rodent damage, exposed/spliced wires)</field></record>
+    <record id="qc_item_elec_10" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">100</field><field name="name">Fuse box condition (blown fuses, corrosion, aftermarket splices)</field></record>
+    <record id="qc_item_elec_11" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">110</field><field name="name">Keyless entry / immobilizer / alarm system function</field></record>
+    <record id="qc_item_elec_12" model="autoboutique.qc.checklist.item"><field name="section">electrical</field><field name="sequence">120</field><field name="name">Sensors (parking sensors, reverse camera, ABS, airbag warning light)</field></record>
+
+    <!-- 4. Aircon -->
+    <record id="qc_item_ac_01" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">10</field><field name="name">Cooling performance (time to cool, max cold temperature reached)</field></record>
+    <record id="qc_item_ac_02" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">20</field><field name="name">Blower motor operation at all fan speeds</field></record>
+    <record id="qc_item_ac_03" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">30</field><field name="name">Compressor engagement (listen/feel for clutch cycling)</field></record>
+    <record id="qc_item_ac_04" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">40</field><field name="name">Refrigerant leak check (oily residue at fittings, hoses)</field></record>
+    <record id="qc_item_ac_05" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">50</field><field name="name">Condenser and evaporator condition (visible corrosion, damage)</field></record>
+    <record id="qc_item_ac_06" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">60</field><field name="name">Cabin air filter condition</field></record>
+    <record id="qc_item_ac_07" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">70</field><field name="name">Vents (airflow direction control, rattles, broken louvers)</field></record>
+    <record id="qc_item_ac_08" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">80</field><field name="name">Unusual odor from vents (musty smell = evaporator mold/mildew)</field></record>
+    <record id="qc_item_ac_09" model="autoboutique.qc.checklist.item"><field name="section">aircon</field><field name="sequence">90</field><field name="name">Rear aircon function (if equipped, vans/SUVs)</field></record>
+
+    <!-- 5. Body & Paint -->
+    <record id="qc_item_body_01" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">10</field><field name="name">Panel gaps and alignment (doors, hood, trunk, fenders)</field></record>
+    <record id="qc_item_body_02" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">20</field><field name="name">Paint color match and texture across panels (respray indicators)</field></record>
+    <record id="qc_item_body_03" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">30</field><field name="name">Paint thickness check with gauge, if available</field></record>
+    <record id="qc_item_body_04" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">40</field><field name="name">Signs of body filler (magnet test on steel panels)</field></record>
+    <record id="qc_item_body_05" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">50</field><field name="name">Dents, scratches, and rust spots (especially wheel wells, door sills, trunk floor)</field></record>
+    <record id="qc_item_body_06" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">60</field><field name="name">Undercoating and rust-proofing condition</field></record>
+    <record id="qc_item_body_07" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">70</field><field name="name">Windshield and window glass (cracks, chips, date codes for originality)</field></record>
+    <record id="qc_item_body_08" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">80</field><field name="name">Weatherstripping and door/trunk seals (cracking, gaps)</field></record>
+    <record id="qc_item_body_09" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">90</field><field name="name">Bumpers and trim (fading, cracks, mounting security)</field></record>
+    <record id="qc_item_body_10" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">100</field><field name="name">Interior upholstery, dashboard, and carpet (tears, stains, water damage/odor)</field></record>
+    <record id="qc_item_body_11" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">110</field><field name="name">Odometer consistency with wear (pedal rubber, seat, steering wheel condition)</field></record>
+    <record id="qc_item_body_12" model="autoboutique.qc.checklist.item"><field name="section">body</field><field name="sequence">120</field><field name="name">VIN plate and chassis/engine number verification against documents</field></record>
+</odoo>

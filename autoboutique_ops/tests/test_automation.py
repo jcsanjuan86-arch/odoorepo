@@ -30,6 +30,11 @@ class TestVehicleAutomation(TransactionCase):
     def _todo(self, record, summary):
         return record.activity_ids.filtered(lambda a: a.summary == summary)
 
+    def _inspect(self, qc, result):
+        """Tick every inspection point, then record the result."""
+        qc._ab_mark_unchecked_ok()
+        qc.result = result
+
     def _approved_bid(self):
         bid = self.env["autoboutique.bid"].create({
             "name": "AUTO-BID-001", "supplier_id": self.supplier.id, "company_id": self.company.id,
@@ -59,10 +64,10 @@ class TestVehicleAutomation(TransactionCase):
     def _ready_vehicle(self):
         receiving = self._receive(self._approved_bid())
         vehicle = receiving.vehicle_id
-        vehicle.qc_ids.result = "pass"
+        self._inspect(vehicle.qc_ids, "pass")
         vehicle.repair_ids.state = "approved"
         vehicle.repair_ids.state = "done"
-        vehicle.qc_ids.filtered(lambda q: q.inspection_type == "final").result = "pass"
+        self._inspect(vehicle.qc_ids.filtered(lambda q: q.inspection_type == "final"), "pass")
         vehicle.detailing_ids.write({
             "exterior_done": True, "interior_done": True, "supervisor_id": self.env.user.id, "state": "approved",
         })
@@ -97,7 +102,7 @@ class TestVehicleAutomation(TransactionCase):
         initial = vehicle.qc_ids
         self.assertEqual(self._todo(initial, "Record initial QC result").user_id, self.inspector)
 
-        initial.result = "pass"
+        self._inspect(initial, "pass")
         self.assertTrue(initial.processed)
         self.assertEqual(vehicle.state, "repair")
         self.assertEqual(len(vehicle.repair_ids), 1)
@@ -107,7 +112,7 @@ class TestVehicleAutomation(TransactionCase):
         final = vehicle.qc_ids.filtered(lambda q: q.inspection_type == "final")
         self.assertEqual(final.result, "pending", "Final QC is created when repairs are done")
 
-        final.result = "pass"
+        self._inspect(final, "pass")
         self.assertEqual(vehicle.state, "detailing")
         job = vehicle.detailing_ids
         self.assertTrue(self._todo(job, "Complete and approve detailing"))
@@ -123,7 +128,7 @@ class TestVehicleAutomation(TransactionCase):
     def test_repair_parts_create_material_request(self):
         receiving = self._receive(self._approved_bid())
         vehicle = receiving.vehicle_id
-        vehicle.qc_ids.result = "fail"
+        self._inspect(vehicle.qc_ids, "fail")
         repair = vehicle.repair_ids
         part = self.env["product.product"].create({"name": "Automation Test Brake Pad", "type": "consu"})
         repair.line_ids = [(0, 0, {"name": "Brake pads", "cost_type": "stock", "product_id": part.id,
