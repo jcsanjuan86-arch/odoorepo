@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "Autoboutique Vehicle Operations",
     "version": "19.0.1.6.1",
     "summary": "Vehicle acquisition, inspection, repair, materials, and detailing",
