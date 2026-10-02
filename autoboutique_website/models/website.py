@@ -83,6 +83,14 @@ class Website(models.Model):
         for page in stale:
             page.write({"is_published": False, "url": "%s-old-%d" % (page.url.rstrip("/") or "/home", page.id)})
 
+        # Odoo keeps a generic "/" page for every website, so the Autoboutique
+        # home page lives at /home and is served at "/" as the site's homepage.
+        home = self.env.ref("autoboutique_website.page_home", raise_if_not_found=False)
+        if home:
+            if home.url != "/home":
+                home.url = "/home"
+            autoboutique_site.homepage_url = "/home"
+
         self._ab_sync_menu(autoboutique_site)
         self._ab_sync_overruns(overruns_site)
 

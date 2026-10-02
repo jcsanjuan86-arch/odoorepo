@@ -5,7 +5,7 @@
     <!-- HOME -->
     <record id="page_home" model="website.page">
         <field name="name">Home</field>
-        <field name="url">/</field>
+        <field name="url">/home</field>
         <field name="type">qweb</field>
         <field name="is_published" eval="True"/>
         <field name="key">autoboutique_website.home</field>
