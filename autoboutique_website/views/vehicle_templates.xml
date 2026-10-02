@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reusable inquiry form (contact page, vehicle page) -->
+    <template id="ab_inquiry_form" name="Autoboutique Inquiry Form">
+        <form action="/autoboutique/inquiry" method="post" class="ab-inquiry-form">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <input type="hidden" name="source" t-att-value="form_source or 'contact'"/>
+            <input type="hidden" name="redirect" t-att-value="form_redirect or request.httprequest.path"/>
+            <input t-if="form_vehicle" type="hidden" name="vehicle_id" t-att-value="form_vehicle.id"/>
+            <h3>Inquire Now</h3>
+            <div t-if="request.params.get('sent')" class="ab-form-ok">Thank you! Our team will contact you shortly.</div>
+            <div t-if="request.params.get('error')" class="ab-form-err">Please enter your name and a phone number or email.</div>
+            <label>Name<input type="text" name="name" placeholder="Full Name" required="required"/></label>
+            <label>Phone<input type="tel" name="phone" placeholder="Phone Number"/></label>
+            <label>Email<input type="email" name="email" placeholder="Email Address"/></label>
+            <label>Message<textarea name="message" rows="3" placeholder="Message"/></label>
+            <button type="submit" class="ab-btn ab-btn-dark ab-btn-block">Send Inquiry</button>
+        </form>
+    </template>
+
+    <!-- Card used on the listing page -->
+    <template id="ab_vehicle_card" name="Autoboutique Vehicle Card">
+        <a t-att-href="car.website_url" class="ab-vcard"
+           t-att-data-brand="car._ab_web_brand()" t-att-data-year="car.model_year or ''"
+           t-att-data-price="int(car._ab_web_price())" t-att-data-name="car._ab_web_title().lower()">
+            <div class="ab-vcard-img">
+                <img t-att-src="website._ab_img(car, car._ab_card_field(), 600)" t-att-alt="car._ab_web_title()" loading="lazy"/>
+                <span t-if="car.state == 'reserved'" class="ab-badge">Reserved</span>
+            </div>
+            <div class="ab-vcard-body">
+                <h3 t-out="car._ab_web_title()"/>
+                <div class="ab-vcard-price">Starts at <t t-out="website._ab_money(car._ab_web_price())"/></div>
+                <span class="ab-vcard-cta">EXPLORE</span>
+            </div>
+        </a>
+    </template>
+
+    <template id="vehicles_listing" name="All Prime Auto Vehicles">
+        <t t-call="autoboutique_website.ab_layout">
+            <t t-set="title">All Vehicles | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+            <t t-set="banner_title">All Prime Auto Vehicles</t>
+            <t t-set="banner_image" t-value="website._ab_static('650117872_1430073349134034_5202172560924559877_n-1.webp')"/>
+            <t t-call="autoboutique_website.ab_page_banner"/>
+            <t t-set="years" t-value="sorted(set(v.model_year for v in ab_vehicles if v.model_year), reverse=True)"/>
+            <t t-set="prices" t-value="[int(v._ab_web_price()) for v in ab_vehicles] or [0]"/>
+            <section class="ab-shop" t-att-data-active-brand="active_brand" t-att-data-search="search">
+                <aside class="ab-shop-filters">
+                    <h2>Filters</h2>
+                    <div class="ab-filter-label">Vehicle Type</div>
+                    <div class="ab-filter-brands">
+                        <button type="button" t-att-class="'ab-chip %s' % ('is-active' if not active_brand else '')" data-brand="">All</button>
+                        <t t-foreach="website._ab_brands()" t-as="brand">
+                            <button type="button" t-att-class="'ab-chip %s' % ('is-active' if active_brand == brand else '')" t-att-data-brand="brand" t-out="brand"/>
+                        </t>
+                    </div>
+                    <div class="ab-filter-label">Year Model</div>
+                    <select class="ab-filter-year" aria-label="Year model">
+                        <option value="">All Years</option>
+                        <t t-foreach="years" t-as="year"><option t-att-value="year" t-out="year"/></t>
+                    </select>
+                    <div class="ab-filter-label">Price Range</div>
+                    <input type="range" class="ab-filter-price" t-att-min="min(prices)" t-att-max="max(prices)" t-att-value="max(prices)" step="1000" aria-label="Maximum price"/>
+                    <div class="ab-filter-range"><span t-out="website._ab_money(min(prices))"/><span class="ab-filter-max" t-out="website._ab_money(max(prices))"/></div>
+                    <div t-if="search" class="ab-filter-search">Search: <b t-out="search"/> <a href="/vehicles">clear</a></div>
+                </aside>
+                <div class="ab-shop-grid">
+                    <t t-foreach="ab_vehicles" t-as="car">
+                        <t t-call="autoboutique_website.ab_vehicle_card"/>
+                    </t>
+                    <p class="ab-shop-empty" hidden="hidden">No vehicles match these filters.</p>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <template id="vehicle_detail" name="Vehicle Page">
+        <t t-call="autoboutique_website.ab_layout">
+            <t t-set="title" t-value="'%s | Prime Auto Boutique' % vehicle._ab_web_title()"/>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+            <t t-set="hero_field" t-value="'website_hero_image' if vehicle.website_hero_image else vehicle._ab_card_field()"/>
+            <section class="ab-vhero" t-attf-style="background-image: url('#{website._ab_img(vehicle, hero_field, 1920)}')">
+                <h1 t-out="vehicle._ab_web_title()"/>
+            </section>
+            <div class="ab-container">
+                <h2 class="ab-vdetail-headline">Find More Reasons To Drive</h2>
+                <section class="ab-vdetail-main">
+                    <div class="ab-vdetail-img">
+                        <img class="ab-variant-target" t-att-src="website._ab_img(vehicle, vehicle._ab_card_field(), 1200)" t-att-alt="vehicle._ab_web_title()"/>
+                        <span t-if="vehicle.state == 'reserved'" class="ab-badge">Reserved</span>
+                    </div>
+                    <div class="ab-vdetail-info">
+                        <h2 t-out="vehicle._ab_web_title()"/>
+                        <div class="ab-vdetail-price">Starts at <t t-out="website._ab_money(vehicle._ab_web_price())"/></div>
+                        <div class="ab-vdetail-desc" t-out="vehicle.website_description"/>
+                        <a href="#inquire" class="ab-btn ab-btn-dark">Inquire Now</a>
+                    </div>
+                </section>
+            </div>
+            <section t-if="vehicle.website_variant_ids" class="ab-variants">
+                <h2>Choose your <t t-out="vehicle._ab_web_title()"/> variant</h2>
+                <div class="ab-variant-row">
+                    <t t-foreach="vehicle.website_variant_ids" t-as="variant">
+                        <div t-att-class="'ab-variant %s' % ('is-active' if variant_first else '')" t-att-data-image="website._ab_img(variant, 'image', 1200) if variant.image else ''">
+                            <img t-if="variant.image" t-att-src="website._ab_img(variant, 'image', 400)" t-att-alt="variant.name" class="ab-variant-thumb"/>
+                            <h3 t-out="variant.name"/>
+                            <div class="ab-variant-price" t-out="variant.price_label"/>
+                            <div class="ab-variant-monthly" t-out="variant.monthly_label"/>
+                            <div t-if="variant.color_ids" class="ab-swatches">
+                                <t t-foreach="variant.color_ids" t-as="color">
+                                    <button type="button" t-att-class="'ab-swatch %s' % ('is-active' if color_first else '')" t-att-style="'background: %s' % (color.hex_code or '#ccc')"
+                                            t-att-data-image="website._ab_img(color, 'image', 1200) if color.image else ''" t-att-aria-label="color.name or color.hex_code"/>
+                                </t>
+                            </div>
+                            <div class="ab-variant-specs">
+                                <div t-if="variant.engine"><strong>Engine:</strong> <t t-out="variant.engine"/></div>
+                                <div t-if="variant.suspension"><strong>Suspension:</strong> <t t-out="variant.suspension"/></div>
+                                <div t-if="variant.brakes"><strong>Brakes:</strong> <t t-out="variant.brakes"/></div>
+                                <div t-if="variant.transmission"><strong>Transmission:</strong> <t t-out="variant.transmission"/></div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </section>
+            <section t-if="vehicle.website_feature_ids" class="ab-features">
+                <t t-foreach="vehicle.website_feature_ids" t-as="feature">
+                    <div t-att-class="'ab-feature %s' % ('is-flipped' if feature_index % 2 else '')">
+                        <div class="ab-feature-text">
+                            <h2 t-out="feature.name"/>
+                            <p t-out="feature.text"/>
+                        </div>
+                        <div class="ab-feature-img" t-attf-style="background-image: url('#{website._ab_img(feature, 'image', 1600)}')"/>
+                    </div>
+                </t>
+            </section>
+            <section t-if="vehicle.website_gallery_ids" class="ab-gallery">
+                <h2>Gallery</h2>
+                <div class="ab-gallery-grid">
+                    <t t-foreach="vehicle.website_gallery_ids" t-as="photo">
+                        <a t-att-href="website._ab_img(photo, 'image', 1920)" class="ab-lightbox"><img t-att-src="website._ab_img(photo, 'image', 600)" alt="Vehicle detail" loading="lazy"/></a>
+                    </t>
+                </div>
+            </section>
+            <section class="ab-vinquire" id="inquire">
+                <div class="ab-container ab-vinquire-inner">
+                    <div>
+                        <h2>Interested in the <t t-out="vehicle._ab_web_title()"/>?</h2>
+                        <p>Send us your details and a Prime Auto Boutique sales consultant will get in touch with a quotation, financing options and a test drive schedule.</p>
+                        <a href="/payment-calculator" class="ab-link-arrow">Compute your monthly payment</a>
+                    </div>
+                    <t t-set="form_source" t-value="'vehicle'"/>
+                    <t t-set="form_vehicle" t-value="vehicle"/>
+                    <t t-call="autoboutique_website.ab_inquiry_form"/>
+                </div>
+            </section>
+        </t>
+    </template>
+</odoo>

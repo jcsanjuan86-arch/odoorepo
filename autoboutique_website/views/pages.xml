@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Pages are attached to the Autoboutique website by autoboutique_sync_websites (end of file). -->
+
+    <!-- HOME -->
+    <record id="page_home" model="website.page">
+        <field name="name">Home</field>
+        <field name="url">/</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.home</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.home"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<section class="ab-hero" data-ab-slider="1">
+    <t t-foreach="[
+        ('650117872_1430073349134034_5202172560924559877_n-1.webp', 'Move Beyond Ordinary.', 'Discover world-class vehicles engineered for performance, safety, and innovation. Experience the future of mobility with elegant design and unmatched reliability.', '/vehicles'),
+        ('627703295_1401473831993986_2111573698351034371_n-5-1.webp', 'Luxury Without Limits', 'Step into a new level of driving with vehicles that combine advanced technology, refined comfort, and powerful performance for every journey ahead.', '/about'),
+        ('628029820_1401473301994039_9165145392062454833_n-1-1.webp', 'Elevate Every Drive', 'Experience premium vehicles crafted for luxury, performance, and sophistication. Discover exceptional automotive excellence designed to match your lifestyle and passion for driving.', '/services'),
+    ]" t-as="slide">
+        <div t-att-class="'ab-slide %s' % ('is-active' if slide_first else '')" t-attf-style="background-image: url('#{website._ab_static(slide[0])}')">
+            <div class="ab-slide-content">
+                <h1 t-out="slide[1]"/>
+                <p t-out="slide[2]"/>
+                <a t-att-href="slide[3]" class="ab-btn ab-btn-light">LEARN MORE</a>
+            </div>
+        </div>
+    </t>
+    <button type="button" class="ab-slide-prev" aria-label="Previous slide"><i class="fa fa-angle-left"/></button>
+    <button type="button" class="ab-slide-next" aria-label="Next slide"><i class="fa fa-angle-right"/></button>
+</section>
+
+<section class="ab-glance">
+    <div class="ab-glance-left">
+        <h2>Prime Auto Boutique</h2>
+        <div class="ab-glance-sub">at a glance</div>
+        <h3>Your premium automotive journey starts here.</h3>
+        <p>Log in to your Prime Auto Boutique account and experience luxury, performance, and convenience all in one place.</p>
+        <a href="/web/login" class="ab-link-arrow">Log In or Sign Up Now</a>
+    </div>
+    <div class="ab-glance-right">
+        <h3>Discover Everything Prime Auto Boutique Has to Offer</h3>
+        <div class="ab-glance-items">
+            <t t-foreach="[
+                ('fa-car', 'Explore Vehicles', 'Browse our collection of sedans, high-performance SUVs, sports cars, executive vans, and exclusive imports.', '/vehicles'),
+                ('fa-money', 'Apply for Financing', 'Drive your dream car sooner with flexible financing solutions tailored to your lifestyle and budget.', '/financing'),
+                ('fa-wrench', 'Auto Services', 'Experience expert auto solutions, luxury vehicle support, and professional services designed for premium vehicle owners.', '/services'),
+                ('fa-question-circle-o', 'FQAs', 'Find answers about vehicle inquiries, financing, reservations, maintenance services, and the Prime Auto Boutique experience.', '/faqs'),
+            ]" t-as="item">
+                <a t-att-href="item[3]" class="ab-glance-item">
+                    <i t-att-class="'fa %s' % item[0]"/>
+                    <h4 t-out="item[1]"/>
+                    <p t-out="item[2]"/>
+                    <span class="ab-red-link">EXPLORE <i class="fa fa-angle-right"/></span>
+                </a>
+            </t>
+        </div>
+    </div>
+</section>
+
+<section class="ab-excellence ab-container">
+    <h2 class="ab-section-title">Experience Automotive Excellence</h2>
+    <div class="ab-tabs" role="tablist">
+        <button type="button" class="ab-tab is-active" data-tab="discover" role="tab">DISCOVER PRIME AUTO</button>
+        <button type="button" class="ab-tab" data-tab="featured" role="tab">FEATURED VEHICLES</button>
+    </div>
+    <div class="ab-tab-panel is-active" data-panel="discover">
+        <div class="ab-discover">
+            <t t-foreach="[
+                ('About Prime Auto', '/about', '627703295_1401473831993986_2111573698351034371_n-5-1.webp'),
+                ('Services', '/services', '628029820_1401473301994039_9165145392062454833_n-1-1.webp'),
+                ('Unit Release', '/unit-release', '650117872_1430073349134034_5202172560924559877_n-1.webp'),
+            ]" t-as="card">
+                <a t-att-href="card[1]" class="ab-discover-card" t-attf-style="background-image: url('#{website._ab_static(card[2])}')">
+                    <h3 t-out="card[0]"/>
+                    <span>EXPLORE <i class="fa fa-angle-right"/></span>
+                </a>
+            </t>
+        </div>
+    </div>
+    <div class="ab-tab-panel" data-panel="featured">
+        <div class="ab-brand-tabs">
+            <button type="button" class="ab-brand-tab is-active" data-brand="">Featured units</button>
+            <t t-foreach="website._ab_brands()" t-as="brand">
+                <button type="button" class="ab-brand-tab" t-att-data-brand="brand" t-out="brand"/>
+            </t>
+        </div>
+        <div class="ab-featured-row">
+            <t t-foreach="ab_vehicles" t-as="car">
+                <div class="ab-fcard" t-att-data-brand="car._ab_web_brand()" t-att-data-featured="'1' if car.website_featured else '0'">
+                    <img t-att-src="website._ab_img(car, car._ab_card_field(), 800)" t-att-alt="car._ab_web_title()" loading="lazy"/>
+                    <div class="ab-fcard-overlay"/>
+                    <div class="ab-fcard-content">
+                        <div class="ab-fcard-title" t-out="car._ab_web_title()"/>
+                        <div class="ab-fcard-tagline" t-out="car.website_tagline"/>
+                        <div class="ab-fcard-bottom">
+                            <a t-att-href="car.website_url" class="ab-fcard-explore">Explore</a>
+                            <div class="ab-fcard-price"><span>Starts At</span><b t-out="website._ab_money(car._ab_web_price())"/><small>MSRP</small></div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </div>
+    <div class="ab-center"><a href="/vehicles" class="ab-btn ab-btn-outline">BROWSE ALL VEHICLES</a></div>
+</section>
+
+<section class="ab-offer-grid-wrap">
+    <div class="ab-container ab-offer-grid">
+        <t t-foreach="[
+            ('image-2026-05-23T183117.169.webp', 'The Prime Experience', 'Learn more about Prime Auto Boutique your trusted destination for luxury vehicles, premium customer service, and exceptional automotive experiences.', 'LEARN MORE', '/about'),
+            ('image-2026-05-23T183130.112.webp', 'Premium Auto Solutions', 'Experience premium automotive solutions including financing assistance, vehicle sourcing, maintenance support, and luxury auto care services.', 'LEARN MORE', '/services'),
+            ('image-2026-05-23T183145.128.webp', 'Vehicle Handover Experience', 'Celebrate your new luxury vehicle experience with our professional and seamless unit release process designed for comfort and convenience.', 'LEARN MORE', '/unit-release'),
+            ('image-2026-05-23T183153.704.webp', 'Luxury Vehicle Collection', 'Browse our curated collection of premium and luxury vehicles featuring top brands, modern performance, and elegant design.', 'LEARN MORE', '/vehicles'),
+        ]" t-as="card">
+            <a t-att-href="card[4]" class="ab-offer-card">
+                <img t-att-src="website._ab_static(card[0])" alt="" class="ab-offer-icon"/>
+                <h3 t-out="card[1]"/>
+                <p t-out="card[2]"/>
+                <span class="ab-red-link"><t t-out="card[3]"/> <i class="fa fa-angle-right"/></span>
+            </a>
+        </t>
+        <t t-foreach="[
+            ('000_12_1764663428867_000.webp', 'Smart Financing Options', 'Flexible and hassle-free financing options tailored to help you drive your dream vehicle with confidence and ease.', 'APPLY NOW', '/financing'),
+            ('000_13_1764663520904_000.webp', 'Customer Support &amp; FAQs', 'Find answers to commonly asked questions about our vehicles, financing options, services, reservations, and dealership processes.', 'LEARN MORE', '/faqs'),
+        ]" t-as="card">
+            <a t-att-href="card[4]" class="ab-offer-wide">
+                <img t-att-src="website._ab_static(card[0])" alt="" loading="lazy"/>
+                <div>
+                    <h3 t-out="card[1]"/>
+                    <p t-out="card[2]"/>
+                    <span class="ab-red-link"><t t-out="card[3]"/> <i class="fa fa-angle-right"/></span>
+                </div>
+            </a>
+        </t>
+    </div>
+</section>
+
+<section class="ab-explore-more">
+    <h2 class="ab-giant">EXPLORE MORE PRIME AUTO</h2>
+    <div class="ab-container">
+        <div class="ab-split-dark">
+            <div class="ab-split-img" t-attf-style="background-image: url('#{website._ab_static('650117872_1430073349134034_5202172560924559877_n-1.webp')}')"/>
+            <div class="ab-split-box">
+                <h3>The Prime Experience</h3>
+                <p>Luxury vehicles, personalized service, and premium automotive care designed around your lifestyle. Experience excellence from a team committed to delivering sophistication and performance at every drive.</p>
+                <a href="/about" class="ab-white-link">EXPLORE NOW <i class="fa fa-angle-right"/></a>
+            </div>
+        </div>
+        <div class="ab-split-dark is-flipped">
+            <div class="ab-split-box">
+                <h3>Drive Beyond Limits</h3>
+                <p>Freedom, performance, and innovation come together to create extraordinary driving experiences without compromise.</p>
+                <a href="/vehicles" class="ab-white-link">EXPLORE NOW <i class="fa fa-angle-right"/></a>
+            </div>
+            <div class="ab-split-img" t-attf-style="background-image: url('#{website._ab_static('628029820_1401473301994039_9165145392062454833_n-1-1.webp')}')"/>
+        </div>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- ABOUT -->
+    <record id="page_about" model="website.page">
+        <field name="name">About Us</field>
+        <field name="url">/about</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.about</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.about"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">About Us | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<section class="ab-who">
+    <div class="ab-who-img" t-attf-style="background-image: url('#{website._ab_static('627703295_1401473831993986_2111573698351034371_n-5-1.webp')}')"/>
+    <div class="ab-who-box">
+        <h1>WHO WE ARE</h1>
+        <p>Prime Auto Boutique is a premier luxury automotive destination dedicated to delivering exceptional vehicles, world-class service, and elevated driving experiences. Established with a passion for automotive excellence, Prime Auto Boutique offers a curated selection of luxury sedans, SUVs, sports cars, and premium mobility solutions tailored for modern lifestyles.</p>
+    </div>
+</section>
+<section class="ab-container ab-about-text">
+    <p>Our showroom and service facilities are designed to provide customers with a seamless and sophisticated automotive journey—from vehicle selection and financing to after-sales support and premium maintenance services.</p>
+    <p>Driven by innovation, performance, and customer satisfaction, Prime Auto Boutique continues to redefine luxury mobility through personalized experiences, advanced automotive technology, and uncompromising quality standards.</p>
+    <p>The company operates through key divisions focused on Sales, Customer Experience, Vehicle Services, Financing Solutions, Marketing, Logistics, and Premium Automotive Care to ensure every customer receives outstanding support throughout their ownership journey.</p>
+    <div class="ab-stats">
+        <div><i class="fa fa-car"/><b>35<sup>*</sup></b><span>Luxury Vehicle Models</span></div>
+        <div><i class="fa fa-trophy"/><b>15<sup>*</sup></b><span>Luxury Vehicle Models</span></div>
+        <div><img t-att-src="website._ab_static('006_22_1761033857710_000.webp')" alt=""/><b>25<sup>*</sup></b><span>Partner Showrooms Nationwide</span></div>
+    </div>
+</section>
+<section class="ab-container ab-vm">
+    <div>
+        <h2>Our Vision</h2>
+        <img t-att-src="website._ab_static('636151723_1409773021164067_5525308220956127380_n-1.webp')" alt="Prime Auto Boutique showroom" loading="lazy"/>
+        <p>To become the leading luxury automotive company where passionate professionals work together to deliver premium vehicles, innovative mobility solutions, and exceptional customer experiences.</p>
+    </div>
+    <div>
+        <h2>Our Mission</h2>
+        <img t-att-src="website._ab_static('636151723_1409773021164067_5525308220956127380_n-1.webp')" alt="Prime Auto Boutique showroom" loading="lazy"/>
+        <p>Driven by excellence and innovation, we commit ourselves:</p>
+        <ul>
+            <li>To provide premium vehicles and personalized automotive experiences tailored to every client’s lifestyle and aspirations.</li>
+            <li>To deliver exceptional customer service through professionalism, transparency, and genuine care.</li>
+            <li>To maintain the highest standards in vehicle quality, performance, and after-sales support.</li>
+            <li>To continuously innovate through modern technology, sustainable mobility solutions, and premium automotive services.</li>
+            <li>To foster a culture of teamwork, integrity, growth, and excellence among our people and partners.</li>
+        </ul>
+    </div>
+</section>
+<section class="ab-container ab-impact">
+    <h2>OUR IMPACT &amp; CONTRIBUTIONS</h2>
+    <div class="ab-impact-grid">
+        <t t-foreach="[
+            ('CUSTOMER EXPERIENCE', '006_22_1761033892290_000.webp', '2,500+', 'Satisfied Premium Vehicle Owners', '15,000+', 'Clients Served Nationwide'),
+            ('INVESTMENTS &amp; GROWTH', '006_22_1761033895756_000.webp', '10 MILLION (PHP)', 'Luxury Automotive Investments', '20 MILLION (PHP)', 'Annual Business Growth Contribution'),
+            ('PARTNERS &amp; NETWORK', '006_22_1761033899370_000.webp', '30+', 'Automotive and Luxury Brand Partners', '50+', 'Certified Service &amp; Support Specialists'),
+            ('VEHICLE SALES', '006_22_1761033888761_000.webp', '12,500+ Units', 'Premium Vehicles Delivered', '2,300+ Units', 'Vehicles Sold in 2025'),
+        ]" t-as="col">
+            <div class="ab-impact-col">
+                <h3 t-out="col[0]"/>
+                <img t-att-src="website._ab_static(col[1])" alt=""/>
+                <b><t t-out="col[2]"/><sup>**</sup></b><span t-out="col[3]"/>
+                <b><t t-out="col[4]"/><sup>**</sup></b><span t-out="col[5]"/>
+            </div>
+        </t>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- SERVICES -->
+    <record id="page_services" model="website.page">
+        <field name="name">Services</field>
+        <field name="url">/services</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.services</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.services"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Services | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Prime Auto Services</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-split">
+    <img t-att-src="website._ab_static('628029820_1401473301994039_9165145392062454833_n-1-1.webp')" alt="Prime Auto Boutique service center" loading="lazy"/>
+    <div>
+        <p>Our Service Department is equipped to handle everything from routine maintenance to advanced vehicle repair works, including General and Preventive Maintenance, Accessories Installation, and Body &amp; Paint Services.</p>
+        <p>We also offer Express Maintenance Services for quick and efficient vehicle care, including oil changes, tune-ups, and scheduled maintenance procedures — keeping your vehicle in top condition with minimal waiting time.</p>
+    </div>
+</section>
+<section class="ab-gray">
+    <div class="ab-container">
+        <div class="ab-kicker">WHAT  WE OFFER</div>
+        <h2 class="ab-section-title">Type of Service Packages</h2>
+        <div class="ab-service-grid">
+            <t t-foreach="[
+                ('service-periodic.webp', 'PERIODIC MAINTENANCE', 'Keep your vehicle performing at its best with scheduled maintenance designed to ensure safety, reliability, and a smooth driving experience every time.'),
+                ('service-general.webp', 'GENERAL SERVICE', 'From diagnostics to repairs, our skilled technicians provide professional vehicle servicing to keep your car running efficiently and reliably.'),
+                ('service-body.webp', 'BODY &amp; PAINT', 'Restore your vehicle’s original appearance with high-quality body repair and paint refinishing services using premium materials and expert craftsmanship.'),
+                ('service-dealer.webp', 'SERVICE CAMPAIGNS', 'Drive with confidence through our service campaigns, offering vehicle inspections, updates, and repair services whenever your vehicle qualifies.'),
+                ('service-preventive.webp', 'OTHER SERVICES', 'Enhance your driving experience with premium detailing, interior sanitation, engine cleaning, ceramic coating, and other value-added services designed to keep your vehicle clean, protected, and road-ready.'),
+            ]" t-as="svc">
+                <div class="ab-service-card">
+                    <img t-att-src="website._ab_static(svc[0])" t-att-alt="svc[1]" loading="lazy"/>
+                    <h3 t-out="svc[1]"/>
+                    <p t-out="svc[2]"/>
+                </div>
+            </t>
+        </div>
+    </div>
+</section>
+<section class="ab-container ab-split">
+    <img t-att-src="website._ab_static('644434790_1420504663424236_984831337652890806_n.webp')" alt="Prime Auto Boutique showroom" loading="lazy"/>
+    <div>
+        <h2 class="ab-light-title">Why Service Your Car with Prime Auto Boutique?</h2>
+        <p>Your vehicle deserves expert care from professionals who understand premium automotive performance and maintenance. At Prime Auto Boutique, we ensure your vehicle receives quality service, genuine attention, and long-term care.</p>
+    </div>
+</section>
+<section class="ab-container ab-why">
+    <div class="ab-kicker">WHAT  WE OFFER</div>
+    <h2 class="ab-section-title">Why Choose Prime Auto Boutique</h2>
+    <div class="ab-why-grid">
+        <t t-foreach="[
+            ('fa-map-o', 'Extensive network of trusted service and dealer partners nationwide'),
+            ('fa-cogs', 'Advanced diagnostic tools and modern automotive equipment'),
+            ('fa-clock-o', 'Fast and efficient Express Maintenance Service'),
+            ('fa-calendar-check-o', 'Smart maintenance reminder and service tracking system'),
+            ('fa-shield', 'Availability of premium genuine and high-quality replacement parts'),
+            ('fa-certificate', 'Professionally trained and certified automotive technicians'),
+            ('fa-file-text-o', 'Service procedures aligned with manufacturer warranty standards'),
+            ('fa-coffee', 'Modern, clean, and comfortable customer lounge experience'),
+        ]" t-as="why">
+            <div class="ab-why-item"><i t-att-class="'fa %s' % why[0]"/><p t-out="why[1]"/></div>
+        </t>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- UNIT RELEASE -->
+    <record id="page_release" model="website.page">
+        <field name="name">Unit Release</field>
+        <field name="url">/unit-release</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.release</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.release"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Unit Release | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Unit Release</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-split">
+    <img t-att-src="website._ab_static('628029820_1401473301994039_9165145392062454833_n-1-1.webp')" alt="Prime Auto Boutique" loading="lazy"/>
+    <div>
+        <h2 class="ab-light-title">Unit Release Journey</h2>
+        <p>We provide a smooth and professional turnover process to ensure your vehicle is fully prepared before you drive away.</p>
+        <t t-foreach="[
+            ('DOCUMENTATION', 'Complete all necessary paperwork, financing approvals, insurance, and registration requirements.'),
+            ('VEHICLE INSPECTION', 'Our team performs a complete quality inspection to ensure your vehicle is road-ready and flawless.'),
+            ('VEHICLE ORIENTATION', 'Learn about your vehicle’s key features, safety systems, maintenance reminders, and technology functions.'),
+            ('UNIT RELEASE', 'Drive home your brand-new vehicle with confidence after the official turnover and final confirmation.'),
+        ]" t-as="step">
+            <div class="ab-step-box"><h3 t-out="step[0]"/><p t-out="step[1]"/></div>
+        </t>
+    </div>
+</section>
+<section class="ab-gray">
+    <div class="ab-container">
+        <h2 class="ab-section-title">Customer Testimonials</h2>
+        <div class="ab-testimonial">
+            <div class="ab-stars">★★★★★</div>
+            <h3>“The Ultimate Concierge Treatment”</h3>
+            <p>“They coordinated my custom interior leather configuration seamlessly with international channels. Throughout the processing timeframe, I received constant video updates. They treat you with absolute boutique respect.”</p>
+            <div class="ab-testimonial-by"><b>Clara Mendoza</b><span>Range Rover Autobiography • Jun 11, 2026</span></div>
+        </div>
+    </div>
+</section>
+<section class="ab-container ab-release-gallery">
+    <div class="ab-gallery-head">
+        <h2 class="ab-light-title">Unit Release Gallery</h2>
+        <p>Explore memorable vehicle release moments from Prime Auto Boutique, where every handover is designed to be premium, professional, and unforgettable.</p>
+    </div>
+    <div class="ab-gallery-grid ab-gallery-5">
+        <t t-foreach="[
+            '648449770_1424789266329109_4012235057640010323_n.webp', '650229190_1431043339037035_5497715872816452689_n.webp',
+            '651161017_1433423082132394_6950336849017608552_n.webp', '652904803_1436141265193909_5113109378811504828_n.webp',
+            '653701241_1435938691880833_4038515091013980991_n.webp', '653703537_1435344901940212_8592384923791602612_n.webp',
+            '655056518_1439641551510547_5807232031334101642_n.webp', '659663129_1447760984031937_6458361530191151181_n.webp',
+            '660153934_1446898424118193_8518039647630435942_n.webp', '660528244_1443683621106340_4635932383641011373_n.webp',
+            '661208366_1447815480693154_1831801263744077705_n.webp', '667055810_1451947483613287_5617472095881131805_n.webp',
+            '672379427_1461367599337942_6662070256918427058_n.webp', '672379427_1461367599337942_6662070256918427058_n-1.webp',
+            '672680326_1462136785927690_6758081621183687572_n.webp', '672680326_1462136785927690_6758081621183687572_n-1.webp',
+            '672680326_1462136785927690_6758081621183687572_n-2.webp', '674547133_1465445058930196_1788680697946493985_n.webp',
+            '678288810_1464786805662688_8192242207435387912_n.webp',
+        ]" t-as="photo">
+            <a t-att-href="website._ab_static(photo)" class="ab-lightbox"><img t-att-src="website._ab_static(photo)" alt="Unit release" loading="lazy"/></a>
+        </t>
+    </div>
+</section>
+<section class="ab-container ab-videos">
+    <h2 class="ab-section-title">Video Interviews</h2>
+    <div class="ab-video-card" t-attf-style="background-image: url('#{website._ab_static('646910254_1425382862936416_7448974539431781434_n-2.webp')}')">
+        <span class="ab-video-tag">Interview</span>
+        <i class="fa fa-play-circle"/>
+        <span class="ab-video-name">Toyota Vios</span>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- CONTACT -->
+    <record id="page_contact" model="website.page">
+        <field name="name">Contact Us</field>
+        <field name="url">/contact</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.contact</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.contact"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Contact Us | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Contact Us</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-split">
+    <img t-att-src="website._ab_static('644434790_1420504663424236_984831337652890806_n.webp')" alt="Prime Auto Boutique showroom" loading="lazy"/>
+    <div>
+        <h2 class="ab-light-title"><b>Prime Auto Boutique</b> is ready to serve you.</h2>
+        <p>If you have any inquiries, comments, or suggestions regarding our vehicles, services, financing, or after-sales support, feel free to reach out to us through the contact form below.</p>
+    </div>
+</section>
+<section class="ab-container ab-contact" id="inquire">
+    <div class="ab-contact-info">
+        <h2 class="ab-light-title">Customer Support Center</h2>
+        <h4>Main Showroom &amp; Service Center</h4>
+        <p>Prime Auto Boutique<br/>Quezon City, Metro Manila, Philippines</p>
+        <h4>Telephone</h4><p>(02) 8888-1234</p>
+        <h4>Mobile</h4><p>+63 917 123 4567</p>
+        <h4>Email</h4><p>info@primeautoboutique.com</p>
+    </div>
+    <div class="ab-contact-form">
+        <t t-set="form_source" t-value="'contact'"/>
+        <t t-set="form_redirect" t-value="'/contact'"/>
+        <t t-call="autoboutique_website.ab_inquiry_form"/>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- FINANCING -->
+    <record id="page_financing" model="website.page">
+        <field name="name">Financing</field>
+        <field name="url">/financing</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.financing</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.financing"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Financing | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Financing</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-finance">
+    <div class="ab-finance-img" t-attf-style="background-image: url('#{website._ab_static('644434790_1420504663424236_984831337652890806_n.webp')}')"/>
+    <div class="ab-finance-calc ab-calc" data-ab-calc="financing">
+        <div class="ab-finance-kicker">take the first step</div>
+        <h2>pick a car you want</h2>
+        <select class="ab-calc-brand ab-line-select" aria-label="Select a type of vehicle">
+            <option value="">SELECT A TYPE OF VEHICLE</option>
+            <t t-foreach="website._ab_brands()" t-as="brand"><option t-att-value="brand" t-out="brand"/></t>
+        </select>
+        <select class="ab-calc-vehicle ab-line-select" aria-label="Select a vehicle">
+            <option value="">SELECT A VEHICLE</option>
+            <t t-foreach="ab_vehicles" t-as="car"><option t-att-value="int(car._ab_web_price())" t-att-data-brand="car._ab_web_brand()" t-out="car._ab_web_title()"/></t>
+        </select>
+        <div class="ab-two">
+            <select class="ab-calc-dp ab-line-select" aria-label="Downpayment">
+                <option value="">DOWNPAYMENT</option>
+                <t t-foreach="[10, 20, 30, 40, 50]" t-as="dp"><option t-att-value="dp"><t t-out="dp"/>%</option></t>
+            </select>
+            <select class="ab-calc-term ab-line-select" aria-label="Term">
+                <option value="">TERM</option>
+                <t t-foreach="[12, 24, 36, 48, 60]" t-as="term"><option t-att-value="term"><t t-out="term"/> MONTHS</option></t>
+            </select>
+        </div>
+        <div class="ab-finance-result">GET A VEHICLE AS LOW AS</div>
+        <div class="ab-finance-amount"><span class="ab-peso">₱</span> <b class="ab-calc-out">-</b> / MONTH</div>
+        <p class="ab-fineprint">*Computations shown on this website are intended solely for informational purposes.</p>
+    </div>
+</section>
+<section class="ab-container ab-acquisition">
+    <h2 class="ab-light-title ab-underlined">Vehicle Acquisition</h2>
+    <div class="ab-acq-grid">
+        <t t-foreach="[
+            ('download-11.webp', 'FLEXIBLE AUTO FINANCING', 'Drive home your dream vehicle with flexible financing solutions from Prime Auto Boutique. Enjoy affordable monthly payments, low cash-out options, and tailored plans that fit your lifestyle and budget.'),
+            ('download-12.webp', 'VEHICLE INSTALLMENT PLANS', 'Get behind the wheel in simple and convenient steps. Prime Auto Boutique offers easy installment plans with competitive rates and flexible payment terms for brand-new and premium vehicles.'),
+            ('006_22_1761033895756_000.webp', 'PREMIUM PAYMENT SOLUTIONS', 'Experience smarter vehicle ownership with lower monthly payments and flexible end-of-term options designed to make luxury and performance vehicles more accessible.'),
+            ('download-13.webp', 'CERTIFIED PRE-OWNED FINANCING', 'Own quality certified pre-owned vehicles with financing options designed to maximize your budget while maintaining affordable payment plans and competitive rates.'),
+            ('download-14.webp', 'BUSINESS VEHICLE FINANCING', 'Grow your business with reliable vehicle financing solutions from Prime Auto Boutique. Enjoy flexible payment terms and affordable financing packages tailored for entrepreneurs and business owners.'),
+        ]" t-as="item">
+            <div class="ab-acq-item">
+                <img t-att-src="website._ab_static(item[0])" alt=""/>
+                <h3 t-out="item[1]"/>
+                <p t-out="item[2]"/>
+            </div>
+        </t>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- FAQS -->
+    <record id="page_faqs" model="website.page">
+        <field name="name">FAQs</field>
+        <field name="url">/faqs</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.faqs</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.faqs"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">FAQs | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Frequently Ask Questions</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-faqs">
+    <h2>YOUR QUESTIONS, ANSWERED!</h2>
+    <t t-foreach="[
+        ('What vehicles does Prime Auto Boutique offer?', 'Prime Auto Boutique offers a wide selection of brand-new, premium, and certified pre-owned vehicles including sedans, SUVs, MPVs, pickups, and luxury models.'),
+        ('Do you offer vehicle financing options?', 'Yes, we provide flexible financing solutions with affordable monthly payments, low downpayment options, and customizable loan terms.'),
+        ('Can I trade in my current vehicle?', 'Absolutely. Prime Auto Boutique accepts trade-ins and can help assess the value of your current vehicle to use toward your next purchase.'),
+        ('Do you sell certified pre-owned vehicles?', 'Yes, we offer certified pre-owned vehicles that undergo quality inspections to ensure reliability, performance, and excellent condition.'),
+        ('How can I schedule a vehicle viewing or test drive?', 'You can contact us directly through our website, social media pages, or dealership hotline to book a vehicle viewing or test drive appointment.'),
+        ('Are your vehicles covered by warranty?', 'Most brand-new vehicles come with manufacturer warranties, while selected pre-owned vehicles may also include warranty coverage depending on the unit.'),
+        ('Can I reserve a vehicle online?', 'Yes, customers may inquire and reserve selected vehicles online through our contact forms or by speaking directly with our sales team.'),
+        ('Do you assist with insurance and registration?', 'Yes, Prime Auto Boutique can assist with vehicle insurance, registration processing, and other documentation for a smoother purchasing experience.'),
+        ('What payment methods do you accept?', 'We accept bank financing, cash payments, manager’s checks, and other approved payment methods depending on the transaction.'),
+        ('How do I contact Prime Auto Boutique?', 'You can reach us through our website contact form, email, social media platforms, or by visiting our dealership directly.'),
+    ]" t-as="faq">
+        <details class="ab-faq">
+            <summary t-out="faq[0]"/>
+            <p t-out="faq[1]"/>
+        </details>
+    </t>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- PROMOS -->
+    <record id="page_promos" model="website.page">
+        <field name="name">Latest Promos</field>
+        <field name="url">/promos</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.promos</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.promos"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Latest Promos | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Latest Promos</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-promos">
+    <a href="/promotions/everyday-moves-toyota" class="ab-promo-card">
+        <img t-att-src="website._ab_static('Image-55-1.webp')" alt="Everyday Moves Toyota" loading="lazy"/>
+        <div class="ab-promo-body">
+            <div class="ab-promo-dates">2026 MAY 27 <span>--</span> 2026 MAY 31</div>
+            <h3>Everyday Moves Toyota</h3>
+            <span class="ab-red-link">Promo Details <i class="fa fa-angle-right"/></span>
+        </div>
+    </a>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <record id="page_promo_everyday_moves" model="website.page">
+        <field name="name">Everyday Moves Toyota</field>
+        <field name="url">/promotions/everyday-moves-toyota</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.promo_everyday_moves</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.promo_everyday_moves"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Everyday Moves Toyota | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Everyday Moves Toyota</t>
+<t t-set="banner_image" t-value="website._ab_static('Image-55-1.webp')"/>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-container ab-promo-detail">
+    <div class="ab-promo-dates">2026 MAY 27 <span>--</span> 2026 MAY 31</div>
+    <img t-att-src="website._ab_static('Image-55-1.webp')" alt="Everyday Moves Toyota" loading="lazy"/>
+    <a href="/vehicles/brand/toyota" class="ab-btn ab-btn-dark">View Toyota Vehicles</a>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- PRICE LIST (dynamic) -->
+    <record id="page_price_list" model="website.page">
+        <field name="name">Price Lists</field>
+        <field name="url">/price-list</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.price_list</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.price_list"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Price Lists | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Price Lists</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-pricelist-wrap">
+    <div class="ab-container">
+        <div class="ab-pl-tabs">
+            <t t-foreach="website._ab_brands()" t-as="brand">
+                <button type="button" t-att-class="'ab-pl-tab %s' % ('is-active' if brand_first else '')" t-att-data-brand="brand" t-out="brand.upper()"/>
+            </t>
+        </div>
+        <p class="ab-pl-note">* PRICES AS OF <t t-out="datetime.date.today().strftime('%B %-d, %Y').upper()"/><br/>** VEHICLE PRICE MAY CHANGE WITHOUT PRIOR NOTICE</p>
+        <t t-foreach="website._ab_brands()" t-as="brand">
+            <div t-att-class="'ab-pl-brand %s' % ('is-active' if brand_first else '')" t-att-data-brand="brand">
+                <h3 class="ab-pl-brand-title" t-out="brand.upper()"/>
+                <t t-foreach="ab_vehicles.filtered(lambda v: v._ab_web_brand() == brand)" t-as="car">
+                    <div class="ab-pl-row">
+                        <img t-att-src="website._ab_img(car, car._ab_card_field(), 600)" t-att-alt="car._ab_web_title()" loading="lazy"/>
+                        <div class="ab-pl-info">
+                            <div class="ab-pl-head">
+                                <h4 t-out="car._ab_web_title()"/>
+                                <a t-att-href="car.website_url" class="ab-pl-explore">EXPLORE</a>
+                                <span class="ab-pl-brochure">NO BROCHURE AVAILABLE</span>
+                            </div>
+                            <div class="ab-pl-table">
+                                <div class="ab-pl-th"><span>VARIANT</span><span>PRICE</span></div>
+                                <t t-if="car.website_variant_ids">
+                                    <t t-foreach="car.website_variant_ids" t-as="variant">
+                                        <div class="ab-pl-tr"><span t-out="variant.name.upper()"/><b t-out="variant.price_label"/></div>
+                                    </t>
+                                </t>
+                                <div t-else="" class="ab-pl-tr"><span>STANDARD BASE SPEC</span><b t-out="website._ab_money(car._ab_web_price())"/></div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- PAYMENT CALCULATOR (dynamic) -->
+    <record id="page_payment_calculator" model="website.page">
+        <field name="name">Payment Calculator</field>
+        <field name="url">/payment-calculator</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.payment_calculator</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.payment_calculator"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Payment Calculator | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<t t-set="banner_title">Payment Calculator</t>
+<t t-call="autoboutique_website.ab_page_banner"/>
+<section class="ab-pc-wrap">
+    <div class="ab-pc-card ab-calc" data-ab-calc="calculator">
+        <div class="ab-pc-fields">
+            <label>MODEL
+                <select class="ab-calc-vehicle">
+                    <option value="">Select Car Model...</option>
+                    <t t-foreach="ab_vehicles" t-as="car"><option t-att-value="int(car._ab_web_price())" t-att-data-id="car.id" t-out="car._ab_web_title()"/></t>
+                </select>
+            </label>
+            <label>DOWNPAYMENT
+                <select class="ab-calc-dp">
+                    <t t-foreach="[10, 20, 30, 40, 50]" t-as="dp"><option t-att-value="dp" t-att-selected="'selected' if dp == 20 else None"><t t-out="dp"/>% Downpayment</option></t>
+                </select>
+            </label>
+            <label>TERM
+                <select class="ab-calc-term">
+                    <t t-foreach="[12, 24, 36, 48, 60]" t-as="term"><option t-att-value="term"><t t-out="term"/> Months</option></t>
+                </select>
+            </label>
+        </div>
+        <div class="ab-center"><button type="button" class="ab-btn ab-btn-dark ab-calc-go">CALCULATE NOW</button></div>
+        <div class="ab-pc-result" hidden="hidden">
+            <div class="ab-pc-model ab-calc-model">---</div>
+            <div class="ab-pc-monthly"><span class="ab-peso">₱</span><b class="ab-calc-out">---</b> / month</div>
+            <div class="ab-pc-financed">Financed Amount: <b class="ab-calc-financed">---</b></div>
+            <div class="ab-pc-actions">
+                <a href="/contact" class="ab-btn ab-btn-outline">Contact Dealer</a>
+                <a href="/lead-form" class="ab-btn ab-btn-dark">Apply Financing</a>
+            </div>
+        </div>
+    </div>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <!-- LEAD FORM -->
+    <record id="page_lead_form" model="website.page">
+        <field name="name">Vehicle Inquiry Form</field>
+        <field name="url">/lead-form</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">autoboutique_website.lead_form</field>
+        <field name="arch" type="xml">
+<t t-name="autoboutique_website.lead_form"><t t-call="autoboutique_website.ab_layout">
+<t t-set="title">Vehicle Inquiry Form | Prime Auto Boutique</t>
+<t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+<section class="ab-lead" id="inquire">
+    <form action="/autoboutique/inquiry" method="post" class="ab-lead-form">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <input type="hidden" name="source" value="lead"/>
+        <input type="hidden" name="redirect" value="/lead-form"/>
+        <h1>Vehicle Inquiry Form</h1>
+        <p class="ab-lead-intro">Please complete the form below and our team will assist you with your inquiry.</p>
+        <div t-if="request.params.get('sent')" class="ab-form-ok">Thank you! Our team will contact you shortly.</div>
+        <div t-if="request.params.get('error')" class="ab-form-err">Please enter your name and a mobile number or email.</div>
+        <h2>Personal Information</h2>
+        <label>Full Name <i>*</i><input type="text" name="name" required="required"/></label>
+        <div class="ab-two">
+            <label>Mobile Number <i>*</i><input type="tel" name="phone" required="required"/></label>
+            <label>Email Address <i>*</i><input type="email" name="email" required="required"/></label>
+        </div>
+        <h2>Vehicle Interest</h2>
+        <label>Which vehicle are you interested in? <i>*</i>
+            <select name="vehicle_id" required="required">
+                <option value="">Select a vehicle</option>
+                <t t-foreach="ab_vehicles" t-as="car"><option t-att-value="car.id" t-out="car._ab_web_title()"/></t>
+            </select>
+        </label>
+        <div class="ab-radio-row">
+            <t t-foreach="[('sedan', 'Sedan'), ('suv', 'SUV'), ('pickup', 'Pickup'), ('mpv', 'MPV'), ('van', 'Van'), ('others', 'Others')]" t-as="opt">
+                <label class="ab-radio"><input type="radio" name="body_type" t-att-value="opt[0]"/> <t t-out="opt[1]"/></label>
+            </t>
+        </div>
+        <h2>Purchase Information</h2>
+        <div class="ab-field-label">Preferred Payment Option <i>*</i></div>
+        <div class="ab-radio-row">
+            <label class="ab-radio"><input type="radio" name="payment_option" value="cash" required="required"/> Cash</label>
+            <label class="ab-radio"><input type="radio" name="payment_option" value="financing"/> Financing</label>
+        </div>
+        <div class="ab-two">
+            <label>Employment Status <small>(For Financing Applicants)</small>
+                <select name="employment_status">
+                    <option value="">Select</option>
+                    <t t-foreach="[('employed', 'Employed'), ('self_employed', 'Self-Employed'), ('business_owner', 'Business Owner'), ('ofw', 'OFW'), ('freelancer', 'Freelancer'), ('others', 'Others')]" t-as="opt"><option t-att-value="opt[0]" t-out="opt[1]"/></t>
+                </select>
+            </label>
+            <label>Estimated Monthly Income
+                <select name="monthly_income">
+                    <option value="">Select</option>
+                    <t t-foreach="[('20_30', '₱20,000 – ₱30,000'), ('30_50', '₱30,001 – ₱50,000'), ('50_80', '₱50,001 – ₱80,000'), ('80_100', '₱80,001 – ₱100,000'), ('100_plus', 'Above ₱100,000')]" t-as="opt"><option t-att-value="opt[0]" t-out="opt[1]"/></t>
+                </select>
+            </label>
+        </div>
+        <h2>Appointment &amp; Follow-up</h2>
+        <div class="ab-field-label">How can we assist you? <i>*</i></div>
+        <div class="ab-radio-row">
+            <t t-foreach="[('quotation', 'Request a Quotation'), ('visit', 'Schedule a Showroom Visit'), ('test_drive', 'Book a Test Drive'), ('financing', 'Financing Assistance')]" t-as="opt">
+                <label class="ab-radio"><input type="radio" name="assistance" t-att-value="opt[0]" t-att-required="'required' if opt_first else None"/> <t t-out="opt[1]"/></label>
+            </t>
+        </div>
+        <h2>Additional Message</h2>
+        <label>Questions or Comments<textarea name="message" rows="4"/></label>
+        <label class="ab-check"><input type="checkbox" name="consent" value="1" required="required"/> I agree to be contacted by Prime Auto Boutique regarding my inquiry and receive updates about available vehicles and promotions.</label>
+        <button type="submit" class="ab-btn ab-btn-dark ab-btn-block">Submit Inquiry</button>
+    </form>
+</section>
+</t></t>
+        </field>
+    </record>
+
+    <function model="website" name="autoboutique_sync_websites"/>
+</odoo>

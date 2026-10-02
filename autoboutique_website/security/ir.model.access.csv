@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vehicle_variant_user,autoboutique.vehicle.variant.user,model_autoboutique_vehicle_variant,base.group_user,1,1,1,1
+access_vehicle_variant_color_user,autoboutique.vehicle.variant.color.user,model_autoboutique_vehicle_variant_color,base.group_user,1,1,1,1
+access_vehicle_feature_user,autoboutique.vehicle.feature.user,model_autoboutique_vehicle_feature,base.group_user,1,1,1,1
+access_vehicle_gallery_user,autoboutique.vehicle.gallery.user,model_autoboutique_vehicle_gallery,base.group_user,1,1,1,1
+access_website_inquiry_user,autoboutique.website.inquiry.user,model_autoboutique_website_inquiry,base.group_user,1,1,1,0
+access_website_inquiry_admin,autoboutique.website.inquiry.admin,model_autoboutique_website_inquiry,base.group_system,1,1,1,1

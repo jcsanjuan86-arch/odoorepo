@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Page wrapper: Odoo's layout without its header/footer, with the Prime Auto Boutique header and footer -->
+    <template id="ab_layout" name="Autoboutique Layout">
+        <t t-call="website.layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="head">
+                <link rel="preconnect" href="https://fonts.googleapis.com"/>
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap"/>
+            </t>
+            <t t-set="ab_vehicles" t-value="website._ab_vehicles()"/>
+            <div class="ab-site">
+                <t t-call="autoboutique_website.ab_header"/>
+                <div class="ab-main">
+                    <t t-out="0"/>
+                </div>
+                <t t-call="autoboutique_website.ab_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="ab_header" name="Autoboutique Header">
+        <header class="ab-header">
+            <div class="ab-header-inner">
+                <a href="/" class="ab-logo" aria-label="Prime Auto Boutique home">
+                    <img t-att-src="website._ab_static('Prime-Auto-Boutique-PH-copy.png')" alt="Prime Auto Boutique"/>
+                </a>
+                <button type="button" class="ab-burger" aria-label="Open menu" aria-expanded="false"><span/><span/><span/></button>
+                <nav class="ab-nav" aria-label="Main">
+                    <!-- Explore Vehicles -->
+                    <div class="ab-nav-item ab-has-mega">
+                        <button type="button" class="ab-nav-link" aria-expanded="false">Explore Vehicles <i class="fa fa-angle-down"/></button>
+                        <div class="ab-mega ab-mega-vehicles">
+                            <div class="ab-mega-inner">
+                                <div class="ab-mega-brands">
+                                    <div class="ab-mega-label">OUR BRANDS</div>
+                                    <a href="/vehicles" class="ab-brand-link is-active" data-brand="">Featured units</a>
+                                    <t t-foreach="website._ab_brands()" t-as="brand">
+                                        <a t-att-href="'/vehicles/brand/%s' % brand.lower()" class="ab-brand-link" t-att-data-brand="brand" t-out="brand"/>
+                                    </t>
+                                </div>
+                                <div class="ab-mega-cars">
+                                    <div class="ab-mega-label">ALL VEHICLES</div>
+                                    <div class="ab-mega-grid">
+                                        <t t-foreach="ab_vehicles" t-as="car">
+                                            <a t-att-href="car.website_url" class="ab-mega-car" t-att-data-brand="car._ab_web_brand()">
+                                                <img t-if="car.website_menu_image" t-att-src="website._ab_img(car, 'website_menu_image', 400)" t-att-alt="car._ab_web_title()" loading="lazy"/>
+                                                <img t-elif="car.website_card_image" t-att-src="website._ab_img(car, 'website_card_image', 400)" t-att-alt="car._ab_web_title()" loading="lazy"/>
+                                                <span class="ab-mega-car-name" t-out="car._ab_web_title()"/>
+                                                <span class="ab-mega-car-cta">Explore</span>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Buying Guide -->
+                    <div class="ab-nav-item ab-has-mega">
+                        <button type="button" class="ab-nav-link" aria-expanded="false">Buying Guide <i class="fa fa-angle-down"/></button>
+                        <div class="ab-mega ab-mega-small">
+                            <div class="ab-mega-inner">
+                                <div class="ab-mega-col">
+                                    <div class="ab-mega-label">Shopping Tools</div>
+                                    <a href="/promos">Latest Promos</a>
+                                    <a href="/payment-calculator">Payment Calculator</a>
+                                    <a href="/price-list">Price List</a>
+                                </div>
+                                <div class="ab-mega-col">
+                                    <div class="ab-mega-label">Financing Options</div>
+                                    <a href="/financing">Financing</a>
+                                </div>
+                                <a href="/promotions/everyday-moves-toyota" class="ab-mega-promo">
+                                    <img t-att-src="website._ab_static('Image-55-1.webp')" alt="Everyday Moves Toyota" loading="lazy"/>
+                                    <span class="ab-promo-date">2026 MAY 27</span>
+                                    <span class="ab-promo-title">Everyday Moves Toyota</span>
+                                    <span class="ab-promo-tag">Featured</span>
+                                    <span class="ab-promo-cta">View Promo</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Services -->
+                    <div class="ab-nav-item ab-has-mega">
+                        <button type="button" class="ab-nav-link" aria-expanded="false">Services <i class="fa fa-angle-down"/></button>
+                        <div class="ab-mega ab-mega-small">
+                            <div class="ab-mega-inner">
+                                <div class="ab-mega-col">
+                                    <div class="ab-mega-label">AFTER SALES</div>
+                                    <a href="/unit-release">Unit Released</a>
+                                    <a href="/services">Services Offerings</a>
+                                    <a href="/financing">Financing</a>
+                                    <a href="/faqs">FAQs</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ab-nav-item"><a href="/about" class="ab-nav-link">About Us</a></div>
+                    <div class="ab-nav-item">
+                        <button type="button" class="ab-nav-link ab-search-toggle" aria-label="Search vehicles"><i class="fa fa-search"/></button>
+                    </div>
+                </nav>
+            </div>
+            <div class="ab-search-overlay" hidden="hidden">
+                <form action="/vehicles" method="get" class="ab-search-form" role="search">
+                    <input type="search" name="search" placeholder="Search vehicles, e.g. Vios" aria-label="Search vehicles"/>
+                    <button type="submit" class="ab-btn ab-btn-dark">Search</button>
+                    <button type="button" class="ab-search-close" aria-label="Close search">×</button>
+                </form>
+            </div>
+        </header>
+    </template>
+
+    <template id="ab_footer" name="Autoboutique Footer">
+        <footer class="ab-footer" t-attf-style="background-image: url('#{website._ab_static('image-2026-05-23T162032.850.webp')}')">
+            <div class="ab-footer-inner">
+                <div class="ab-footer-logo">
+                    <img t-att-src="website._ab_static('prime_auto_boutique_transparent.png')" alt="Prime Auto Boutique"/>
+                </div>
+                <div class="ab-footer-cols">
+                    <div>
+                        <h4>Explore Vehicles</h4>
+                        <t t-foreach="['Toyota', 'Nissan', 'Mitsubishi', 'MG', 'Isuzu', 'Hyundai', 'Honda']" t-as="brand">
+                            <a t-att-href="'/vehicles/brand/%s' % brand.lower()" t-out="brand"/>
+                        </t>
+                    </div>
+                    <div>
+                        <h4>Quick Links</h4>
+                        <a href="/about">About</a>
+                        <a href="/services">Services</a>
+                        <a href="/unit-release">Unit Release</a>
+                        <a href="/contact">Contact</a>
+                    </div>
+                    <div>
+                        <h4>Support</h4>
+                        <a href="/financing">Financing</a>
+                        <a href="/faqs">FAQs</a>
+                    </div>
+                    <div>
+                        <h4>Socials</h4>
+                        <div class="ab-socials">
+                            <a href="#" aria-label="Facebook"><i class="fa fa-facebook-official"/></a>
+                            <a href="#" aria-label="X"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg></a>
+                            <a href="#" aria-label="YouTube"><i class="fa fa-youtube-play"/></a>
+                            <a href="#" aria-label="Instagram"><i class="fa fa-instagram"/></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ab-footer-bottom">© PRIME AUTO BOTIQUE. 2026 ALL RIGHTS RESERVED.</div>
+        </footer>
+    </template>
+
+    <!-- Banner used at the top of inner pages -->
+    <template id="ab_page_banner" name="Autoboutique Page Banner">
+        <section class="ab-banner" t-attf-style="background-image: url('#{banner_image or website._ab_static('646910254_1425382862936416_7448974539431781434_n-2.webp')}')">
+            <h1 t-out="banner_title"/>
+        </section>
+    </template>
+</odoo>

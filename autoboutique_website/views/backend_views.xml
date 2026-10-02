@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vehicle Master: Website tab -->
+    <record id="view_vehicle_form_website" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.website</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_view_on_website" type="object" string="View on Website" icon="fa-globe" invisible="not website_listed"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Website" name="website">
+                    <div class="alert alert-info" role="status" invisible="website_listed">
+                        Not on the website. Cars are listed while they are <b>Ready for Sale</b> or <b>Reserved</b> and <b>Published on Website</b> is ticked (it ticks itself when the car reaches Ready for Sale).
+                    </div>
+                    <group>
+                        <group>
+                            <field name="website_published"/>
+                            <field name="website_listed" invisible="1"/>
+                            <field name="website_title" placeholder="e.g. 2023 MG ZS"/>
+                            <field name="website_slug"/>
+                            <field name="website_tagline"/>
+                        </group>
+                        <group>
+                            <field name="website_featured"/>
+                            <field name="website_sequence"/>
+                            <field name="selling_price" string="Website Price (Selling Price)"/>
+                            <field name="wp_import_ref" readonly="1" invisible="not wp_import_ref"/>
+                        </group>
+                    </group>
+                    <group string="Photos">
+                        <field name="website_card_image" widget="image" options="{'size': [180, 120]}"/>
+                        <field name="website_hero_image" widget="image" options="{'size': [180, 120]}"/>
+                        <field name="website_menu_image" widget="image" options="{'size': [180, 120]}"/>
+                    </group>
+                    <field name="website_description" placeholder="Description shown next to the main photo"/>
+                    <notebook>
+                        <page string="Gallery" name="website_gallery">
+                            <field name="website_gallery_ids" mode="kanban">
+                                <kanban>
+                                    <field name="id"/>
+                                    <templates><t t-name="card"><field name="image" widget="image" options="{'size': [160, 110]}"/></t></templates>
+                                </kanban>
+                                <form><group><field name="sequence"/><field name="image" widget="image"/></group></form>
+                            </field>
+                        </page>
+                        <page string="Variants" name="website_variants">
+                            <field name="website_variant_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="price_label"/>
+                                    <field name="monthly_label"/>
+                                    <field name="transmission"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group><field name="name"/><field name="price_label"/><field name="monthly_label"/><field name="image" widget="image" options="{'size': [180, 100]}"/></group>
+                                        <group><field name="engine"/><field name="suspension"/><field name="brakes"/><field name="transmission"/></group>
+                                    </group>
+                                    <field name="color_ids">
+                                        <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name"/>
+                                            <field name="hex_code" widget="color"/>
+                                            <field name="image" widget="image" options="{'size': [60, 40]}"/>
+                                        </list>
+                                    </field>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Feature Rows" name="website_features">
+                            <field name="website_feature_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="text"/>
+                                </list>
+                                <form><group><field name="name"/><field name="text"/><field name="image" widget="image" options="{'size': [240, 160]}"/></group></form>
+                            </field>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_vehicle_list_website" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.list.website</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_vehicle_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <header>
+                    <button name="action_import_sandbox_vehicles" type="object" string="Import Sandbox Vehicles"
+                            display="always" groups="base.group_system"
+                            confirm="Create or update the 13 vehicles from the sandbox website as Ready for Sale listings? Photos download in the background."/>
+                </header>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="selling_price" optional="show"/>
+                <field name="website_published" optional="show" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Website inquiries -->
+    <record id="view_inquiry_list" model="ir.ui.view">
+        <field name="name">autoboutique.website.inquiry.list</field>
+        <field name="model">autoboutique.website.inquiry</field>
+        <field name="arch" type="xml">
+            <list decoration-bf="state == 'new'" decoration-muted="state == 'closed'">
+                <field name="create_date" string="Received"/>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="source"/>
+                <field name="vehicle_id"/>
+                <field name="assistance" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'new'" decoration-success="state == 'contacted'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_inquiry_form" model="ir.ui.view">
+        <field name="name">autoboutique.website.inquiry.form</field>
+        <field name="model">autoboutique.website.inquiry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_mark_contacted" type="object" string="Mark Contacted" class="btn-primary" invisible="state != 'new'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state == 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group><field name="name"/><field name="phone" widget="phone"/><field name="email" widget="email"/><field name="source"/><field name="vehicle_id"/></group>
+                        <group><field name="body_type"/><field name="payment_option"/><field name="employment_status"/><field name="monthly_income"/><field name="assistance"/><field name="consent"/></group>
+                    </group>
+                    <field name="message" placeholder="Message"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_inquiries" model="ir.actions.act_window">
+        <field name="name">Website Inquiries</field>
+        <field name="res_model">autoboutique.website.inquiry</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No website inquiries yet</p><p>Inquiries from the Contact page, vehicle pages and the Vehicle Inquiry Form appear here with a call-back to-do.</p></field>
+    </record>
+    <menuitem id="menu_inquiries" name="Website Inquiries" parent="autoboutique_ops.menu_root" action="action_inquiries" sequence="35"/>
+
+    <!-- Background download of sandbox banners, variants, feature rows and galleries -->
+    <record id="cron_import_sandbox_photos" model="ir.cron">
+        <field name="name">Autoboutique: download sandbox vehicle photos</field>
+        <field name="model_id" ref="autoboutique_ops.model_autoboutique_vehicle"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_sandbox_photos()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
