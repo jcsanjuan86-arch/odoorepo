@@ -73,8 +73,8 @@ class Vehicle(models.Model):
             "company_id": company.id, "purchase_ok": True, "sale_ok": True, "invoice_policy": "order",
         })
 
-    @api.model
     def action_import_sandbox_vehicles(self):
+        # Called from the list header button, which passes the (ignored) selected ids.
         """Create or update the sandbox listings. Photos beyond the listing photo follow in the background."""
         company = self._ab_website_company()
         Vehicle = self.with_company(company).with_context(ab_automating=True, tracking_disable=True)
