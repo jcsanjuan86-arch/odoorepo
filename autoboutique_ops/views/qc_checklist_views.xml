@@ -16,6 +16,11 @@
                         <field name="status" invisible="1"/>
                         <field name="remarks"/>
                     </group>
+                    <group string="Repair" invisible="not repair_line_ids">
+                        <field name="repair_line_ids" nolabel="1" colspan="2" readonly="1">
+                            <list><field name="repair_id"/><field name="name"/><field name="cost_type"/><field name="product_id"/><field name="estimated_cost"/></list>
+                        </field>
+                    </group>
                     <group string="Photos">
                         <field name="photo" widget="image"/>
                         <field name="attachment_ids" widget="many2many_binary"/>
@@ -66,6 +71,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -81,6 +87,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -96,6 +103,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -111,6 +119,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -126,6 +135,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -141,6 +151,7 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
@@ -156,10 +167,33 @@
                                 <field name="tick_na"/>
                                 <field name="remarks"/>
                                 <field name="photo" widget="image" options="{'size': [40, 40]}"/>
+                                <field name="repair_status" optional="show"/>
                             </list>
                         </field>
                     </page>
                 </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Repair lines show the checklist point they fix; material request items show stock on hand -->
+    <record id="view_repair_form_checklist" model="ir.ui.view">
+        <field name="name">autoboutique.repair.form.checklist</field>
+        <field name="model">autoboutique.repair</field>
+        <field name="inherit_id" ref="view_repair_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']/list/field[@name='name']" position="after">
+                <field name="qc_line_id" optional="show" options="{'no_create': True}" domain="[('qc_id.vehicle_id', '=', parent.vehicle_id), ('status', '=', 'attention')]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_mrf_form_availability" model="ir.ui.view">
+        <field name="name">autoboutique.mrf.form.availability</field>
+        <field name="model">autoboutique.mrf</field>
+        <field name="inherit_id" ref="view_mrf_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='item_ids']/list/field[@name='quantity']" position="after">
+                <field name="qty_available"/>
             </xpath>
         </field>
     </record>

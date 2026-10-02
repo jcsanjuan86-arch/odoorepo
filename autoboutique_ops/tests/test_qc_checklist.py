@@ -64,6 +64,42 @@ class TestQCChecklist(TransactionCase):
         self.assertIn("Rotors below minimum", qc.findings)
         self.assertIn("Brake pad/rotor", qc.repair_id.notes)
 
+    def test_attention_points_become_repair_lines_and_parts_are_bought(self):
+        qc = self._qc()
+        brake = qc.line_ids.filtered(lambda line: "Brake pad/rotor" in line.name)
+        brake.write({"status": "attention", "remarks": "Rotors below minimum"})
+        self._tick_all(qc)
+        qc.result = "fail"
+        repair = qc.repair_id
+        repair_line = repair.line_ids.filtered(lambda line: line.qc_line_id == brake)
+        self.assertEqual(len(repair_line), 1, "Each flagged point becomes a repair line")
+        self.assertIn("Rotors below minimum", repair_line.name)
+        self.assertTrue(brake.repair_status)
+
+        vendor = self.env["res.partner"].create({"name": "Checklist Parts Supplier"})
+        rotor = self.env["product.product"].create({
+            "name": "Checklist Test Brake Rotor", "type": "consu", "is_storable": True, "standard_price": 2500,
+            "seller_ids": [(0, 0, {"partner_id": vendor.id, "price": 2500})],
+        })
+        repair_line.write({"cost_type": "stock", "product_id": rotor.id, "quantity": 2})
+        repair.state = "approved"
+        mrf = self.vehicle.mrf_ids
+        item = mrf.item_ids
+        self.assertEqual(item.repair_line_id, repair_line)
+        self.assertEqual(item.source, "purchase", "No rotors on hand, so they are bought")
+        self.assertEqual(mrf.vendor_id, vendor, "Vendor comes from the product's vendor list")
+        mrf.action_approve_request()
+        self.assertEqual(mrf.purchase_order_id.partner_id, vendor)
+        self.assertEqual(mrf.purchase_order_id.state, "draft")
+        self.assertEqual(item.purchase_order_line_id.product_id, rotor)
+        self.assertEqual(repair_line.purchase_order_line_id, item.purchase_order_line_id)
+
+        repair.state = "done"
+        mrf.state = "closed"
+        final = self.vehicle.qc_ids.filtered(lambda q: q.inspection_type == "final")
+        recheck = final.line_ids.filtered(lambda line: line.item_id == brake.item_id)
+        self.assertIn("Re-check after repair", recheck.remarks)
+
     def test_report_renders(self):
         qc = self._qc()
         qc.line_ids[0].write({"status": "attention", "remarks": "Missing booklet", "photo": PIXEL})
