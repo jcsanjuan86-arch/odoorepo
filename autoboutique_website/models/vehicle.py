@@ -39,7 +39,7 @@ class Vehicle(models.Model):
     website_variant_ids = fields.One2many("autoboutique.vehicle.variant", "vehicle_id", string="Variants")
     website_feature_ids = fields.One2many("autoboutique.vehicle.feature", "vehicle_id", string="Feature Rows")
     website_gallery_ids = fields.One2many("autoboutique.vehicle.gallery", "vehicle_id", string="Gallery")
-    website_listed = fields.Boolean(compute="_compute_website_listed", search="_search_website_listed")
+    website_listed = fields.Boolean("Listed on Website", compute="_compute_website_listed", store=True, index=True)
     website_url = fields.Char(compute="_compute_website_url")
     wp_import_ref = fields.Integer("Sandbox Product ID", copy=False, index=True,
                                    help="Vehicle imported from the sandbox website listing.")
@@ -51,12 +51,6 @@ class Vehicle(models.Model):
     def _compute_website_listed(self):
         for vehicle in self:
             vehicle.website_listed = vehicle.website_published and vehicle.state in LISTED_STATES
-
-    def _search_website_listed(self, operator, value):
-        domain = [("website_published", "=", True), ("state", "in", LISTED_STATES)]
-        if (operator == "=") == bool(value):
-            return domain
-        return ["!", "&"] + domain
 
     @api.depends("website_slug")
     def _compute_website_url(self):

@@ -64,12 +64,14 @@ class QCLine(models.Model):
     name = fields.Char("Inspection Item", required=True)
     status = fields.Selection(STATUSES)
     # Tick boxes shown to inspectors; ticking one clears the others.
-    tick_ok = fields.Boolean("OK", compute="_compute_ticks", inverse="_inverse_tick_ok")
-    tick_attention = fields.Boolean("Needs Attention", compute="_compute_ticks", inverse="_inverse_tick_attention")
-    tick_na = fields.Boolean("N/A", compute="_compute_ticks", inverse="_inverse_tick_na")
+    # One compute method per tick: fields sharing a compute are protected together
+    # while one of them is written, which would leave the other ticks stale.
+    tick_ok = fields.Boolean("OK", compute="_compute_tick_ok", inverse="_inverse_tick_ok")
+    tick_attention = fields.Boolean("Needs Attention", compute="_compute_tick_attention", inverse="_inverse_tick_attention")
+    tick_na = fields.Boolean("N/A", compute="_compute_tick_na", inverse="_inverse_tick_na")
     remarks = fields.Char("Remarks / Notes")
     photo = fields.Image(max_width=1920, max_height=1920)
-    photo_512 = fields.Image(related="photo", max_width=512, max_height=512, store=True)
+    photo_512 = fields.Image("Photo (512px)", related="photo", max_width=512, max_height=512, store=True)
     attachment_ids = fields.Many2many(
         "ir.attachment", "autoboutique_qc_line_ir_attachment_rel", "line_id", "attachment_id",
         string="More Photos",
@@ -81,10 +83,18 @@ class QCLine(models.Model):
             line.section_sequence = SECTION_SEQUENCE.get(line.section, 99)
 
     @api.depends("status")
-    def _compute_ticks(self):
+    def _compute_tick_ok(self):
         for line in self:
             line.tick_ok = line.status == "ok"
+
+    @api.depends("status")
+    def _compute_tick_attention(self):
+        for line in self:
             line.tick_attention = line.status == "attention"
+
+    @api.depends("status")
+    def _compute_tick_na(self):
+        for line in self:
             line.tick_na = line.status == "na"
 
     def _set_tick(self, status, ticked):
