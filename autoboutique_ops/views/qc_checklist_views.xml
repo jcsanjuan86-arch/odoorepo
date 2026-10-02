@@ -176,6 +176,18 @@
         </field>
     </record>
 
+    <!-- Car photo on the Vehicle Master -->
+    <record id="view_vehicle_form_photo" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.photo</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="view_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/*[1]" position="before">
+                <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_256'}"/>
+            </xpath>
+        </field>
+    </record>
+
     <!-- Repair lines show the checklist point they fix; material request items show stock on hand -->
     <record id="view_repair_form_checklist" model="ir.ui.view">
         <field name="name">autoboutique.repair.form.checklist</field>

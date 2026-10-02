@@ -3,7 +3,8 @@ from odoo.exceptions import ValidationError
 
 
 class VehicleExtension(models.Model):
-    _inherit = "autoboutique.vehicle"
+    _name = "autoboutique.vehicle"
+    _inherit = ["autoboutique.vehicle", "image.mixin"]
 
     sales_application_ids = fields.One2many("autoboutique.sales.application", "vehicle_id")
     release_ids = fields.One2many("autoboutique.vehicle.release", "vehicle_id")
