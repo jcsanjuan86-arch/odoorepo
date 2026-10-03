@@ -125,6 +125,16 @@ class TestVehicleAutomation(TransactionCase):
         self.assertEqual(vehicle.state, "ready")
         self.assertFalse(self._todo(vehicle, "Verify documents and approve for sale"))
 
+        # Listing prices include VAT; the margin is measured on the price before VAT.
+        vat = self.env["account.tax"].create({
+            "name": "Automation VAT 12% incl", "amount": 12, "type_tax_use": "sale",
+            "price_include_override": "tax_included", "company_id": self.company.id,
+        })
+        vehicle.product_id.taxes_id = vat
+        vehicle.selling_price = 1120000
+        self.assertAlmostEqual(vehicle.selling_price_untaxed, 1000000, places=2)
+        self.assertAlmostEqual(vehicle.gross_profit, 1000000 - vehicle.actual_vehicle_cost, places=2)
+
     def test_repair_parts_create_material_request(self):
         receiving = self._receive(self._approved_bid())
         vehicle = receiving.vehicle_id

@@ -15,15 +15,27 @@ class VehicleExtension(models.Model):
     customer_id = fields.Many2one("res.partner")
     sales_agent_id = fields.Many2one("res.users")
     selling_price = fields.Monetary(currency_field="currency_id")
+    selling_price_untaxed = fields.Monetary("Price before VAT", compute="_compute_profit", currency_field="currency_id")
     gross_profit = fields.Monetary(compute="_compute_profit", currency_field="currency_id")
+    margin_percent = fields.Float("Margin %", compute="_compute_profit", digits=(5, 1))
     registration_status = fields.Selection([("draft", "Draft"), ("processing", "Processing"), ("completed", "Completed")], compute="_compute_document_rollups")
     insurance_status = fields.Selection([("draft", "Draft"), ("active", "Active"), ("expired", "Expired")], compute="_compute_document_rollups")
     missing_document_count = fields.Integer(compute="_compute_document_rollups")
 
-    @api.depends("selling_price", "actual_vehicle_cost")
+    @api.depends("selling_price", "actual_vehicle_cost", "product_id.taxes_id", "company_id.account_sale_tax_id")
     def _compute_profit(self):
+        # Listing prices include VAT; costs do not. Compare like with like.
         for vehicle in self:
-            vehicle.gross_profit = vehicle.selling_price - vehicle.actual_vehicle_cost
+            company = vehicle.company_id or self.env.company
+            taxes = vehicle.product_id.taxes_id.filtered(lambda tax: tax.company_id == company) \
+                or company.account_sale_tax_id
+            untaxed = vehicle.selling_price
+            if taxes and vehicle.selling_price:
+                untaxed = taxes.compute_all(vehicle.selling_price, currency=company.currency_id,
+                                            product=vehicle.product_id)["total_excluded"]
+            vehicle.selling_price_untaxed = untaxed
+            vehicle.gross_profit = untaxed - vehicle.actual_vehicle_cost
+            vehicle.margin_percent = 100.0 * vehicle.gross_profit / untaxed if untaxed else 0.0
 
     @api.depends("registration_ids.status", "insurance_ids.status", "document_ids.status", "document_ids.required")
     def _compute_document_rollups(self):
