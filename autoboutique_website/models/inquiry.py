@@ -47,9 +47,10 @@ class WebsiteInquiry(models.Model):
     def create(self, vals_list):
         inquiries = super().create(vals_list)
         # With the Salesforce integration active, agents work the lead there; otherwise Odoo calls back.
-        sync = self.env["autoboutique.salesforce.sync"] if "autoboutique.salesforce.sync" in self.env else None
+        has_sync = "autoboutique.salesforce.sync" in self.env
         for inquiry in inquiries:
-            queued = sync and sync.sudo()._enqueue_website_inquiry(inquiry)
+            # The sync model is an empty recordset (falsy), so test the registry, not the model.
+            queued = has_sync and self.env["autoboutique.salesforce.sync"].sudo()._enqueue_website_inquiry(inquiry)
             if not queued:
                 schedule_todo(inquiry, "manager", "Call back website inquiry",
                               note="%s via %s%s." % (inquiry.name, dict(self._fields["source"].selection)[inquiry.source],
