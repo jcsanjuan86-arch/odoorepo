@@ -17,7 +17,7 @@ $src = @(
     "$d\classes\AutobotiqueRouter.cls", "$d\classes\AutobotiqueRouterTest.cls", "$d\triggers\AutobotiqueMessagingSession.trigger",
     "$d\objects\Contact\fields\Personal_Agent__c.field-meta.xml", "$d\objects\MessagingEndUser\fields\Personal_Agent__c.field-meta.xml",
     "$d\serviceChannels", "$d\servicePresenceStatuses", "$d\queueRoutingConfigs", "$d\queues", "$d\presenceUserConfigs",
-    "$d\flows\Autobotique_Messaging_Routing.flow-meta.xml", "$d\messagingChannels\FACEBOOK_US_135785939801940.messagingChannel-meta.xml"
+    "$d\flows\Autobotique_Messaging_Routing.flow-meta.xml"
 )
 $a = @('project', 'deploy', $Mode, '-o', 'myorg', '--test-level', 'RunSpecifiedTests', '--wait', '30', '--json')
 foreach ($s in $src) { $a += @('--source-dir', $s) }
@@ -34,3 +34,4 @@ $r.result.details.runTestResult.codeCoverageWarnings | Where-Object { $_.message
 "tests: $($r.result.numberTestsCompleted) completed, $($r.result.numberTestErrors) errors; id: $($r.result.id)"
 
 sf apex run -f scripts\apex\schedule_follow_ups.apex | Select-String "SCHEDULED"
+
