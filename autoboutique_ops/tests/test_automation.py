@@ -177,8 +177,11 @@ class TestVehicleAutomation(TransactionCase):
 
         release.write({"final_qc_verified": True, "detailing_verified": True, "documents_verified": True,
                        "customer_id_checked": True, "keys_handed_over": True, "originals_handed_over": True})
+        # Cars imported as listings never went through intake; the release checklist covers the documents.
+        vehicle.with_context(ab_automating=True).documents_verified = False
         release.action_approve_release()
         self.assertEqual(vehicle.state, "released")
+        self.assertTrue(vehicle.documents_verified, "The release checklist verifies the car's documents")
         registration = vehicle.registration_ids
         self.assertEqual(registration.status, "processing")
 
@@ -186,9 +189,11 @@ class TestVehicleAutomation(TransactionCase):
                             "plate_number": "NAB 1234"})
         registration.action_complete()
         today = fields.Date.context_today(vehicle)
-        self.env["autoboutique.insurance"].create({
+        other_company = self.env["res.company"].create({"name": "Automation Other Company"})
+        policy = self.env["autoboutique.insurance"].create({
             "name": "Comprehensive", "vehicle_id": vehicle.id, "provider_id": self.supplier.id,
             "policy_number": "AUTO-POL-1", "effective_date": today, "expiration_date": today + timedelta(days=365),
-            "status": "active", "company_id": self.company.id,
+            "status": "active", "company_id": other_company.id,
         })
+        self.assertEqual(policy.company_id, vehicle.company_id, "The policy follows the car's company")
         self.assertEqual(vehicle.state, "documents")

@@ -10,6 +10,22 @@ class CompanyMixin(models.AbstractModel):
         "res.company", required=True, default=lambda self: self.env.company, index=True
     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._ab_follow_vehicle_company(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self._ab_follow_vehicle_company(vals)
+        return super().write(vals)
+
+    def _ab_follow_vehicle_company(self, vals):
+        # Records about a car belong to the car's company, whichever company the user has switched to.
+        field = self._fields.get("vehicle_id")
+        if vals.get("vehicle_id") and field is not None and field.comodel_name == "autoboutique.vehicle":
+            vals["company_id"] = self.env["autoboutique.vehicle"].sudo().browse(vals["vehicle_id"]).company_id.id
+
 
 class Bid(models.Model):
     _name = "autoboutique.bid"

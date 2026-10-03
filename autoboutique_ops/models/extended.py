@@ -123,7 +123,7 @@ class VehicleRelease(models.Model):
             if self.search_count([("vehicle_id", "=", release.vehicle_id.id), ("state", "=", "approved"), ("id", "!=", release.id)]):
                 raise ValidationError("This vehicle already has a completed release.")
             release.write({"state": "approved", "payment_verified": True, "approved_by": self.env.user.id, "release_date": fields.Datetime.now()})
-            release.vehicle_id.write({"state": "released", "sale_order_id": release.sale_order_id.id, "invoice_id": invoice.id, "payment_received": True, "release_date": fields.Date.context_today(self)})
+            release.vehicle_id.write({"state": "released", "documents_verified": True, "sale_order_id": release.sale_order_id.id, "invoice_id": invoice.id, "payment_received": True, "release_date": fields.Date.context_today(self)})
             release.sales_application_id.state = "sold"
 
 
