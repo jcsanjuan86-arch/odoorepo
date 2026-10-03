@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
         <application>Test_Callcenter</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <classAccesses>
+        <apexClass>ApplicationRequirementsController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <classAccesses>
         <apexClass>AutobotiqueMessagingActionsController</apexClass>
         <enabled>true</enabled>
@@ -16,11 +20,17 @@
         <apexClass>FacebookLeadKanbanController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-    <classAccesses>
-        <apexClass>ApplicationRequirementsController</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
     <description>Staff access for Autobotique loan applications, documents, and character references.</description>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Contact.Personal_Agent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>MessagingEndUser.Personal_Agent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Applicant_Upload__c.Agent_Notes__c</field>
@@ -757,6 +767,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Vehicle_Inventory__c.Available_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Inventory__c.Branch__c</field>
         <readable>true</readable>
@@ -777,6 +792,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Vehicle_Inventory__c.Listing_URL__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Inventory__c.Notes__c</field>
         <readable>true</readable>
@@ -784,6 +804,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Inventory__c.Odometer__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Vehicle_Inventory__c.Odoo_Vehicle_ID__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -824,21 +849,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Vehicle_Inventory__c.Vehicle_Image_Upload__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Vehicle_Inventory__c.Odoo_Vehicle_ID__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Vehicle_Inventory__c.Available_Date__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Vehicle_Inventory__c.Listing_URL__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
@@ -956,15 +966,15 @@
         <visibility>Available</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>Requirements</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>Vehicle_Inventory__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
         <tab>standard-Contact</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>Requirements</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

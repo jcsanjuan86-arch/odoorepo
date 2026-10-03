@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Queue xmlns="http://soap.sforce.com/2006/04/metadata">
+    <doesIncludeBosses>true</doesIncludeBosses>
+    <doesSendEmailToMembers>false</doesSendEmailToMembers>
+    <name>Website Leads</name>
+    <queueMembers>
+        <users>
+            <user>michaelestanislao167@autoboutique.ph</user>
+            <user>ferdie.perete@gmail.com</user>
+            <user>limeacasio2013@gmail.com</user>
+            <user>ycjorlano3@gmail.com</user>
+            <user>lontocmacky77@gmail.com</user>
+            <user>santosrosalie1193@gmail.com</user>
+            <user>francomarjorie84@gmail.com</user>
+            <user>ainbsqns@gmail.com</user>
+            <user>josephbaldescoquiminales10@gmail.com</user>
+        </users>
+    </queueMembers>
+    <queueRoutingConfig>Website_Leads_Routing</queueRoutingConfig>
+    <queueSobject>
+        <sobjectType>Facebook_Inquiry__c</sobjectType>
+    </queueSobject>
+</Queue>

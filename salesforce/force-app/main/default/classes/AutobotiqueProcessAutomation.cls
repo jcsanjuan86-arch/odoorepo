@@ -6,7 +6,8 @@
  * - Changing the applicant type swaps the document checklist: missing items of
  *   the old type are removed, uploaded ones are kept as optional, and the new
  *   type's items are added.
- * - Website inquiries created by Odoo are assigned to the least busy agent.
+ * - Website inquiries created by Odoo go to the customer's personal agent or the
+ *   next agent in round robin (see AutobotiqueRouter).
  * - Contact mobile numbers are normalized to 09XXXXXXXXX and duplicates are
  *   blocked with the name of the existing customer.
  */
@@ -194,85 +195,11 @@ public without sharing class AutobotiqueProcessAutomation {
     // ------------------------------------------------------------------ inquiries
 
     public static void beforeInsertInquiries(List<Facebook_Inquiry__c> records) {
-        List<Facebook_Inquiry__c> unassigned = new List<Facebook_Inquiry__c>();
-        for (Facebook_Inquiry__c inquiry : records) {
-            if (inquiry.Channel__c == 'Website' && inquiry.Assigned_Agent__c == null) {
-                unassigned.add(inquiry);
-            }
-        }
-        if (unassigned.isEmpty()) {
-            return;
-        }
-        List<Id> agents = leastBusyAgents();
-        if (agents.isEmpty()) {
-            return;
-        }
-        Integer index = 0;
-        for (Facebook_Inquiry__c inquiry : unassigned) {
-            Id agentId = agents[Math.mod(index++, agents.size())];
-            inquiry.Assigned_Agent__c = agentId;
-            inquiry.OwnerId = agentId;
-        }
+        AutobotiqueRouter.assignWebsiteLeads(records);
     }
 
-    /** Agents ordered by open inquiries, fewest first. Users ticked "Receives Website Leads" win if any. */
-    @TestVisible
-    private static List<Id> leastBusyAgents() {
-        Set<Id> candidates = new Set<Id>();
-        for (User agent : [
-            SELECT Id FROM User WHERE IsActive = true AND UserType = 'Standard' AND Autobotique_Website_Leads__c = true
-        ]) {
-            candidates.add(agent.Id);
-        }
-        if (candidates.isEmpty()) {
-            for (PermissionSetAssignment assignment : [
-                SELECT AssigneeId FROM PermissionSetAssignment
-                WHERE PermissionSet.Name = 'Autobotique_Staff' AND Assignee.IsActive = true
-                AND Assignee.UserType = 'Standard' AND (NOT Assignee.Name LIKE '%Integration%')
-            ]) {
-                candidates.add(assignment.AssigneeId);
-            }
-        }
-        if (candidates.isEmpty()) {
-            return new List<Id>();
-        }
-        Map<Id, Integer> load = new Map<Id, Integer>();
-        for (Id candidate : candidates) {
-            load.put(candidate, 0);
-        }
-        for (AggregateResult row : [
-            SELECT Assigned_Agent__c agent, COUNT(Id) total FROM Facebook_Inquiry__c
-            WHERE Assigned_Agent__c IN :candidates AND Inquiry_Status__c NOT IN ('Converted', 'Closed', 'Not Qualified')
-            GROUP BY Assigned_Agent__c
-        ]) {
-            load.put((Id) row.get('agent'), (Integer) row.get('total'));
-        }
-        List<AgentLoad> ranked = new List<AgentLoad>();
-        for (Id candidate : load.keySet()) {
-            ranked.add(new AgentLoad(candidate, load.get(candidate)));
-        }
-        ranked.sort();
-        List<Id> ordered = new List<Id>();
-        for (AgentLoad entry : ranked) {
-            ordered.add(entry.userId);
-        }
-        return ordered;
-    }
-
-    private class AgentLoad implements Comparable {
-        Id userId;
-        Integer openCount;
-        AgentLoad(Id userId, Integer openCount) {
-            this.userId = userId;
-            this.openCount = openCount;
-        }
-        public Integer compareTo(Object other) {
-            AgentLoad that = (AgentLoad) other;
-            if (openCount != that.openCount) {
-                return openCount - that.openCount;
-            }
-            return String.valueOf(userId).compareTo(String.valueOf(that.userId));
-        }
+    public static void afterInsertInquiries(List<Facebook_Inquiry__c> records) {
+        AutobotiqueRouter.pushWebsiteLeads(records);
     }
 
     // ------------------------------------------------------------------ contacts

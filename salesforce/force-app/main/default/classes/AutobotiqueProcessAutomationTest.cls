@@ -126,10 +126,10 @@ private class AutobotiqueProcessAutomationTest {
     }
 
     @IsTest
-    static void websiteInquiriesGoToTheLeastBusyAgent() {
-        System.runAs(new User(Id = UserInfo.getUserId())) {
-            update new User(Id = UserInfo.getUserId(), Autobotique_Website_Leads__c = true);
-        }
+    static void websiteInquiriesGoToAnOnlineAgent() {
+        // Routing rules themselves are covered in AutobotiqueRouterTest.
+        AutobotiqueRouter.testPool = new Set<Id>{ UserInfo.getUserId() };
+        AutobotiqueRouter.testFreeCapacity = new Map<Id, Decimal>{ UserInfo.getUserId() => 5 };
         Facebook_Inquiry__c web = new Facebook_Inquiry__c(
             Customer_Name__c = 'Web Buyer', Channel__c = 'Website', Facebook_User_ID__c = 'website-1',
             Inquiry_Status__c = 'New', Lead_Stage__c = 'New Message'

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PresenceUserConfig xmlns="http://soap.sforce.com/2006/04/metadata">
+    <assignments>
+        <users>
+            <user>michaelestanislao167@autoboutique.ph</user>
+            <user>ferdie.perete@gmail.com</user>
+            <user>limeacasio2013@gmail.com</user>
+            <user>ycjorlano3@gmail.com</user>
+            <user>lontocmacky77@gmail.com</user>
+            <user>santosrosalie1193@gmail.com</user>
+            <user>francomarjorie84@gmail.com</user>
+            <user>ainbsqns@gmail.com</user>
+            <user>josephbaldescoquiminales10@gmail.com</user>
+        </users>
+    </assignments>
+    <capacity>5</capacity>
+    <enableAutoAccept>false</enableAutoAccept>
+    <enableDecline>false</enableDecline>
+    <enableDeclineReason>false</enableDeclineReason>
+    <enableDisconnectSound>true</enableDisconnectSound>
+    <enableRequestSound>true</enableRequestSound>
+    <label>Autobotique Agents - 5 at a time</label>
+</PresenceUserConfig>

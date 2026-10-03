@@ -7,6 +7,10 @@
  *   gets a high-priority task and a bell/mobile notification for its agent.
  *
  * A record never gets a second task of the same kind while one is still open.
+ *
+ * Once an hour it also checks every active Facebook page: a page that is not routed by
+ * the "Autobotique Messaging Routing" flow (for example a newly added page) triggers an
+ * alert to the administrators until it is switched over.
  */
 public without sharing class AutobotiqueFollowUpJob implements Schedulable {
     public static final String FOLLOW_UP_PREFIX = 'Autobotique follow-up: ';
@@ -94,7 +98,57 @@ public without sharing class AutobotiqueFollowUpJob implements Schedulable {
             Database.insert(tasks, false);
         }
         notify(noReply);
+        if (Datetime.now().minute() < 15) {
+            alertUnroutedPages(unroutedPages());
+        }
         return tasks.size();
+    }
+
+    /** Active Facebook pages whose conversations skip the personal-agent / round-robin routing flow. */
+    @TestVisible
+    private static List<String> unroutedPages() {
+        String flowId = '';
+        for (FlowDefinitionView flow : [
+            SELECT DurableId FROM FlowDefinitionView WHERE ApiName = 'Autobotique_Messaging_Routing' LIMIT 1
+        ]) {
+            flowId = flow.DurableId.left(15);
+        }
+        List<String> pages = new List<String>();
+        for (MessagingChannel page : [
+            SELECT MasterLabel, SessionHandlerId FROM MessagingChannel WHERE IsActive = true AND MessageType = 'Facebook'
+        ]) {
+            if (page.SessionHandlerId == null || String.valueOf(page.SessionHandlerId).left(15) != flowId) {
+                pages.add(page.MasterLabel);
+            }
+        }
+        return pages;
+    }
+
+    @TestVisible
+    private static void alertUnroutedPages(List<String> pages) {
+        List<CustomNotificationType> types = [
+            SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'Autobotique_Alert' LIMIT 1
+        ];
+        if (pages.isEmpty() || types.isEmpty()) {
+            return;
+        }
+        Set<String> admins = new Set<String>();
+        for (User admin : [
+            SELECT Id FROM User WHERE IsActive = true AND UserType = 'Standard' AND Profile.Name = 'System Administrator'
+        ]) {
+            admins.add(admin.Id);
+        }
+        Messaging.CustomNotification notification = new Messaging.CustomNotification();
+        notification.setNotificationTypeId(types[0].Id);
+        notification.setTitle('Facebook page not using agent routing');
+        notification.setBody(String.join(pages, ', ') + ': open Setup > Messaging Settings, edit the page and set ' +
+            'Routing Type = Omni-Channel Flow, Flow = Autobotique Messaging Routing, Fallback Queue = Facebook.');
+        notification.setTargetPageRef('{"type":"standard__webPage","attributes":{"url":"/lightning/setup/MessagingSettings/home"}}');
+        try {
+            notification.send(admins);
+        } catch (Exception error) {
+            System.debug(LoggingLevel.WARN, 'Autobotique page alert failed: ' + error.getMessage());
+        }
     }
 
     private static Id userOf(Id agentId, Id ownerId) {
