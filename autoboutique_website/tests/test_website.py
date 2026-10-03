@@ -60,6 +60,8 @@ class TestAutoboutiqueWebsite(TransactionCase):
             self.assertTrue(all(v.website_card_image and v.product_id for v in imported))
             vios = imported.filtered(lambda v: v.website_slug == "toyota-vios-1-3-e-cvt")
             self.assertEqual(vios.selling_price, 738000)
+            self.assertTrue(all(v.model_year for v in imported), "Every listing has a model year")
+            self.assertEqual(vios.model_year, 2021)
             self.Vehicle._cron_import_sandbox_photos()
             self.assertFalse(imported.filtered("wp_gallery_pending"))
             self.assertEqual(len(vios.website_variant_ids.color_ids), 4)

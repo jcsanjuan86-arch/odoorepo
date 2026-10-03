@@ -40,7 +40,8 @@
         "tagline":  "Smart, Stylish, and Fuel-Efficient for Everyday Drives.",
         "card_title":  "Mirage",
         "card_image":  "https://saddlebrown-guanaco-660591.hostingersite.com/wp-content/uploads/2026/05/4H1A7903-2-scaled.webp",
-        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_44_51-AM.webp"
+        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_44_51-AM.webp",
+        "year":  2022
     },
     {
         "wp_id":  651,
@@ -82,7 +83,8 @@
         "tagline":  "Built Tough for Every Business Journey.",
         "card_title":  "L300",
         "card_image":  "https://saddlebrown-guanaco-660591.hostingersite.com/wp-content/uploads/2026/05/f81a954e-865d-4136-bc85-2ef4e5e7d5f2.webp",
-        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_58_29-AM.webp"
+        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_58_29-AM.webp",
+        "year":  2022
     },
     {
         "wp_id":  626,
@@ -211,7 +213,8 @@
         "tagline":  "Built for Every Journey. Designed for Every Passenger.",
         "card_title":  "2024 Commuter Deluxe",
         "card_image":  "https://saddlebrown-guanaco-660591.hostingersite.com/wp-content/uploads/2026/05/670838283_2129757151090959_1716710828812553592_n.webp",
-        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_31_21-AM.webp"
+        "menu_image":  "/autoboutique_website/static/src/img/site/ChatGPT-Image-May-28-2026-09_31_21-AM.webp",
+        "year":  2024
     },
     {
         "wp_id":  570,
@@ -611,6 +614,7 @@
         "tagline":  "Elegant, fuel-efficient, and built for everyday driving comfort.",
         "card_title":  "Vios",
         "card_image":  "https://saddlebrown-guanaco-660591.hostingersite.com/wp-content/uploads/2026/05/4H1A3024-1-scaled.webp",
-        "menu_image":  "/autoboutique_website/static/src/img/site/002_326_1732167652431_000.webp"
+        "menu_image":  "/autoboutique_website/static/src/img/site/002_326_1732167652431_000.webp",
+        "year":  2021
     }
 ]

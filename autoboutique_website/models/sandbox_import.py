@@ -81,6 +81,8 @@ class Vehicle(models.Model):
         created = updated = 0
         for row in self._ab_sandbox_dataset():
             year, model = _split_name(row["name"], row["brand"])
+            # Some sandbox names carry no year; the dataset then gives it (Salesforce requires one).
+            year = year or row.get("year") or 0
             vehicle = Vehicle.search([("wp_import_ref", "=", row["wp_id"]), ("company_id", "=", company.id)], limit=1)
             values = {
                 "name": row["name"],
