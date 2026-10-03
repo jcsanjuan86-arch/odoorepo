@@ -1,0 +1,140 @@
+.panel {
+    padding: 0.25rem 0.75rem 0.75rem;
+}
+
+.section {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 0.5rem 0;
+}
+
+.hero {
+    background: #f4f8fb;
+    border: 1px solid #d8e6f3;
+    border-radius: 0.25rem;
+    margin: 0.35rem 0 0.75rem;
+    padding: 0.65rem;
+}
+
+.hero .eyebrow {
+    color: #0176d3;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0 0 0.15rem;
+    text-transform: uppercase;
+}
+
+.hero h2 {
+    color: #032d60;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.hero p {
+    color: #3e3e3c;
+    margin: 0.25rem 0 0;
+}
+
+.section:last-child {
+    border-bottom: 0;
+}
+
+.section h3 {
+    color: #032d60;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+}
+
+.data-row {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: minmax(6.5rem, 42%) minmax(0, 1fr);
+    min-height: 1.8rem;
+}
+
+.data-row span {
+    color: #5c5c5c;
+}
+
+.data-row strong {
+    color: #181818;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr;
+    padding: 0.7rem 0;
+}
+
+.button {
+    width: 100%;
+}
+
+.button-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+}
+
+.message-preview {
+    background: #f8f8f8;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+    margin: 0 0 0.75rem;
+    padding: 0.65rem;
+}
+
+.message-preview h3 {
+    color: #032d60;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin: 0 0 0.4rem;
+    text-transform: uppercase;
+}
+
+.message-preview pre {
+    color: #181818;
+    font-family: inherit;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.row {
+    align-items: center;
+    border-bottom: 1px solid #e5e5e5;
+    color: #032d60;
+    display: flex;
+    gap: 0.75rem;
+    min-height: 3rem;
+    text-decoration: none;
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.label {
+    display: block;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.value {
+    color: #5c5c5c;
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.empty {
+    color: #5c5c5c;
+    margin: 0.5rem 0;
+}

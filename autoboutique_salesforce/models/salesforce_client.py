@@ -161,3 +161,11 @@ class SalesforceClient:
     def update(self, sobject, record_id, payload):
         self.request("PATCH", "sobjects/%s/%s" % (sobject, record_id), json=payload)
         return record_id
+
+    def apex_post(self, path, payload):
+        """Call a custom Apex REST endpoint (/services/apexrest/<path>)."""
+        return self.request("POST", "/services/apexrest/%s" % path.lstrip("/"), json=payload)
+
+    def create(self, sobject, payload):
+        """Insert one record.  Returns its ID."""
+        return self.request("POST", "sobjects/%s" % sobject, json=payload).get("id")

@@ -1,0 +1,101 @@
+<template>
+    <lightning-card title="Autobotique Conversation" icon-name="standard:service_appointment">
+        <div class="panel">
+            <section class="hero">
+                <p class="eyebrow">Facebook Sales Intake</p>
+                <h2>Start here, not standard CRM</h2>
+                <p>Use the Autobotique lead workflow for every buyer conversation.</p>
+            </section>
+
+            <section class="actions">
+                <lightning-button
+                    variant="brand"
+                    label={leadButtonLabel}
+                    icon-name="utility:new"
+                    onclick={handleCreateInquiry}
+                    disabled={isWorking}
+                    class="button">
+                </lightning-button>
+                <template if:true={showCreateApplication}>
+                    <lightning-button
+                        variant="brand"
+                        label={applicationButtonLabel}
+                        icon-name={applicationButtonIcon}
+                        onclick={handleCreateApplication}
+                        disabled={isWorking}
+                        class="button">
+                    </lightning-button>
+                </template>
+                <div class="button-grid">
+                    <lightning-button
+                        variant="neutral"
+                        label="Lead Manager"
+                        icon-name="utility:kanban"
+                        onclick={openLeadManager}
+                        class="button">
+                    </lightning-button>
+                    <lightning-button
+                        variant="neutral"
+                        label="Vehicle Inventory"
+                        icon-name="utility:travel_and_places"
+                        onclick={openInventory}
+                        class="button">
+                    </lightning-button>
+                </div>
+                <lightning-button
+                    variant="neutral"
+                    label="Copy Available Cars"
+                    icon-name="utility:copy"
+                    onclick={handleCopyCars}
+                    disabled={isWorking}
+                    class="button">
+                </lightning-button>
+            </section>
+
+            <template if:true={carMessage}>
+                <section class="message-preview">
+                    <h3>Ready To Paste In Chat</h3>
+                    <pre>{carMessage}</pre>
+                </section>
+            </template>
+
+            <section class="section">
+                <h3>Customer Profile</h3>
+                <template for:each={customerRows} for:item="row">
+                    <div key={row.label} class="data-row">
+                        <span>{row.label}</span>
+                        <strong>{row.value}</strong>
+                    </div>
+                </template>
+            </section>
+
+            <section class="section">
+                <h3>Lead Workflow</h3>
+                <template for:each={leadRows} for:item="row">
+                    <div key={row.label} class="data-row">
+                        <span>{row.label}</span>
+                        <strong>{row.value}</strong>
+                    </div>
+                </template>
+            </section>
+
+            <section class="section">
+                <h3>Linked Records</h3>
+            <template if:true={recordLinks.length}>
+                <template for:each={recordLinks} for:item="item">
+                    <a key={item.label} class="row" href={item.url} target="_blank">
+                        <lightning-icon icon-name={item.icon} size="small" alternative-text={item.label}></lightning-icon>
+                        <span>
+                            <span class="label">{item.label}</span>
+                            <span class="value">{item.status}</span>
+                        </span>
+                    </a>
+                </template>
+            </template>
+            <template if:false={recordLinks.length}>
+                <p class="empty">No linked CRM records yet.</p>
+            </template>
+            </section>
+        </div>
+    </lightning-card>
+</template>

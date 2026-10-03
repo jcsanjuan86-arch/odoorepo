@@ -91,6 +91,11 @@ class Vehicle(models.Model):
                 # sudo: reaching Ready for Sale is the authorization to publish.
                 to_publish.write({"publish_to_salesforce": True})  # re-enters and enqueues
         sync._enqueue_vehicles(mine)
+        # Handover: mark the buyer's Salesforce application Released (again once the plate is known).
+        if changed_fields & {"state", "plate_number"}:
+            for vehicle in mine.filtered(lambda v: v.state in ("released", "documents")):
+                for application in vehicle.salesforce_application_ids.filtered(lambda a: a.state == "sold"):
+                    sync._enqueue_application_release(application)
 
     def action_salesforce_sync(self):
         if not self.env.user.has_group(SYNC_GROUP):

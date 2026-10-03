@@ -3,3 +3,4 @@ from . import test_mapping
 from . import test_duplicates
 from . import test_webhook
 from . import test_company_isolation
+from . import test_process_sync

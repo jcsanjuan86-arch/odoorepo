@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Document_Type__c</fullName>
+    <label>Document Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>COE</fullName>
+                <default>false</default>
+                <label>COE</label>
+            </value>
+            <value>
+                <fullName>3 Months Payslip</fullName>
+                <default>false</default>
+                <label>3 Months Payslip</label>
+            </value>
+            <value>
+                <fullName>Payroll Statement</fullName>
+                <default>false</default>
+                <label>Payroll Statement</label>
+            </value>
+            <value>
+                <fullName>Bank Statement</fullName>
+                <default>false</default>
+                <label>Bank Statement</label>
+            </value>
+            <value>
+                <fullName>Government ID 1</fullName>
+                <default>false</default>
+                <label>Government ID 1</label>
+            </value>
+            <value>
+                <fullName>Government ID 2</fullName>
+                <default>false</default>
+                <label>Government ID 2</label>
+            </value>
+            <value>
+                <fullName>Company ID</fullName>
+                <default>false</default>
+                <label>Company ID</label>
+            </value>
+            <value>
+                <fullName>Proof Of Billing</fullName>
+                <default>false</default>
+                <label>Proof Of Billing</label>
+            </value>
+            <value>
+                <fullName>Spouse ID</fullName>
+                <default>false</default>
+                <label>Spouse ID</label>
+            </value>
+            <value>
+                <fullName>Marriage Certificate</fullName>
+                <default>false</default>
+                <label>Marriage Certificate</label>
+            </value>
+            <value>
+                <fullName>TIN Number</fullName>
+                <default>false</default>
+                <label>TIN Number</label>
+            </value>
+            <value>
+                <fullName>Facebook Link</fullName>
+                <default>false</default>
+                <label>Facebook Link</label>
+            </value>
+            <value>
+                <fullName>Specimen Signature 1</fullName>
+                <default>false</default>
+                <label>Specimen Signature 1</label>
+            </value>
+            <value>
+                <fullName>Specimen Signature 2</fullName>
+                <default>false</default>
+                <label>Specimen Signature 2</label>
+            </value>
+            <value>
+                <fullName>Specimen Signature 3</fullName>
+                <default>false</default>
+                <label>Specimen Signature 3</label>
+            </value>
+            <value>
+                <fullName>DTI Registration</fullName>
+                <default>false</default>
+                <label>DTI Registration</label>
+            </value>
+            <value>
+                <fullName>Business Permit</fullName>
+                <default>false</default>
+                <label>Business Permit</label>
+            </value>
+            <value>
+                <fullName>Receipts</fullName>
+                <default>false</default>
+                <label>Receipts</label>
+            </value>
+            <value>
+                <fullName>Business Photos</fullName>
+                <default>false</default>
+                <label>Business Photos</label>
+            </value>
+            <value>
+                <fullName>Payslip</fullName>
+                <default>false</default>
+                <label>Payslip</label>
+            </value>
+            <value>
+                <fullName>Passport</fullName>
+                <default>false</default>
+                <label>Passport</label>
+            </value>
+            <value>
+                <fullName>Visa</fullName>
+                <default>false</default>
+                <label>Visa</label>
+            </value>
+            <value>
+                <fullName>Employment Contract</fullName>
+                <default>false</default>
+                <label>Employment Contract</label>
+            </value>
+            <value>
+                <fullName>Remittance Receipt</fullName>
+                <default>false</default>
+                <label>Remittance Receipt</label>
+            </value>
+            <value>
+                <fullName>Authorization Letter</fullName>
+                <default>false</default>
+                <label>Authorization Letter</label>
+            </value>
+            <value>
+                <fullName>Selfie Holding ID</fullName>
+                <default>false</default>
+                <label>Selfie Holding ID</label>
+            </value>
+            <value>
+                <fullName>Receiver Government ID 1</fullName>
+                <default>false</default>
+                <label>Receiver Government ID 1</label>
+            </value>
+            <value>
+                <fullName>Receiver Government ID 2</fullName>
+                <default>false</default>
+                <label>Receiver Government ID 2</label>
+            </value>
+            <value>
+                <fullName>Meralco Bill</fullName>
+                <default>false</default>
+                <label>Meralco Bill</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

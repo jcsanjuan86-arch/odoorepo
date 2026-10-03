@@ -56,8 +56,10 @@ APPLICATION_FIELDS = [
     "Application_Date__c", "Borrower_First_Name__c", "Borrower_Middle_Name__c", "Borrower_Last_Name__c",
     "Borrower_Email__c", "Borrower_Mobile_Number__c", "Client__c", "Vehicle_Price__c",
     "Selected_Vehicle__c", "Selected_Vehicle__r.VIN__c", "Selected_Vehicle__r.Odoo_Vehicle_ID__c",
-    "Assigned_Agent__r.Email", "Final_Reviewer__r.Name",
+    "Assigned_Agent__r.Email", "Final_Reviewer__r.Name", "Final_Reviewer__r.Email",
 ]
+INQUIRY_OBJECT = "Facebook_Inquiry__c"
+PAYMENT_INTENT = {"cash": "Cash", "financing": "Financing"}
 # Salesforce loan statuses that mean the agent has submitted the file.
 SUBMITTED_STATUSES = {"Submitted", "Under Review", "Final Review", "Approved"}
 REJECTED_STATUSES = {"Rejected"}
@@ -395,8 +397,165 @@ class SalesforceSync(models.AbstractModel):
             application._ab_todo("manager", "Reserve the car approved in Salesforce",
                                  note="Automatic reservation failed: %s" % exc)
             return "Approved in Salesforce; automatic reservation failed, manager notified."
+        approver = self._find_user_by_email((data.get("Final_Reviewer__r") or {}).get("Email"), application.company_id)
+        if approver:
+            # The final checker approved it, not the integration user that ran the reservation.
+            application.approved_by = approver
         application.message_post(body="Approved in Salesforce by %s; car reserved automatically." % reviewer)
         return "Approved in Salesforce; car reserved and quotation drafted."
+
+    @api.model
+    def _find_user_by_email(self, email, company):
+        email = (email or "").strip()
+        if not email:
+            return self.env["res.users"]
+        return self.env["res.users"].sudo().search([
+            "|", ("login", "=ilike", email), ("email", "=ilike", email),
+            ("company_ids", "in", company.id), ("share", "=", False),
+        ], limit=1)
+
+    # -- outbound: handover --------------------------------------------------------
+
+    @api.model
+    def _enqueue_application_release(self, application):
+        settings = self._settings()
+        Job = self.env["autoboutique.salesforce.job"]
+        if (not settings["active"] or application.company_id != settings["company"]
+                or not application.salesforce_application_id):
+            return Job
+        return Job._enqueue("application_release", application.company_id, application=application)
+
+    @api.model
+    def _push_application_release(self, application, job=None):
+        """The car was handed over in Odoo: set the Salesforce application to Released."""
+        application = application.sudo()
+        if not application.exists() or not application.salesforce_application_id:
+            return False
+        vehicle = application.vehicle_id
+        release = self.env["autoboutique.vehicle.release"].sudo().search([
+            ("sales_application_id", "=", application.id), ("state", "=", "approved")], limit=1)
+        # Loan applications are private in Salesforce: a dedicated Apex endpoint
+        # (AutobotiqueReleaseService) makes this one change for the integration user.
+        payload = {
+            "applicationId": application.salesforce_application_id,
+            "plateNumber": (vehicle.plate_number or "")[:20] or None,
+            "odometer": release.odometer or vehicle.mileage or None,
+        }
+        try:
+            self._get_client().apex_post("autobotique/release", payload)
+        except SalesforceError as exc:
+            if exc.code == "FIELD_CUSTOM_VALIDATION_EXCEPTION" and not vehicle.plate_number:
+                # Salesforce needs the plate; this job runs again when the plate is entered in Odoo.
+                raise SalesforceError("Salesforce needs the plate number before Released. It is sent "
+                                      "automatically once the plate is entered on the vehicle.",
+                                      code="WAITING_FOR_PLATE") from exc
+            raise
+        application.write({"salesforce_status": "Released", "salesforce_last_sync_at": fields.Datetime.now()})
+        self.env["autoboutique.salesforce.log"]._record(
+            application.company_id, "outbound", "application_release", "success",
+            "Application marked Released in Salesforce.", sales_application_id=application.id,
+            vehicle_id=vehicle.id, job_id=job.id if job else False,
+            salesforce_record_id=application.salesforce_application_id)
+        return True
+
+    # -- outbound: website inquiries -------------------------------------------------
+
+    @api.model
+    def _enqueue_website_inquiry(self, inquiry):
+        settings = self._settings()
+        Job = self.env["autoboutique.salesforce.job"]
+        if not settings["active"] or inquiry.company_id != settings["company"]:
+            return Job
+        return Job._enqueue("inquiry_push", inquiry.company_id, record=inquiry)
+
+    @staticmethod
+    def _normalize_mobile(value):
+        """Same rule as Salesforce (AutobotiqueProcessAutomation.normalizeMobile): PH mobiles -> 09XXXXXXXXX."""
+        digits = re.sub(r"\D", "", value or "")
+        if len(digits) == 12 and digits.startswith("639"):
+            digits = "0" + digits[2:]
+        elif len(digits) == 10 and digits.startswith("9"):
+            digits = "0" + digits
+        return digits if len(digits) == 11 and digits.startswith("09") else (value or "").strip()
+
+    @api.model
+    def _prepare_inquiry_payload(self, inquiry, contact_id):
+        vehicle = inquiry.vehicle_id
+        details = [inquiry.message or ""]
+        for label, field in (("Assistance", "assistance"), ("Body type", "body_type"),
+                             ("Employment", "employment_status"), ("Monthly income", "monthly_income")):
+            if inquiry[field]:
+                details.append("%s: %s" % (label, dict(inquiry._fields[field].selection)[inquiry[field]]))
+        if inquiry.downpayment_percent and inquiry.term_months:
+            details.append("Calculator: %s%% down, %s months" % (inquiry.downpayment_percent, inquiry.term_months))
+        source = dict(inquiry._fields["source"].selection).get(inquiry.source, "Website")
+        return {
+            "Customer_Name__c": (inquiry.name or "Website Customer")[:255],
+            "Contact__c": contact_id,
+            "Channel__c": "Website",
+            "Facebook_User_ID__c": self._inquiry_external_key(inquiry),
+            "Inquiry_Status__c": "New",
+            "Lead_Stage__c": "New Message",
+            "Lead_Priority__c": "Hot" if vehicle else "Warm",
+            "Next_Action__c": "Call Customer",
+            "Next_Follow_Up_Date__c": fields.Date.to_string(fields.Date.context_today(self)),
+            "Payment_Intent__c": PAYMENT_INTENT.get(inquiry.payment_option, "Undecided"),
+            "Vehicle_Interested__c": vehicle.salesforce_vehicle_id or None,
+            "Vehicle_Interest_Text__c": (vehicle.display_name or inquiry.vehicle_interest or "")[:255] or None,
+            "Customer_Message__c": ("Website (%s)\n%s" % (source, "\n".join(filter(None, details))))[:32000],
+            "Existing_Client__c": False,
+        }
+
+    @api.model
+    def _inquiry_external_key(self, inquiry):
+        return "website-%s-%s" % (self.env.cr.dbname[-12:], inquiry.id)
+
+    @api.model
+    def _find_or_create_contact(self, client, inquiry):
+        mobile = self._normalize_mobile(inquiry.phone)
+        email = (inquiry.email or "").strip()
+        conditions = []
+        if mobile:
+            conditions.append("MobilePhone = %s" % soql_quote(mobile))
+        if email:
+            conditions.append("Email = %s" % soql_quote(email))
+        if conditions:
+            rows = client.query("SELECT Id FROM Contact WHERE %s ORDER BY CreatedDate LIMIT 1" % " OR ".join(conditions))
+            if rows:
+                return rows[0]["Id"], True
+        parts = (inquiry.name or "Website Customer").strip().rsplit(" ", 1)
+        return client.create("Contact", {
+            "FirstName": parts[0][:40] if len(parts) > 1 else None,
+            "LastName": (parts[-1] if len(parts) > 1 else parts[0])[:80],
+            "Email": email or None,
+            "MobilePhone": mobile or None,
+        }), False
+
+    @api.model
+    def _push_website_inquiry(self, inquiry, job=None):
+        """Create the Salesforce lead (Facebook_Inquiry__c, channel Website) for a website form."""
+        if not inquiry:
+            return False
+        inquiry = inquiry.sudo()
+        if inquiry.salesforce_inquiry_id:
+            return inquiry.salesforce_inquiry_id
+        client = self._get_client()
+        existing = client.query("SELECT Id FROM %s WHERE Facebook_User_ID__c = %s LIMIT 1" % (
+            INQUIRY_OBJECT, soql_quote(self._inquiry_external_key(inquiry))))
+        if existing:
+            record_id = existing[0]["Id"]
+        else:
+            contact_id, known = self._find_or_create_contact(client, inquiry)
+            payload = self._prepare_inquiry_payload(inquiry, contact_id)
+            payload["Existing_Client__c"] = known
+            record_id = client.create(INQUIRY_OBJECT, payload)
+        inquiry.salesforce_inquiry_id = record_id
+        inquiry.message_post(body="Sent to Salesforce as a website lead (%s)." % record_id)
+        self.env["autoboutique.salesforce.log"]._record(
+            inquiry.company_id, "outbound", "inquiry_push", "success", "Website inquiry created in Salesforce.",
+            vehicle_id=inquiry.vehicle_id.id or False, job_id=job.id if job else False,
+            salesforce_record_id=record_id)
+        return record_id
 
     @api.model
     def _find_vehicle_for_application(self, data, company):

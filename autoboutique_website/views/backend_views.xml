@@ -135,7 +135,7 @@
                 <sheet>
                     <group>
                         <group><field name="name"/><field name="phone" widget="phone"/><field name="email" widget="email"/><field name="source"/><field name="vehicle_id"/></group>
-                        <group><field name="body_type"/><field name="payment_option"/><field name="employment_status"/><field name="monthly_income"/><field name="assistance"/><field name="consent"/></group>
+                        <group><field name="body_type"/><field name="payment_option"/><field name="employment_status"/><field name="monthly_income"/><field name="assistance"/><field name="consent"/><field name="salesforce_inquiry_id" invisible="not salesforce_inquiry_id"/></group>
                     </group>
                     <field name="message" placeholder="Message"/>
                 </sheet>

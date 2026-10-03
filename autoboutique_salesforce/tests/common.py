@@ -22,6 +22,7 @@ class FakeSalesforce:
     def __init__(self):
         self.vehicles = {}
         self.applications = {}
+        self.created = {}
         self.calls = []
         self._counter = 0
 
@@ -44,8 +45,25 @@ class FakeSalesforce:
         self.vehicles[record_id] = dict(payload, **{external_field: external_value})
         return record_id, True
 
+    def apex_post(self, path, payload):
+        self.calls.append(("apex_post", path, dict(payload)))
+        if path == "autobotique/release":
+            row = self.applications.setdefault(payload["applicationId"], {})
+            row.update({"Status__c": "Released", "Vehicle_Plate_Number__c": payload.get("plateNumber"),
+                        "Vehicle_Odometer__c": payload.get("odometer")})
+        return {"ok": True}
+
+    def create(self, sobject, payload):
+        self.calls.append(("create", sobject, dict(payload)))
+        record_id = self._new_id("003" if sobject == "Contact" else "a0C")
+        self.created.setdefault(sobject, {})[record_id] = dict(payload)
+        return record_id
+
     def update(self, sobject, record_id, payload):
         self.calls.append(("update", sobject, record_id, dict(payload)))
+        if sobject == "Auto_Loan_Application__c":
+            self.applications.setdefault(record_id, {}).update(payload)
+            return record_id
         if record_id not in self.vehicles:
             raise SalesforceError("NOT_FOUND", status=404, code="NOT_FOUND")
         self.vehicles[record_id].update(payload)
@@ -59,6 +77,13 @@ class FakeSalesforce:
         if "FROM Vehicle_Inventory__c WHERE Odoo_Vehicle_ID__c" in soql:
             ext = soql.split("Odoo_Vehicle_ID__c = '")[1].split("'")[0]
             return [{"Id": rid} for rid, row in self.vehicles.items() if row.get("Odoo_Vehicle_ID__c") == ext]
+        if "FROM Contact WHERE" in soql:
+            return [{"Id": rid} for rid, row in self.created.get("Contact", {}).items()
+                    if ("'%s'" % row.get("MobilePhone")) in soql or ("'%s'" % row.get("Email")) in soql]
+        if "FROM Facebook_Inquiry__c WHERE Facebook_User_ID__c" in soql:
+            key = soql.split("Facebook_User_ID__c = '")[1].split("'")[0]
+            return [{"Id": rid} for rid, row in self.created.get("Facebook_Inquiry__c", {}).items()
+                    if row.get("Facebook_User_ID__c") == key]
         if "FROM Auto_Loan_Application__c WHERE Id" in soql:
             sf_id = soql.split("Id = '")[1].split("'")[0]
             return [self.applications[sf_id]] if sf_id in self.applications else []

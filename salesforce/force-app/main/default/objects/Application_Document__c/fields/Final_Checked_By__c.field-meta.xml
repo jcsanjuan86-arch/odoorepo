@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Final_Checked_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>User who last checked this requirement in final review.</description>
+    <label>Final Checked By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Final Checked Documents</relationshipLabel>
+    <relationshipName>Final_Checked_Documents</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

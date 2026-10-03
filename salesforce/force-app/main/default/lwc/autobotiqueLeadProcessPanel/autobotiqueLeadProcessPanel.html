@@ -1,0 +1,67 @@
+<template>
+    <lightning-card title="Autobotique Flow" icon-name="standard:messaging_user">
+        <div class="panel">
+            <section class="steps">
+                <div class={conversationClass}>
+                    <span>1</span>
+                    <strong>Conversation</strong>
+                    <p>Link the customer Contact and the vehicle they want.</p>
+                </div>
+                <div class={leadClass}>
+                    <span>2</span>
+                    <strong>Qualified Lead</strong>
+                    <p>Optional: mark a serious buyer who is not ready to apply yet.</p>
+                </div>
+                <div class={applicationClass}>
+                    <span>3</span>
+                    <strong>Application Started</strong>
+                    <p>One click qualifies, converts and creates the loan application.</p>
+                </div>
+                <div class={uploadClass}>
+                    <span>4</span>
+                    <strong>Documents</strong>
+                    <p>Send the upload link. The lead stage now follows the application.</p>
+                </div>
+            </section>
+
+            <template lwc:if={missingHint}>
+                <p class="hint">{missingHint}</p>
+            </template>
+
+            <section class="actions">
+                <lightning-button
+                    variant="brand"
+                    label={applicationButtonLabel}
+                    icon-name={applicationButtonIcon}
+                    onclick={handleApplication}
+                    disabled={startDisabled}>
+                </lightning-button>
+                <template lwc:if={showQualify}>
+                    <lightning-button
+                        variant="neutral"
+                        label="Qualify Only"
+                        icon-name="utility:check"
+                        onclick={handleQualify}
+                        disabled={isWorking}>
+                    </lightning-button>
+                </template>
+                <template lwc:if={hasApplication}>
+                    <lightning-button
+                        variant="neutral"
+                        label="Create Upload Link"
+                        icon-name="utility:link"
+                        onclick={handleCreateUpload}
+                        disabled={isWorking}>
+                    </lightning-button>
+                </template>
+            </section>
+
+            <template lwc:if={uploadUrl}>
+                <section class="upload-link">
+                    <span>Customer Upload URL</span>
+                    <a href={uploadUrl} target="_blank">{uploadUrl}</a>
+                </section>
+            </template>
+        </div>
+    </lightning-card>
+</template>

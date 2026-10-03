@@ -41,14 +41,19 @@ class WebsiteInquiry(models.Model):
     state = fields.Selection([("new", "New"), ("contacted", "Contacted"), ("closed", "Closed")],
                              default="new", required=True, tracking=True)
     company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company, index=True)
+    salesforce_inquiry_id = fields.Char("Salesforce Lead ID", copy=False, readonly=True)
 
     @api.model_create_multi
     def create(self, vals_list):
         inquiries = super().create(vals_list)
+        # With the Salesforce integration active, agents work the lead there; otherwise Odoo calls back.
+        sync = self.env["autoboutique.salesforce.sync"] if "autoboutique.salesforce.sync" in self.env else None
         for inquiry in inquiries:
-            schedule_todo(inquiry, "manager", "Call back website inquiry",
-                          note="%s via %s%s." % (inquiry.name, dict(self._fields["source"].selection)[inquiry.source],
-                                                 " about %s" % inquiry.vehicle_id._ab_web_title() if inquiry.vehicle_id else ""))
+            queued = sync and sync.sudo()._enqueue_website_inquiry(inquiry)
+            if not queued:
+                schedule_todo(inquiry, "manager", "Call back website inquiry",
+                              note="%s via %s%s." % (inquiry.name, dict(self._fields["source"].selection)[inquiry.source],
+                                                     " about %s" % inquiry.vehicle_id._ab_web_title() if inquiry.vehicle_id else ""))
         return inquiries
 
     def action_mark_contacted(self):

@@ -30,9 +30,15 @@ class SalesforceJob(models.Model):
     name = fields.Char(compute="_compute_name")
     company_id = fields.Many2one("res.company", required=True, index=True, readonly=True)
     job_type = fields.Selection(
-        [("vehicle_push", "Push Vehicle"), ("application_pull", "Pull Loan Application")],
+        [("vehicle_push", "Push Vehicle"), ("application_pull", "Pull Loan Application"),
+         ("application_release", "Mark Application Released"), ("inquiry_push", "Push Website Inquiry")],
         required=True, readonly=True)
     vehicle_id = fields.Many2one("autoboutique.vehicle", index=True, readonly=True, ondelete="cascade")
+    sales_application_id = fields.Many2one("autoboutique.sales.application", index=True, readonly=True,
+                                           ondelete="cascade")
+    # Website inquiries live in autoboutique_website, which this module does not depend on.
+    res_model = fields.Char(readonly=True)
+    res_id = fields.Integer(readonly=True)
     salesforce_record_id = fields.Char(readonly=True)
     dedupe_key = fields.Char(required=True, index=True, readonly=True)
     force = fields.Boolean(readonly=True, help="Push even if nothing changed since the last sync.")
@@ -49,19 +55,35 @@ class SalesforceJob(models.Model):
         "A pending Salesforce job already exists for this record.",
     )
 
-    @api.depends("job_type", "vehicle_id", "salesforce_record_id")
+    @api.depends("job_type", "vehicle_id", "salesforce_record_id", "sales_application_id", "res_model", "res_id")
     def _compute_name(self):
         labels = dict(self._fields["job_type"].selection)
         for job in self:
-            target = job.vehicle_id.display_name or job.salesforce_record_id or ""
+            target = (job.vehicle_id.display_name or job.sales_application_id.display_name
+                      or job.salesforce_record_id or ("%s #%s" % (job.res_model, job.res_id) if job.res_model else ""))
             job.name = "%s %s" % (labels.get(job.job_type, ""), target)
+
+    def _target_record(self):
+        self.ensure_one()
+        if not self.res_model or self.res_model not in self.env:
+            return None
+        return self.env[self.res_model].sudo().browse(self.res_id).exists()
 
     # -- enqueueing ------------------------------------------------------------
 
     @api.model
-    def _enqueue(self, job_type, company, vehicle=None, salesforce_record_id=None, force=False):
+    def _enqueue(self, job_type, company, vehicle=None, salesforce_record_id=None, force=False,
+                 application=None, record=None):
         """Queue work once.  Re-queuing the same record reuses the pending job."""
-        key = "%s:%s" % (job_type, vehicle.id if vehicle else salesforce_record_id)
+        if vehicle:
+            target = vehicle.id
+        elif application:
+            target = "app%s" % application.id
+        elif record:
+            target = "%s%s" % (record._name, record.id)
+        else:
+            target = salesforce_record_id
+        key = "%s:%s" % (job_type, target)
         Job = self.sudo()
         existing = Job.search([("dedupe_key", "=", key), ("state", "=", "pending")], limit=1)
         if existing:
@@ -74,6 +96,9 @@ class SalesforceJob(models.Model):
                     "job_type": job_type,
                     "company_id": company.id,
                     "vehicle_id": vehicle.id if vehicle else False,
+                    "sales_application_id": application.id if application else False,
+                    "res_model": record._name if record else False,
+                    "res_id": record.id if record else 0,
                     "salesforce_record_id": salesforce_record_id,
                     "dedupe_key": key,
                     "force": force,
@@ -108,6 +133,10 @@ class SalesforceJob(models.Model):
             with self.env.cr.savepoint():
                 if self.job_type == "vehicle_push":
                     sync._push_vehicle(self.vehicle_id, force=self.force, job=self)
+                elif self.job_type == "application_release":
+                    sync._push_application_release(self.sales_application_id, job=self)
+                elif self.job_type == "inquiry_push":
+                    sync._push_website_inquiry(self._target_record(), job=self)
                 else:
                     sync._pull_loan_application(self.salesforce_record_id, job=self)
         except SalesforceError as exc:
@@ -132,7 +161,7 @@ class SalesforceJob(models.Model):
         if self.vehicle_id:
             self.vehicle_id.sudo().write({"salesforce_sync_status": "error", "salesforce_last_error": message})
         self.env["autoboutique.salesforce.log"]._record(
-            self.company_id, "outbound" if self.job_type == "vehicle_push" else "inbound",
+            self.company_id, "inbound" if self.job_type == "application_pull" else "outbound",
             self.job_type, "error", message, vehicle_id=self.vehicle_id.id or False,
             job_id=self.id, salesforce_record_id=self.salesforce_record_id,
         )

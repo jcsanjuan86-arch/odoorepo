@@ -1,0 +1,130 @@
+<template>
+    <section class="review-shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Autobotique</p>
+                <h1>Final Applications</h1>
+                <p class="subtle">Last check for completed applications, submitted requirements, and return-to-agent notes.</p>
+            </div>
+            <lightning-button
+                label="Refresh"
+                icon-name="utility:refresh"
+                onclick={refreshAll}>
+            </lightning-button>
+        </header>
+
+        <div class="workspace">
+            <aside class="queue">
+                <h2>Review Queue</h2>
+                <template if:true={hasApplications}>
+                    <template for:each={applications} for:item="application">
+                        <button key={application.id} class={application.className} data-id={application.id} onclick={selectApplication}>
+                            <span class="record-title">{application.name}</span>
+                            <span>{application.applicationNumber}</span>
+                            <span>{application.status} - {application.finalReviewStatus}</span>
+                            <span>{application.completedDocuments}/{application.requiredDocuments} requirements done</span>
+                        </button>
+                    </template>
+                </template>
+                <template if:false={hasApplications}>
+                    <div class="empty-state">No applications are waiting for final review.</div>
+                </template>
+            </aside>
+
+            <main class="detail">
+                <template if:true={selectedDetail}>
+                    <section class="summary">
+                        <div>
+                            <p class="eyebrow">Application</p>
+                            <h2>{selectedDetail.application.name}</h2>
+                            <p>{selectedDetail.application.clientName}</p>
+                        </div>
+                        <div class="summary-grid">
+                            <span>Status <strong>{selectedDetail.application.status}</strong></span>
+                            <span>Final <strong>{selectedDetail.application.finalReviewStatus}</strong></span>
+                            <span>Agent <strong>{selectedDetail.application.assignedAgentName}</strong></span>
+                            <span>Vehicle <strong>{selectedDetail.application.vehicleName}</strong></span>
+                        </div>
+                    </section>
+
+                    <div class="actions">
+                        <lightning-button
+                            label="Start Review"
+                            icon-name="utility:preview"
+                            onclick={handleStartReview}
+                            disabled={isWorking}>
+                        </lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label="Complete Final Review"
+                            icon-name="utility:success"
+                            onclick={handleComplete}
+                            disabled={isWorking}>
+                        </lightning-button>
+                        <lightning-button
+                            variant="destructive-text"
+                            label="Return To Agent"
+                            icon-name="utility:undo"
+                            onclick={handleReturn}
+                            disabled={isWorking}>
+                        </lightning-button>
+                        <lightning-button
+                            label="Open Record"
+                            icon-name="utility:new_window"
+                            onclick={openRecord}>
+                        </lightning-button>
+                    </div>
+
+                    <lightning-textarea
+                        label="Final Review Notes"
+                        value={reviewNotes}
+                        onchange={handleNotesChange}
+                        placeholder="Add missing requirement notes or final approval comments.">
+                    </lightning-textarea>
+
+                    <section class="documents">
+                        <div class="documents-header">
+                            <h2>Requirements</h2>
+                            <span>{selectedDetail.application.completedDocuments}/{selectedDetail.application.requiredDocuments} done</span>
+                        </div>
+
+                        <template for:each={selectedDetail.documents} for:item="document">
+                            <article key={document.id} class="document-row">
+                                <div>
+                                    <h3>{document.documentType}</h3>
+                                    <p>{document.documentStatus}</p>
+                                    <template if:true={document.submittedFileUrl}>
+                                        <a href={document.submittedFileUrl} target="_blank">Open submitted file</a>
+                                    </template>
+                                </div>
+                                <span class={document.statusClass}>{document.finalCheckStatus}</span>
+                                <div class="document-actions">
+                                    <lightning-button-icon
+                                        icon-name="utility:check"
+                                        alternative-text="Mark done"
+                                        title="Mark done"
+                                        data-id={document.id}
+                                        onclick={markDocumentDone}
+                                        disabled={isWorking}>
+                                    </lightning-button-icon>
+                                    <lightning-button-icon
+                                        icon-name="utility:error"
+                                        alternative-text="Needs correction"
+                                        title="Needs correction"
+                                        data-id={document.id}
+                                        onclick={markDocumentNeedsCorrection}
+                                        disabled={isWorking}>
+                                    </lightning-button-icon>
+                                </div>
+                            </article>
+                        </template>
+                    </section>
+                </template>
+
+                <template if:false={selectedDetail}>
+                    <div class="empty-state detail-empty">Select an application for final checking.</div>
+                </template>
+            </main>
+        </div>
+    </section>
+</template>

@@ -1,6 +1,6 @@
 {
     "name": "Autoboutique Salesforce Integration",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "summary": "Sync the Autoboutique Vehicle Master with Salesforce inventory and loan applications",
     "author": "Prime Auto Boutique",
     "category": "Inventory",

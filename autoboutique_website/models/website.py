@@ -93,6 +93,16 @@ class Website(models.Model):
 
         self._ab_sync_menu(autoboutique_site)
         self._ab_sync_overruns(overruns_site)
+        self.env["autoboutique.vehicle"].sudo().search([("website_slug", "!=", False)])._ab_sync_listing_url()
+
+    def write(self, vals):
+        result = super().write(vals)
+        if "domain" in vals:
+            # Vehicle links sent to Salesforce use the website's domain.
+            self.env["autoboutique.vehicle"].sudo().search([
+                ("company_id", "in", self.company_id.ids), ("website_slug", "!=", False),
+            ])._ab_sync_listing_url()
+        return result
 
     @api.model
     def _ab_sync_menu(self, site):

@@ -1,0 +1,81 @@
+.panel {
+    padding: 0.75rem;
+}
+
+.steps {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.step {
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+    display: grid;
+    gap: 0.2rem;
+    grid-template-columns: 1.75rem 1fr;
+    padding: 0.6rem;
+}
+
+.step span {
+    align-items: center;
+    background: #eef4ff;
+    border-radius: 999px;
+    color: #032d60;
+    display: inline-flex;
+    font-weight: 800;
+    height: 1.5rem;
+    justify-content: center;
+    width: 1.5rem;
+}
+
+.step strong {
+    color: #032d60;
+}
+
+.step p {
+    color: #5c5c5c;
+    grid-column: 2;
+    margin: 0;
+}
+
+.step.done {
+    border-color: #45c65a;
+}
+
+.step.done span {
+    background: #45c65a;
+    color: #fff;
+}
+
+.hint {
+    background: #fef7e5;
+    border-radius: 0.25rem;
+    color: #8c4b02;
+    margin: 0.75rem 0 0;
+    padding: 0.5rem 0.6rem;
+}
+
+.actions {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.upload-link {
+    background: #f4f8fb;
+    border: 1px solid #d8e6f3;
+    border-radius: 0.25rem;
+    margin-top: 0.75rem;
+    padding: 0.6rem;
+}
+
+.upload-link span {
+    color: #5c5c5c;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.upload-link a {
+    overflow-wrap: anywhere;
+}

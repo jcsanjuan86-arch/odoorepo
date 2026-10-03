@@ -2,11 +2,15 @@
 <!-- Least-privilege access for the Connected App's run-as integration user. -->
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>Odoo Integration</label>
-    <description>Lets the Odoo integration user publish Vehicle Inventory and read Auto Loan Applications.</description>
+    <description>Lets the Odoo integration user publish Vehicle Inventory, read Auto Loan Applications, mark them Released through AutobotiqueReleaseService, and create website inquiries with their contacts.</description>
     <customPermissions>
         <enabled>true</enabled>
         <name>Odoo_Integration</name>
     </customPermissions>
+    <classAccesses>
+        <apexClass>AutobotiqueReleaseService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <hasActivationRequired>false</hasActivationRequired>
     <objectPermissions>
         <object>Vehicle_Inventory__c</object>
@@ -26,6 +30,25 @@
         <viewAllRecords>true</viewAllRecords>
         <modifyAllRecords>false</modifyAllRecords>
     </objectPermissions>
+    <!-- Website inquiries from Odoo arrive as leads with their customer contact. -->
+    <objectPermissions>
+        <object>Facebook_Inquiry__c</object>
+        <allowRead>true</allowRead>
+        <allowCreate>true</allowCreate>
+        <allowEdit>false</allowEdit>
+        <allowDelete>false</allowDelete>
+        <viewAllRecords>true</viewAllRecords>
+        <modifyAllRecords>false</modifyAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>Contact</object>
+        <allowRead>true</allowRead>
+        <allowCreate>true</allowCreate>
+        <allowEdit>false</allowEdit>
+        <allowDelete>false</allowDelete>
+        <viewAllRecords>true</viewAllRecords>
+        <modifyAllRecords>false</modifyAllRecords>
+    </objectPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Odoo_Vehicle_ID__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.VIN__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Vehicle_Inventory__c.Odometer__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
@@ -36,6 +59,24 @@
     <fieldPermissions><field>Vehicle_Inventory__c.Listing_URL__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Application_Number__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Status__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Auto_Loan_Application__c.Vehicle_Plate_Number__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Auto_Loan_Application__c.Vehicle_Odometer__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Auto_Loan_Application__c.Final_Reviewer__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Customer_Name__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Contact__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Inquiry_Status__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Lead_Stage__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Lead_Priority__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Next_Action__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Next_Follow_Up_Date__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Payment_Intent__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Vehicle_Interested__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Vehicle_Interest_Text__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Customer_Message__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Facebook_Inquiry__c.Existing_Client__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Contact.Email</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Contact.MobilePhone</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Final_Review_Status__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Application_Date__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Borrower_First_Name__c</field><editable>false</editable><readable>true</readable></fieldPermissions>

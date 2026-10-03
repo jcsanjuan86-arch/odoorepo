@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Autobotique_Website_Leads__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Website inquiries are shared among users with this ticked. If nobody is ticked, they go to the least busy Autobotique staff member.</description>
+    <inlineHelpText>Tick to receive new website inquiries (shared by least open inquiries).</inlineHelpText>
+    <label>Receives Website Leads</label>
+    <type>Checkbox</type>
+</CustomField>

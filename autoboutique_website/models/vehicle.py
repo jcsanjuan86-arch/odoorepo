@@ -77,6 +77,7 @@ class Vehicle(models.Model):
         vehicles = super().create(vals_list)
         for vehicle in vehicles.filtered(lambda v: not v.website_slug):
             vehicle.website_slug = vehicle._ab_unique_slug(slugify(vehicle.website_title or vehicle._ab_default_title()))
+        vehicles._ab_sync_listing_url()
         return vehicles
 
     def write(self, vals):
@@ -88,7 +89,27 @@ class Vehicle(models.Model):
                 clean = slugify(vehicle.website_slug)
                 if clean != vehicle.website_slug:
                     vehicle.website_slug = vehicle._ab_unique_slug(clean)
+        if {"website_slug", "website_published", "company_id"} & set(vals):
+            self._ab_sync_listing_url()
         return result
+
+    def _ab_site_base_url(self):
+        """Public address of this vehicle's company website (its domain, else the database URL)."""
+        self.ensure_one()
+        website = self.env["website"].sudo().search([("company_id", "=", self.company_id.id)], order="id", limit=1)
+        domain = (website.domain or "").strip().rstrip("/")
+        if domain:
+            return domain if domain.startswith("http") else "https://%s" % domain
+        return (self.env["ir.config_parameter"].sudo().get_param("web.base.url") or "").rstrip("/")
+
+    def _ab_sync_listing_url(self):
+        """Keep the Salesforce listing link (autoboutique_salesforce.listing_url) on the website page."""
+        if "listing_url" not in self._fields:
+            return
+        for vehicle in self.filtered("website_slug"):
+            url = "%s%s" % (vehicle._ab_site_base_url(), vehicle.website_url) if vehicle.website_published else False
+            if vehicle.listing_url != url:
+                vehicle.listing_url = url
 
     @api.constrains("state", "documents_verified", "ready_for_sale_approved")
     def _check_ready_for_sale(self):

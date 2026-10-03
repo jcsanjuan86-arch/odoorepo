@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_Submission_Fields</fullName>
+    <active>true</active>
+    <description>Prevents submission/review/approval without core customer, vehicle, and payment fields.</description>
+    <errorConditionFormula>AND(
+    OR(
+        ISPICKVAL(Status__c, &quot;Submitted&quot;),
+        ISPICKVAL(Status__c, &quot;Under Review&quot;),
+        ISPICKVAL(Status__c, &quot;Final Review&quot;),
+        ISPICKVAL(Status__c, &quot;Approved&quot;),
+        ISPICKVAL(Status__c, &quot;Released&quot;)
+    ),
+    OR(
+        ISBLANK(Borrower_First_Name__c),
+        ISBLANK(Borrower_Last_Name__c),
+        ISBLANK(Borrower_Mobile_Number__c),
+        ISPICKVAL(Applicant_Type__c, &quot;&quot;),
+        ISPICKVAL(Payment_Option__c, &quot;&quot;),
+        ISBLANK(Selected_Vehicle__c),
+        ISBLANK(Vehicle_Price_PHP__c)
+    )
+)</errorConditionFormula>
+    <errorMessage>Before submitting, complete borrower name/mobile, applicant type, payment option, selected vehicle, and vehicle price.</errorMessage>
+</ValidationRule>

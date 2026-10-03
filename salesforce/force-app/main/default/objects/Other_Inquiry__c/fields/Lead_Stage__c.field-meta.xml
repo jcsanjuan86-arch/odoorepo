@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lead_Stage__c</fullName>
+    <label>Lead Stage</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New Message</fullName>
+                <default>true</default>
+                <label>New Inquiry</label>
+            </value>
+            <value>
+                <fullName>Contacted</fullName>
+                <default>false</default>
+                <label>Contacted</label>
+            </value>
+            <value>
+                <fullName>Needs Qualification</fullName>
+                <default>false</default>
+                <label>Needs Qualification</label>
+            </value>
+            <value>
+                <fullName>Vehicle Selected</fullName>
+                <default>false</default>
+                <label>Vehicle Selected</label>
+            </value>
+            <value>
+                <fullName>Docs Requested</fullName>
+                <default>false</default>
+                <label>Docs Requested</label>
+            </value>
+            <value>
+                <fullName>Docs Submitted</fullName>
+                <default>false</default>
+                <label>Docs Submitted</label>
+            </value>
+            <value>
+                <fullName>For Supervisor Review</fullName>
+                <default>false</default>
+                <label>For Supervisor Review</label>
+            </value>
+            <value>
+                <fullName>Converted to Application</fullName>
+                <default>false</default>
+                <label>Converted to Application</label>
+            </value>
+            <value>
+                <fullName>Closed Lost</fullName>
+                <default>false</default>
+                <label>Closed Lost</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
