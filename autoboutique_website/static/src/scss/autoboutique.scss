@@ -254,6 +254,12 @@ $ab-max: 1240px;
         label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: $ab-ink; margin-bottom: 14px; }
         input, textarea, select { display: block; width: 100%; margin-top: 4px; border: 1px solid #c9c9c9; padding: 9px 10px; font: 400 13px $ab-font; background: $ab-white; }
     }
+    .ab-pay-choice {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-bottom: 14px;
+        span { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: $ab-ink; width: 100%; }
+        label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+        input { width: auto; margin: 0; }
+    }
     .ab-form-ok { background: #e7f5ea; color: #1d6b34; padding: 10px 12px; margin-bottom: 14px; font-size: 13px; }
     .ab-form-err { background: #fdeaea; color: #a3221b; padding: 10px 12px; margin-bottom: 14px; font-size: 13px; }
     .ab-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

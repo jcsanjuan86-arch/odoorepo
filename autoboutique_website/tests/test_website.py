@@ -69,6 +69,14 @@ class TestAutoboutiqueWebsite(TransactionCase):
             self.Vehicle.action_import_sandbox_vehicles()
             self.assertEqual(self.Vehicle.search_count([("wp_import_ref", "!=", 0)]), 13)
 
+    def test_payment_choice_is_read_from_the_message(self):
+        from odoo.addons.autoboutique_website.controllers.main import payment_from_message
+        self.assertEqual(payment_from_message("I'd like financing with 20% down over 48 months"), "financing")
+        self.assertEqual(payment_from_message("Magkano po DP? Pwede hulugan?"), "financing")
+        self.assertEqual(payment_from_message("I will pay cash"), "cash")
+        self.assertFalse(payment_from_message("Is the Mirage available?"))
+        self.assertFalse(payment_from_message("Cash or loan, which is cheaper?"))
+
     def test_inquiry_creates_callback_todo(self):
         car = self._listing()
         inquiry = self.env["autoboutique.website.inquiry"].create({

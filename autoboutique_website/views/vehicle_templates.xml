@@ -13,6 +13,11 @@
             <label>Name<input type="text" name="name" placeholder="Full Name" required="required"/></label>
             <label>Phone<input type="tel" name="phone" placeholder="Phone Number"/></label>
             <label>Email<input type="email" name="email" placeholder="Email Address"/></label>
+            <div class="ab-pay-choice" role="radiogroup" aria-label="How will you pay?">
+                <span>How will you pay?</span>
+                <label><input type="radio" name="payment_option" value="financing"/> Financing</label>
+                <label><input type="radio" name="payment_option" value="cash"/> Cash</label>
+            </div>
             <label>Message<textarea name="message" rows="3" placeholder="Message"/></label>
             <button type="submit" class="ab-btn ab-btn-dark ab-btn-block">Send Inquiry</button>
         </form>

@@ -1,6 +1,8 @@
 // Schedules AutobotiqueFollowUpJob every 15 minutes (four hourly cron entries).
 // Safe to re-run: existing Autobotique follow-up schedules are replaced.
 // Run: sf apex run -o myorg -f scripts/apex/schedule_follow_ups.apex
+// Deploying Apex while these jobs are scheduled fails ("schedulable class has jobs pending"):
+// abort the 'Autobotique follow-ups' jobs first, deploy, then run this script again.
 for (CronTrigger existing : [
     SELECT Id FROM CronTrigger WHERE CronJobDetail.Name LIKE 'Autobotique follow-ups%'
 ]) {

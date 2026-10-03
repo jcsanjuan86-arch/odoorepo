@@ -50,6 +50,15 @@ private class AutobotiqueProcessAutomationTest {
     }
 
     @IsTest
+    static void websiteLeadsNameTheApplicationAfterTheWebsite() {
+        Facebook_Inquiry__c lead = inquiry(contact().Id, vehicle().Id);
+        update new Facebook_Inquiry__c(Id = lead.Id, Channel__c = 'Website');
+        Id applicationId = AutobotiqueMessagingActionsController.startApplication(lead.Id).recordId;
+        System.assertEquals('Ana Cruz - Website Inquiry',
+            [SELECT Name FROM Auto_Loan_Application__c WHERE Id = :applicationId].Name);
+    }
+
+    @IsTest
     static void startApplicationExplainsWhatIsMissing() {
         Facebook_Inquiry__c lead = inquiry(null, null);
         try {

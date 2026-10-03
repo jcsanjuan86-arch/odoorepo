@@ -68,7 +68,7 @@ public with sharing class AutobotiqueMessagingActionsController {
         return [
             SELECT Id, Customer_Name__c, Contact__c, Assigned_Agent__c, Payment_Intent__c,
                 Vehicle_Interested__c, Auto_Loan_Application__c, Qualified_Lead__c,
-                Inquiry_Status__c, Lead_Stage__c, Next_Action__c
+                Inquiry_Status__c, Lead_Stage__c, Next_Action__c, Channel__c
             FROM Facebook_Inquiry__c
             WHERE Id = :inquiryId
             LIMIT 1
@@ -564,9 +564,10 @@ public with sharing class AutobotiqueMessagingActionsController {
         String firstName = nameParts.isEmpty() ? 'Facebook' : nameParts[0];
         String lastName = nameParts.size() > 1 ? nameParts[1] : 'Customer';
         String paymentOption = inquiry.Payment_Intent__c == 'Cash' ? 'Cash' : 'Financing';
+        Boolean fromWebsite = inquiry.isSet('Channel__c') && inquiry.Channel__c == 'Website';
 
         return new Auto_Loan_Application__c(
-            Name = customerName + ' - Facebook Conversation',
+            Name = customerName + (fromWebsite ? ' - Website Inquiry' : ' - Facebook Conversation'),
             OwnerId = UserInfo.getUserId(),
             Assigned_Agent__c = inquiry.Assigned_Agent__c == null ? UserInfo.getUserId() : inquiry.Assigned_Agent__c,
             Client__c = inquiry.Contact__c,
@@ -579,7 +580,7 @@ public with sharing class AutobotiqueMessagingActionsController {
             Borrower_Last_Name__c = lastName,
             Selected_Vehicle__c = inquiry.Vehicle_Interested__c,
             Next_Follow_Up_Date__c = Date.today().addDays(1),
-            Agent_Notes__c = 'Created from Autobotique Messaging CRM panel.'
+            Agent_Notes__c = fromWebsite ? 'Created from a website inquiry.' : 'Created from Autobotique Messaging CRM panel.'
         );
     }
 

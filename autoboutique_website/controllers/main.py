@@ -14,6 +14,18 @@ INQUIRY_FIELDS = {
 SOURCES = {"contact", "vehicle", "lead", "calculator"}
 
 
+def payment_from_message(message):
+    """Customers often write their plan instead of picking it: 'financing'/'loan' or 'cash'."""
+    text = (message or "").lower()
+    wants_financing = any(word in text for word in ("financ", "loan", "installment", "hulugan", "downpayment", "down payment"))
+    wants_cash = "cash" in text and "cash out" not in text and "cashout" not in text
+    if wants_financing and not wants_cash:
+        return "financing"
+    if wants_cash and not wants_financing:
+        return "cash"
+    return False
+
+
 def _is_autoboutique():
     website = request.website
     return bool(website) and website.company_id.name and website.company_id.name.lower() == "autoboutique"
@@ -79,6 +91,8 @@ class AutoboutiqueWebsite(http.Controller):
         for key in ("body_type", "payment_option", "employment_status", "monthly_income", "assistance"):
             if values[key] and values[key] not in dict(Inquiry._fields[key].selection):
                 values[key] = False
+        if not values["payment_option"]:
+            values["payment_option"] = payment_from_message(values["message"])
         vehicle = False
         if post.get("vehicle_id", "").isdigit():
             vehicle = request.env["autoboutique.vehicle"].sudo().search([
