@@ -437,11 +437,17 @@ class MRF(models.Model):
                     "order_line": [(0, 0, {
                         "product_id": line.product_id.id,
                         "product_qty": line.quantity,
-                        "price_unit": line.product_id.standard_price,
+                        "price_unit": mrf._ab_part_price(line),
                         "name": line.product_id.display_name,
                     }) for line in purchase_items],
                 })
                 mrf.purchase_order_id = order
+
+    def _ab_part_price(self, line):
+        # Vendor price first, else cost, both for the MRF's company (not whichever company the user switched to).
+        product = line.product_id.with_company(self.company_id)
+        seller = product._select_seller(partner_id=self.vendor_id, quantity=line.quantity, uom_id=product.uom_id)
+        return seller.price if seller else product.standard_price
 
 
 class MRFLine(models.Model):

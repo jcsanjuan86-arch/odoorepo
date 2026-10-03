@@ -130,7 +130,10 @@ class TestVehicleAutomation(TransactionCase):
         vehicle = receiving.vehicle_id
         self._inspect(vehicle.qc_ids, "fail")
         repair = vehicle.repair_ids
-        part = self.env["product.product"].create({"name": "Automation Test Brake Pad", "type": "consu"})
+        part = self.env["product.product"].create({
+            "name": "Automation Test Brake Pad", "type": "consu",
+            "seller_ids": [(0, 0, {"partner_id": self.supplier.id, "price": 950, "company_id": self.company.id})],
+        })
         repair.line_ids = [(0, 0, {"name": "Brake pads", "cost_type": "stock", "product_id": part.id,
                                    "quantity": 2, "company_id": self.company.id})]
         repair.state = "approved"
@@ -138,6 +141,13 @@ class TestVehicleAutomation(TransactionCase):
         self.assertEqual(mrf.state, "submitted")
         self.assertEqual(mrf.item_ids.product_id, part)
         self.assertEqual(mrf.item_ids.quantity, 2)
+        self.assertEqual(mrf.item_ids.source, "purchase", "Nothing on hand: the part is bought")
+        self.assertEqual(mrf.vendor_id, self.supplier, "The vendor comes from the product's vendor list")
+        # Approved from another company: the RFQ still uses the vendor price for the car's company.
+        other_company = self.env["res.company"].create({"name": "Automation Parts Other Company"})
+        mrf.with_context(allowed_company_ids=[other_company.id, self.company.id]).action_approve_request()
+        self.assertEqual(mrf.purchase_order_id.order_line.price_unit, 950)
+        mrf.purchase_order_id.button_cancel()
 
         repair.state = "done"
         self.assertFalse(vehicle.qc_ids.filtered(lambda q: q.inspection_type == "final"),
