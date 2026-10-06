@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Premium hours on top of the monthly salary (Labor Code rates on the hourly rate). -->
+    <data noupdate="1">
+        <record id="work_entry_type_ph_overtime" model="hr.work.entry.type">
+            <field name="name">Overtime (125%)</field>
+            <field name="code">PH_OT</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="is_extra_hours" eval="True"/>
+            <field name="amount_rate">1.25</field>
+        </record>
+        <record id="work_entry_type_ph_rest_day" model="hr.work.entry.type">
+            <field name="name">Rest Day Work (130%)</field>
+            <field name="code">PH_RD</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="is_extra_hours" eval="True"/>
+            <field name="amount_rate">1.30</field>
+        </record>
+        <record id="work_entry_type_ph_special_holiday" model="hr.work.entry.type">
+            <field name="name">Special Holiday Work (130%)</field>
+            <field name="code">PH_SH</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="is_extra_hours" eval="True"/>
+            <field name="amount_rate">1.30</field>
+        </record>
+        <record id="work_entry_type_ph_regular_holiday" model="hr.work.entry.type">
+            <field name="name">Regular Holiday Work (200%)</field>
+            <field name="code">PH_RH</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="is_extra_hours" eval="True"/>
+            <field name="amount_rate">2.00</field>
+        </record>
+        <record id="work_entry_type_ph_night_differential" model="hr.work.entry.type">
+            <field name="name">Night Differential (+10%)</field>
+            <field name="code">PH_ND</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="is_extra_hours" eval="True"/>
+            <field name="amount_rate">0.10</field>
+        </record>
+    </data>
+</odoo>

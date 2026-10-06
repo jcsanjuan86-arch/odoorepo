@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rates are monthly. Add a new dated value when a government table changes. -->
+    <data noupdate="1">
+        <record id="rule_parameter_ph_sss" model="hr.rule.parameter">
+            <field name="name">PH: SSS contribution</field>
+            <field name="code">l10n_ph_sss</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="description">Monthly salary credit (MSC) range and step, employee/employer rates (%), and employees' compensation (EC) paid by the employer.</field>
+        </record>
+        <record id="rule_parameter_ph_sss_2025" model="hr.rule.parameter.value">
+            <field name="rule_parameter_id" ref="rule_parameter_ph_sss"/>
+            <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
+            <field name="parameter_value">{'msc_min': 5000, 'msc_max': 35000, 'msc_step': 500, 'employee_rate': 5.0, 'employer_rate': 10.0, 'ec_threshold': 15000, 'ec_low': 10.0, 'ec_high': 30.0}</field>
+        </record>
+
+        <record id="rule_parameter_ph_philhealth" model="hr.rule.parameter">
+            <field name="name">PH: PhilHealth premium</field>
+            <field name="code">l10n_ph_philhealth</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="description">Premium rate (%) on the monthly basic salary between the floor and ceiling, shared equally.</field>
+        </record>
+        <record id="rule_parameter_ph_philhealth_2024" model="hr.rule.parameter.value">
+            <field name="rule_parameter_id" ref="rule_parameter_ph_philhealth"/>
+            <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
+            <field name="parameter_value">{'rate': 5.0, 'floor': 10000, 'ceiling': 100000}</field>
+        </record>
+
+        <record id="rule_parameter_ph_pagibig" model="hr.rule.parameter">
+            <field name="name">PH: Pag-IBIG (HDMF) contribution</field>
+            <field name="code">l10n_ph_pagibig</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="description">Rates (%) on the monthly salary up to the maximum fund salary.</field>
+        </record>
+        <record id="rule_parameter_ph_pagibig_2024" model="hr.rule.parameter.value">
+            <field name="rule_parameter_id" ref="rule_parameter_ph_pagibig"/>
+            <field name="date_from" eval="datetime(2024, 2, 1).date()"/>
+            <field name="parameter_value">{'max_fund_salary': 10000, 'low_salary_limit': 1500, 'employee_rate_low': 1.0, 'employee_rate': 2.0, 'employer_rate': 2.0}</field>
+        </record>
+
+        <record id="rule_parameter_ph_tax_brackets" model="hr.rule.parameter">
+            <field name="name">PH: Annual income tax table (TRAIN)</field>
+            <field name="code">l10n_ph_tax_brackets</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="description">(over, up to, tax on the lower amount, % of the excess) on annual taxable compensation.</field>
+        </record>
+        <record id="rule_parameter_ph_tax_brackets_2023" model="hr.rule.parameter.value">
+            <field name="rule_parameter_id" ref="rule_parameter_ph_tax_brackets"/>
+            <field name="date_from" eval="datetime(2023, 1, 1).date()"/>
+            <field name="parameter_value">[(0, 250000, 0, 0), (250000, 400000, 0, 15), (400000, 800000, 22500, 20), (800000, 2000000, 102500, 25), (2000000, 8000000, 402500, 30), (8000000, None, 2202500, 35)]</field>
+        </record>
+
+        <record id="rule_parameter_ph_13th_month_exemption" model="hr.rule.parameter">
+            <field name="name">PH: 13th month and other benefits tax exemption</field>
+            <field name="code">l10n_ph_13th_month_exemption</field>
+            <field name="country_id" ref="base.ph"/>
+        </record>
+        <record id="rule_parameter_ph_13th_month_exemption_2018" model="hr.rule.parameter.value">
+            <field name="rule_parameter_id" ref="rule_parameter_ph_13th_month_exemption"/>
+            <field name="date_from" eval="datetime(2018, 1, 1).date()"/>
+            <field name="parameter_value">90000</field>
+        </record>
+    </data>
+</odoo>

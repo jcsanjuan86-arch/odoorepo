@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="category_ph_nontaxable" model="hr.salary.rule.category">
+        <field name="name">Non-Taxable Benefits</field>
+        <field name="code">PH_NTX</field>
+        <field name="country_id" ref="base.ph"/>
+    </record>
+    <record id="category_ph_contribution" model="hr.salary.rule.category">
+        <field name="name">Government Contributions</field>
+        <field name="code">PH_GOV</field>
+        <field name="country_id" ref="base.ph"/>
+        <field name="parent_id" ref="hr_payroll.DED"/>
+    </record>
+    <record id="category_ph_taxable" model="hr.salary.rule.category">
+        <field name="name">Taxable Compensation</field>
+        <field name="code">PH_TAXABLE</field>
+        <field name="country_id" ref="base.ph"/>
+    </record>
+</odoo>

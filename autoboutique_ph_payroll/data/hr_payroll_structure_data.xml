@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="structure_ph_regular_pay" model="hr.payroll.structure">
+        <field name="name">Philippines: Regular Pay</field>
+        <field name="code">PHREG</field>
+        <field name="country_id" ref="base.ph"/>
+        <field name="type_id" ref="structure_type_ph_employee"/>
+        <field name="ytd_computation" eval="True"/>
+        <field name="rule_ids" eval="[]"/>
+    </record>
+
+    <record id="structure_ph_13th_month" model="hr.payroll.structure">
+        <field name="name">Philippines: 13th Month Pay</field>
+        <field name="code">PH13TH</field>
+        <field name="country_id" ref="base.ph"/>
+        <field name="type_id" ref="structure_type_ph_employee"/>
+        <field name="use_worked_day_lines" eval="False"/>
+        <field name="payslip_name">13th Month Pay</field>
+        <field name="rule_ids" eval="[]"/>
+    </record>
+
+    <record id="structure_type_ph_employee" model="hr.payroll.structure.type">
+        <field name="default_struct_id" ref="structure_ph_regular_pay"/>
+    </record>
+</odoo>

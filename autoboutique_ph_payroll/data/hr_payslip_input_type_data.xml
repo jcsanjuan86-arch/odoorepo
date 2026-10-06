@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="input_ph_taxable_allowance" model="hr.payslip.input.type">
+            <field name="name">Taxable Allowance</field>
+            <field name="code">PH_TAX_ALW</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="struct_ids" eval="[(4, ref('structure_ph_regular_pay'))]"/>
+        </record>
+        <record id="input_ph_deminimis" model="hr.payslip.input.type">
+            <field name="name">De Minimis Benefits (non-taxable)</field>
+            <field name="code">PH_DEMINIMIS</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="struct_ids" eval="[(4, ref('structure_ph_regular_pay'))]"/>
+        </record>
+        <record id="input_ph_sss_loan" model="hr.payslip.input.type">
+            <field name="name">SSS Loan Amortization</field>
+            <field name="code">PH_SSS_LOAN</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="struct_ids" eval="[(4, ref('structure_ph_regular_pay'))]"/>
+        </record>
+        <record id="input_ph_pagibig_loan" model="hr.payslip.input.type">
+            <field name="name">Pag-IBIG Loan Amortization</field>
+            <field name="code">PH_HDMF_LOAN</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="struct_ids" eval="[(4, ref('structure_ph_regular_pay'))]"/>
+        </record>
+        <record id="input_ph_cash_advance" model="hr.payslip.input.type">
+            <field name="name">Cash Advance Deduction</field>
+            <field name="code">PH_CASH_ADV</field>
+            <field name="country_id" ref="base.ph"/>
+            <field name="struct_ids" eval="[(4, ref('structure_ph_regular_pay'))]"/>
+        </record>
+    </data>
+</odoo>

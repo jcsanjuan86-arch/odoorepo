@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Philippines: Regular Pay -->
+    <record id="rule_ph_basic" model="hr.salary.rule">
+        <field name="name">Basic Salary</field>
+        <field name="code">BASIC</field>
+        <field name="sequence">1</field>
+        <field name="category_id" ref="hr_payroll.BASIC"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_regular_pay()</field>
+    </record>
+
+    <record id="rule_ph_premium" model="hr.salary.rule">
+        <field name="name">Overtime, Holiday and Night Differential Pay</field>
+        <field name="code">PH_PREMIUM</field>
+        <field name="sequence">5</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(payslip._l10n_ph_premium_pay())</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_premium_pay()</field>
+    </record>
+
+    <record id="rule_ph_taxable_allowance" model="hr.salary.rule">
+        <field name="name">Taxable Allowance</field>
+        <field name="code">PH_TAX_ALW</field>
+        <field name="sequence">10</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="input_ph_taxable_allowance"/>
+        <field name="amount_select">input</field>
+        <field name="amount_other_input_id" ref="input_ph_taxable_allowance"/>
+    </record>
+
+    <record id="rule_ph_deminimis" model="hr.salary.rule">
+        <field name="name">De Minimis Benefits</field>
+        <field name="code">PH_DEMINIMIS</field>
+        <field name="sequence">11</field>
+        <field name="category_id" ref="category_ph_nontaxable"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="input_ph_deminimis"/>
+        <field name="amount_select">input</field>
+        <field name="amount_other_input_id" ref="input_ph_deminimis"/>
+    </record>
+
+    <record id="rule_ph_gross" model="hr.salary.rule">
+        <field name="name">Gross Taxable Pay</field>
+        <field name="code">GROSS</field>
+        <field name="sequence">100</field>
+        <field name="category_id" ref="hr_payroll.GROSS"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories['BASIC'] + categories['ALW']</field>
+    </record>
+
+    <record id="rule_ph_sss_employee" model="hr.salary.rule">
+        <field name="name">SSS Contribution</field>
+        <field name="code">SSS_EE</field>
+        <field name="sequence">110</field>
+        <field name="category_id" ref="category_ph_contribution"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -payslip._l10n_ph_contributions()['sss_employee']</field>
+    </record>
+
+    <record id="rule_ph_philhealth_employee" model="hr.salary.rule">
+        <field name="name">PhilHealth Contribution</field>
+        <field name="code">PHIC_EE</field>
+        <field name="sequence">111</field>
+        <field name="category_id" ref="category_ph_contribution"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -payslip._l10n_ph_contributions()['philhealth_employee']</field>
+    </record>
+
+    <record id="rule_ph_pagibig_employee" model="hr.salary.rule">
+        <field name="name">Pag-IBIG Contribution</field>
+        <field name="code">HDMF_EE</field>
+        <field name="sequence">112</field>
+        <field name="category_id" ref="category_ph_contribution"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -payslip._l10n_ph_contributions()['pagibig_employee']</field>
+    </record>
+
+    <record id="rule_ph_taxable" model="hr.salary.rule">
+        <field name="name">Taxable Compensation</field>
+        <field name="code">PH_TAXABLE</field>
+        <field name="sequence">120</field>
+        <field name="category_id" ref="category_ph_taxable"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories['GROSS'] + categories['PH_GOV']</field>
+    </record>
+
+    <record id="rule_ph_withholding_tax" model="hr.salary.rule">
+        <field name="name">Withholding Tax</field>
+        <field name="code">PH_WHT</field>
+        <field name="sequence">130</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -payslip._l10n_ph_withholding_tax(categories['PH_TAXABLE'])</field>
+    </record>
+
+    <record id="rule_ph_sss_loan" model="hr.salary.rule">
+        <field name="name">SSS Loan</field>
+        <field name="code">PH_SSS_LOAN</field>
+        <field name="sequence">150</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="input_ph_sss_loan"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs['PH_SSS_LOAN'].amount</field>
+    </record>
+
+    <record id="rule_ph_pagibig_loan" model="hr.salary.rule">
+        <field name="name">Pag-IBIG Loan</field>
+        <field name="code">PH_HDMF_LOAN</field>
+        <field name="sequence">151</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="input_ph_pagibig_loan"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs['PH_HDMF_LOAN'].amount</field>
+    </record>
+
+    <record id="rule_ph_cash_advance" model="hr.salary.rule">
+        <field name="name">Cash Advance</field>
+        <field name="code">PH_CASH_ADV</field>
+        <field name="sequence">152</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="input_ph_cash_advance"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs['PH_CASH_ADV'].amount</field>
+    </record>
+
+    <record id="rule_ph_net" model="hr.salary.rule">
+        <field name="name">Net Pay</field>
+        <field name="code">NET</field>
+        <field name="sequence">200</field>
+        <field name="category_id" ref="hr_payroll.NET"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories['BASIC'] + categories['ALW'] + categories['PH_NTX'] + categories['DED']</field>
+        <field name="employee_move_line" eval="True"/>
+    </record>
+
+    <record id="rule_ph_sss_employer" model="hr.salary.rule">
+        <field name="name">SSS Employer Share</field>
+        <field name="code">SSS_ER</field>
+        <field name="sequence">210</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_contributions()['sss_employer']</field>
+    </record>
+
+    <record id="rule_ph_sss_ec" model="hr.salary.rule">
+        <field name="name">SSS Employees' Compensation (EC)</field>
+        <field name="code">SSS_EC</field>
+        <field name="sequence">211</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_contributions()['sss_ec']</field>
+    </record>
+
+    <record id="rule_ph_philhealth_employer" model="hr.salary.rule">
+        <field name="name">PhilHealth Employer Share</field>
+        <field name="code">PHIC_ER</field>
+        <field name="sequence">212</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_contributions()['philhealth_employer']</field>
+    </record>
+
+    <record id="rule_ph_pagibig_employer" model="hr.salary.rule">
+        <field name="name">Pag-IBIG Employer Share</field>
+        <field name="code">HDMF_ER</field>
+        <field name="sequence">213</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="structure_ph_regular_pay"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_contributions()['pagibig_employer']</field>
+    </record>
+
+    <!-- Philippines: 13th Month Pay -->
+    <record id="rule_ph_13th_month" model="hr.salary.rule">
+        <field name="name">13th Month Pay</field>
+        <field name="code">PH_13TH</field>
+        <field name="sequence">1</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="struct_id" ref="structure_ph_13th_month"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._l10n_ph_13th_month()</field>
+    </record>
+
+    <record id="rule_ph_13th_month_net" model="hr.salary.rule">
+        <field name="name">Net Pay</field>
+        <field name="code">NET</field>
+        <field name="sequence">200</field>
+        <field name="category_id" ref="hr_payroll.NET"/>
+        <field name="struct_id" ref="structure_ph_13th_month"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories['ALW'] + categories['DED']</field>
+        <field name="employee_move_line" eval="True"/>
+    </record>
+</odoo>
