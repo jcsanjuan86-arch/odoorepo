@@ -3,5 +3,5 @@
     <description>Odoo webhook for loan application change notifications. Production Odoo; use the staging URL when deploying to a sandbox.</description>
     <disableProtocolSecurity>false</disableProtocolSecurity>
     <isActive>true</isActive>
-    <url>https://jcsanjuan86-arch-odoorepo.odoo.com</url>
+    <url>https://enterprisejcsanjuan.odoo.com</url>
 </RemoteSiteSetting>

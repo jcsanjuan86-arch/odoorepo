@@ -77,7 +77,7 @@ inactive.
 ## 2. Deploy the metadata
 
 Edit `salesforce/force-app/main/default/remoteSiteSettings/Odoo_Webhook.remoteSite-meta.xml`
-It points at production Odoo, `https://jcsanjuan86-arch-odoorepo.odoo.com`.
+It points at production Odoo, `https://enterprisejcsanjuan.odoo.com`.
 For a sandbox, change it to the Odoo.sh staging URL.
 
 Then, from the `salesforce/` folder:
