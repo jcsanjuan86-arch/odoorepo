@@ -14,6 +14,7 @@ public with sharing class AutobotiqueMessagingActionsController {
         Id existingInquiryId;
         String customerName;
         String facebookUserId;
+        Id agentId; // set when the agent who accepted the chat should handle the inquiry
     }
 
     @AuraEnabled
@@ -23,7 +24,31 @@ public with sharing class AutobotiqueMessagingActionsController {
         }
 
         ConversationContext context = loadContext(messagingSessionId);
+        context.agentId = UserInfo.getUserId();
         return ensureFacebookInquiry(context, true);
+    }
+
+    /**
+     * After update on MessagingSession: when an agent accepts (or is transferred) a chat, Omni-Channel makes
+     * them the owner. The customer's inquiry is created or reused and linked right then, so no click is needed.
+     * Never blocks the accept: on failure the agent still has the "Create Customer Inquiry" button.
+     */
+    public static void onSessionsAccepted(List<MessagingSession> sessions, Map<Id, MessagingSession> oldMap) {
+        for (MessagingSession session : sessions) {
+            Id owner = session.OwnerId;
+            if (owner == null || owner.getSObjectType() != User.SObjectType || owner == oldMap.get(session.Id).OwnerId) {
+                continue;
+            }
+            Savepoint sp = Database.setSavepoint();
+            try {
+                ConversationContext context = loadContext(session.Id);
+                context.agentId = owner;
+                ensureFacebookInquiry(context, true);
+            } catch (Exception e) {
+                Database.rollback(sp);
+                System.debug(LoggingLevel.ERROR, 'Customer inquiry not created for ' + session.Id + ': ' + e.getMessage());
+            }
+        }
     }
 
     @AuraEnabled
@@ -407,7 +432,8 @@ public with sharing class AutobotiqueMessagingActionsController {
 
     private static ConversationContext loadContext(Id messagingSessionId) {
         MessagingSession session = [
-            SELECT Id, CaseId, EndUserContactId, Facebook_Inquiry__c, Auto_Loan_Application__c
+            SELECT Id, CaseId, EndUserContactId, Facebook_Inquiry__c, Auto_Loan_Application__c,
+                MessagingEndUserId, MessagingEndUser.Name
             FROM MessagingSession
             WHERE Id = :messagingSessionId
             LIMIT 1
@@ -418,8 +444,9 @@ public with sharing class AutobotiqueMessagingActionsController {
         context.caseId = session.CaseId;
         context.contactId = session.EndUserContactId;
         context.existingInquiryId = session.Facebook_Inquiry__c;
-        context.customerName = 'Facebook Customer';
-        context.facebookUserId = String.valueOf(session.Id);
+        context.customerName = String.isBlank(session.MessagingEndUser?.Name) ? 'Facebook Customer' : session.MessagingEndUser.Name;
+        // The Messenger user, so a returning customer without a Contact still finds their open inquiry.
+        context.facebookUserId = String.valueOf(session.MessagingEndUserId != null ? session.MessagingEndUserId : session.Id);
 
         if (context.contactId != null) {
             Contact contact = [
@@ -436,11 +463,13 @@ public with sharing class AutobotiqueMessagingActionsController {
 
     private static ActionResult ensureFacebookInquiry(ConversationContext context, Boolean linkMessagingSession) {
         if (context.existingInquiryId != null) {
-            return result(context.existingInquiryId, 'Facebook inquiry is already linked.');
+            handOver(context.existingInquiryId, context.agentId);
+            return result(context.existingInquiryId, 'Customer inquiry is already linked.');
         }
 
         Facebook_Inquiry__c activeInquiry = findActiveInquiry(context);
         if (activeInquiry != null) {
+            handOver(activeInquiry.Id, context.agentId);
             if (linkMessagingSession) {
                 update new MessagingSession(
                     Id = context.messagingSessionId,
@@ -463,50 +492,59 @@ public with sharing class AutobotiqueMessagingActionsController {
         return result(inquiry.Id, 'Customer inquiry created and linked to this conversation.');
     }
 
+    private static void handOver(Id inquiryId, Id agentId) {
+        if (agentId != null) {
+            new CustomerHistory().handOver(inquiryId, agentId);
+        }
+    }
+
     private static Facebook_Inquiry__c findActiveInquiry(ConversationContext context) {
-        if (context.contactId == null && String.isBlank(context.facebookUserId)) {
+        Set<Id> contactIds = new Set<Id>();
+        Set<String> messengerIds = new Set<String>();
+        if (context.contactId != null) {
+            contactIds.add(context.contactId);
+        }
+        if (!String.isBlank(context.facebookUserId)) {
+            messengerIds.add(context.facebookUserId);
+        }
+        if (contactIds.isEmpty() && messengerIds.isEmpty()) {
             return null;
         }
+        return new CustomerHistory().findOpenInquiry(contactIds, messengerIds);
+    }
 
-        List<Facebook_Inquiry__c> matches;
-        if (context.contactId != null && !String.isBlank(context.facebookUserId)) {
-            matches = [
+    /**
+     * Inquiries are private to their agent. A returning customer's open inquiry may belong to another
+     * agent, so it is looked up and handed over without sharing instead of being duplicated.
+     */
+    private without sharing class CustomerHistory {
+        Facebook_Inquiry__c findOpenInquiry(Set<Id> contactIds, Set<String> messengerIds) {
+            List<Facebook_Inquiry__c> matches = [
                 SELECT Id
                 FROM Facebook_Inquiry__c
                 WHERE Inquiry_Status__c != 'Converted'
                 AND Lead_Stage__c != 'Converted to Application'
                 AND Inquiry_Status__c != 'Closed'
                 AND Lead_Stage__c != 'Closed Lost'
-                AND (Contact__c = :context.contactId OR Facebook_User_ID__c = :context.facebookUserId)
+                AND (Contact__c IN :contactIds OR Facebook_User_ID__c IN :messengerIds)
                 ORDER BY LastModifiedDate DESC
                 LIMIT 1
             ];
-        } else if (context.contactId != null) {
-            matches = [
-                SELECT Id
-                FROM Facebook_Inquiry__c
-                WHERE Inquiry_Status__c != 'Converted'
-                AND Lead_Stage__c != 'Converted to Application'
-                AND Inquiry_Status__c != 'Closed'
-                AND Lead_Stage__c != 'Closed Lost'
-                AND Contact__c = :context.contactId
-                ORDER BY LastModifiedDate DESC
-                LIMIT 1
-            ];
-        } else {
-            matches = [
-                SELECT Id
-                FROM Facebook_Inquiry__c
-                WHERE Inquiry_Status__c != 'Converted'
-                AND Lead_Stage__c != 'Converted to Application'
-                AND Inquiry_Status__c != 'Closed'
-                AND Lead_Stage__c != 'Closed Lost'
-                AND Facebook_User_ID__c = :context.facebookUserId
-                ORDER BY LastModifiedDate DESC
-                LIMIT 1
-            ];
+            return matches.isEmpty() ? null : matches[0];
         }
-        return matches.isEmpty() ? null : matches[0];
+
+        /** The agent now chatting with the customer handles the inquiry; the one before is kept as Previous Agent. */
+        void handOver(Id inquiryId, Id agentId) {
+            Facebook_Inquiry__c inquiry = [SELECT Id, OwnerId, Assigned_Agent__c FROM Facebook_Inquiry__c WHERE Id = :inquiryId];
+            if (inquiry.Assigned_Agent__c == agentId && inquiry.OwnerId == agentId) {
+                return;
+            }
+            Facebook_Inquiry__c change = new Facebook_Inquiry__c(Id = inquiryId, OwnerId = agentId, Assigned_Agent__c = agentId);
+            if (inquiry.Assigned_Agent__c != null && inquiry.Assigned_Agent__c != agentId) {
+                change.Previous_Agent__c = inquiry.Assigned_Agent__c;
+            }
+            update change;
+        }
     }
 
     private static ActionResult createLoanApplication(Facebook_Inquiry__c inquiry, Id messagingSessionId, Boolean linkMessagingSession) {
@@ -537,9 +575,10 @@ public with sharing class AutobotiqueMessagingActionsController {
     }
 
     private static Facebook_Inquiry__c buildInquiry(ConversationContext context) {
+        Id agent = context.agentId != null ? context.agentId : UserInfo.getUserId();
         return new Facebook_Inquiry__c(
-            OwnerId = UserInfo.getUserId(),
-            Assigned_Agent__c = UserInfo.getUserId(),
+            OwnerId = agent,
+            Assigned_Agent__c = agent,
             Contact__c = context.contactId,
             Case__c = context.caseId,
             Customer_Name__c = String.isBlank(context.customerName) ? 'Facebook Customer' : context.customerName,

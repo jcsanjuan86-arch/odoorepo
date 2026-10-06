@@ -1,6 +1,6 @@
-# Renames "Facebook Inquiry" to "Customer Inquiry" everywhere people see it (labels only; API names stay).
+# Customer Inquiry: the renamed labels (API names stay) and the inquiry created when an agent accepts a chat.
 # Pauses the follow-up jobs (Salesforce blocks deploys while they are scheduled), deploys, then restarts them.
-# Run from the salesforce folder:  powershell -File scripts\deploy_inquiry_rename.ps1
+# Run from the salesforce folder:  powershell -File scripts\deploy_customer_inquiry.ps1
 param([ValidateSet('validate', 'start')][string]$Mode = 'start')
 Set-Location (Split-Path $PSScriptRoot -Parent)
 sf apex run -f scripts\apex\unschedule_follow_ups.apex | Select-String "LEFT"
@@ -15,7 +15,8 @@ $src = @(
     "$d\flexipages\Facebook_Inquiry_Record_Page.flexipage-meta.xml", "$d\tabs\Facebook_Leads_Kanban.tab-meta.xml",
     "$d\lwc\facebookQualifiedLeadsKanban", "$d\lwc\autobotiqueMessagingCrmPanel",
     "$d\classes\FacebookLeadKanbanController.cls", "$d\classes\FacebookLeadKanbanControllerTest.cls",
-    "$d\classes\AutobotiqueMessagingActionsController.cls"
+    "$d\classes\AutobotiqueMessagingActionsController.cls", "$d\triggers\AutobotiqueMessagingSession.trigger",
+    "$d\classes\AutobotiqueRouterTest.cls"
 )
 $a = @('project', 'deploy', $Mode, '-o', 'myorg', '--test-level', 'RunSpecifiedTests', '--wait', '30', '--json')
 foreach ($s in $src) { $a += @('--source-dir', $s) }

@@ -143,6 +143,24 @@ private class AutobotiqueRouterTest {
         Test.stopTest();
         System.assertEquals(team[1].Id, [SELECT Personal_Agent__c FROM MessagingEndUser WHERE Id = :person.Id].Personal_Agent__c);
 
+        // Accepting the chat creates the customer inquiry; the agent does not click anything.
+        Id inquiryId = [SELECT Facebook_Inquiry__c FROM MessagingSession WHERE Id = :first.Id].Facebook_Inquiry__c;
+        System.assertNotEquals(null, inquiryId, 'The accepted chat is linked to a new customer inquiry.');
+        Facebook_Inquiry__c inquiry = [SELECT OwnerId, Assigned_Agent__c, Customer_Name__c FROM Facebook_Inquiry__c WHERE Id = :inquiryId];
+        System.assertEquals(team[1].Id, inquiry.Assigned_Agent__c);
+        System.assertEquals(team[1].Id, inquiry.OwnerId);
+        System.assertEquals('Messenger Buyer', inquiry.Customer_Name__c);
+
+        // The customer comes back while the personal agent is offline (Messenger reuses the session record,
+        // unlinked here): another agent takes the chat and the same open inquiry, not a duplicate.
+        update new MessagingSession(Id = first.Id, Facebook_Inquiry__c = null, OwnerId = team[0].Id);
+        System.assertEquals(inquiryId, [SELECT Facebook_Inquiry__c FROM MessagingSession WHERE Id = :first.Id].Facebook_Inquiry__c,
+            'A returning customer keeps one open inquiry.');
+        System.assertEquals(1, [SELECT COUNT() FROM Facebook_Inquiry__c WHERE Facebook_User_ID__c = :person.Id]);
+        inquiry = [SELECT Assigned_Agent__c, Previous_Agent__c FROM Facebook_Inquiry__c WHERE Id = :inquiryId];
+        System.assertEquals(team[0].Id, inquiry.Assigned_Agent__c);
+        System.assertEquals(team[1].Id, inquiry.Previous_Agent__c);
+
         // The customer messages again: routing looks the personal agent up through the Messaging User.
         online(new Map<Id, Decimal>{ team[0].Id => 5, team[1].Id => 5 });
         AutobotiqueRouter.Request request = new AutobotiqueRouter.Request();
