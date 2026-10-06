@@ -143,7 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>Lead_Manager</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <description>Facebook Messenger inquiry intake record for Autobotique call center agents.</description>
+    <description>Online customer inquiry (Facebook pages and website) for Autobotique sales agents. API name kept as Facebook_Inquiry__c.</description>
     <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>true</enableFeeds>
@@ -154,15 +154,15 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>Facebook Inquiry</label>
+    <label>Customer Inquiry</label>
     <nameField>
         <displayFormat>FBI-{00000}</displayFormat>
-        <label>Facebook Inquiry Number</label>
+        <label>Inquiry Number</label>
         <trackFeedHistory>false</trackFeedHistory>
         <trackHistory>false</trackHistory>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Facebook Inquiries</pluralLabel>
+    <pluralLabel>Customer Inquiries</pluralLabel>
     <searchLayouts>
         <searchResultsAdditionalFields>Customer_Name__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Lead_Stage__c</searchResultsAdditionalFields>

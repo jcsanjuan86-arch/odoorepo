@@ -1,0 +1,261 @@
+.board-shell {
+    background: #f4f6f9;
+    min-height: 100%;
+    padding: 1rem;
+}
+
+.board-header {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.board-header h1 {
+    color: #032d60;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.board-header p {
+    color: #5c5c5c;
+    margin: 0.1rem 0 0;
+}
+
+.header-actions {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.board {
+    display: grid;
+    gap: 0.75rem;
+    grid-auto-columns: minmax(17rem, 1fr);
+    grid-auto-flow: column;
+    min-height: 34rem;
+    overflow-x: auto;
+}
+
+.column {
+    background: #fff;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 17rem;
+}
+
+.column-header {
+    align-items: center;
+    border-bottom: 1px solid #d8dde6;
+    display: flex;
+    justify-content: space-between;
+    min-height: 3rem;
+    padding: 0 0.75rem;
+}
+
+.column-header h2 {
+    color: #181818;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.column-header span {
+    background: #eef4ff;
+    border-radius: 999px;
+    color: #032d60;
+    font-weight: 700;
+    min-width: 1.8rem;
+    padding: 0.15rem 0.45rem;
+    text-align: center;
+}
+
+.cards {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.6rem;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #d8dde6;
+    border-left: 0.35rem solid #747474;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    padding: 0.65rem;
+}
+
+.card:hover {
+    border-color: #0176d3;
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.14);
+}
+
+.card:active {
+    cursor: grabbing;
+}
+
+.priority-hot {
+    border-left-color: #ba0517;
+}
+
+.priority-warm {
+    border-left-color: #dd7a01;
+}
+
+.priority-cold {
+    border-left-color: #0176d3;
+}
+
+.card-top {
+    align-items: start;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.lead-name {
+    background: transparent;
+    border: 0;
+    color: #032d60;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0;
+    text-align: left;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.lead-name:hover,
+.lead-name:focus {
+    color: #0176d3;
+    text-decoration: underline;
+}
+
+.card-top span,
+footer span {
+    background: #f3f3f3;
+    border-radius: 999px;
+    color: #444;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+}
+
+.meta {
+    color: #5c5c5c;
+    display: grid;
+    font-size: 0.75rem;
+    gap: 0.1rem;
+    margin-top: 0.45rem;
+}
+
+.vehicle {
+    color: #181818;
+    font-weight: 700;
+    margin-top: 0.45rem;
+    overflow-wrap: anywhere;
+}
+
+.source {
+    color: #706e6b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+}
+
+footer {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.55rem;
+}
+
+.edit-button {
+    margin-left: auto;
+}
+
+.error {
+    background: #fef1f1;
+    border: 1px solid #ea001e;
+    border-radius: 0.25rem;
+    color: #ba0517;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem;
+}
+
+.modal-backdrop {
+    align-items: flex-start;
+    background: rgba(8, 7, 7, 0.55);
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    overflow: auto;
+    padding: 4rem 1rem;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 9000;
+}
+
+.modal {
+    background: #ffffff;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+    max-width: 58rem;
+    width: min(100%, 58rem);
+}
+
+.stage-modal {
+    max-width: 36rem;
+}
+
+.modal-header {
+    align-items: center;
+    border-bottom: 1px solid #d8dde6;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+}
+
+.modal-header h2 {
+    color: #032d60;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.editor-grid {
+    display: grid;
+    gap: 0 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 1rem;
+}
+
+.stage-editor {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.modal-footer {
+    align-items: center;
+    border-top: 1px solid #d8dde6;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding: 0.85rem 1rem;
+}
+
+@media (max-width: 700px) {
+    .editor-grid {
+        grid-template-columns: 1fr;
+    }
+}

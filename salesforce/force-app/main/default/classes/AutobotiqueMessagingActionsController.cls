@@ -34,7 +34,7 @@ public with sharing class AutobotiqueMessagingActionsController {
 
         ConversationContext context = loadContext(messagingSessionId);
         if (context.existingInquiryId == null) {
-            throw new AuraHandledException('Create the Autobotique lead for this conversation first.');
+            throw new AuraHandledException('Create the customer inquiry for this conversation first.');
         }
 
         Facebook_Inquiry__c inquiry = loadInquiry(context.existingInquiryId);
@@ -52,7 +52,7 @@ public with sharing class AutobotiqueMessagingActionsController {
     @AuraEnabled
     public static ActionResult startApplication(Id inquiryId) {
         if (inquiryId == null) {
-            throw new AuraHandledException('Open an Autobotique lead first.');
+            throw new AuraHandledException('Open a customer inquiry first.');
         }
         Facebook_Inquiry__c inquiry = loadInquiry(inquiryId);
         if (inquiry.Auto_Loan_Application__c != null) {
@@ -108,7 +108,7 @@ public with sharing class AutobotiqueMessagingActionsController {
     @AuraEnabled
     public static ActionResult qualifyLead(Id inquiryId) {
         if (inquiryId == null) {
-            throw new AuraHandledException('Open an Autobotique lead first.');
+            throw new AuraHandledException('Open a customer inquiry first.');
         }
 
         Facebook_Inquiry__c inquiry = [
@@ -142,7 +142,7 @@ public with sharing class AutobotiqueMessagingActionsController {
     @AuraEnabled
     public static ActionResult convertLead(Id inquiryId) {
         if (inquiryId == null) {
-            throw new AuraHandledException('Open an Autobotique lead first.');
+            throw new AuraHandledException('Open a customer inquiry first.');
         }
 
         Facebook_Inquiry__c inquiry = [
@@ -180,7 +180,7 @@ public with sharing class AutobotiqueMessagingActionsController {
     @AuraEnabled
     public static ActionResult createLoanApplicationFromInquiry(Id inquiryId) {
         if (inquiryId == null) {
-            throw new AuraHandledException('Open an Autobotique lead first.');
+            throw new AuraHandledException('Open a customer inquiry first.');
         }
 
         return startApplication(inquiryId);
@@ -189,7 +189,7 @@ public with sharing class AutobotiqueMessagingActionsController {
     @AuraEnabled
     public static ActionResult createUploadRequest(Id inquiryId) {
         if (inquiryId == null) {
-            throw new AuraHandledException('Open an Autobotique lead first.');
+            throw new AuraHandledException('Open a customer inquiry first.');
         }
 
         Facebook_Inquiry__c inquiry = [
@@ -208,7 +208,7 @@ public with sharing class AutobotiqueMessagingActionsController {
             String.isBlank(inquiry.Customer_Name__c) ? 'Facebook Customer' : inquiry.Customer_Name__c,
             inquiry.Contact__r == null ? null : inquiry.Contact__r.Email,
             inquiry.Contact__r == null ? null : inquiry.Contact__r.MobilePhone,
-            'Upload request created from Autobotique lead process.'
+            'Upload request created from the customer inquiry.'
         );
     }
 
@@ -447,7 +447,7 @@ public with sharing class AutobotiqueMessagingActionsController {
                     Facebook_Inquiry__c = activeInquiry.Id
                 );
             }
-            return result(activeInquiry.Id, 'Existing active Autobotique lead found. Opening that lead instead of creating a duplicate.');
+            return result(activeInquiry.Id, 'This customer already has an open inquiry. Opening it instead of creating a duplicate.');
         }
 
         Facebook_Inquiry__c inquiry = buildInquiry(context);
@@ -460,7 +460,7 @@ public with sharing class AutobotiqueMessagingActionsController {
             );
         }
 
-        return result(inquiry.Id, 'Autobotique lead created and linked to this conversation.');
+        return result(inquiry.Id, 'Customer inquiry created and linked to this conversation.');
     }
 
     private static Facebook_Inquiry__c findActiveInquiry(ConversationContext context) {

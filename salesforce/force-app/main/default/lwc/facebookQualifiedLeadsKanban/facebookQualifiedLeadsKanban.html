@@ -1,0 +1,181 @@
+<template>
+    <section class="board-shell">
+        <header class="board-header">
+            <div>
+                <h1>Lead Manager</h1>
+                <p>Customer and other inquiries by sales stage</p>
+            </div>
+            <div class="header-actions">
+                <lightning-button
+                    variant="brand"
+                    label="New Customer Inquiry"
+                    icon-name="utility:add"
+                    onclick={handleNewLead}>
+                </lightning-button>
+                <lightning-button
+                    variant="brand-outline"
+                    label="New Other Inquiry"
+                    icon-name="utility:new"
+                    onclick={handleNewOtherLead}>
+                </lightning-button>
+                <lightning-button
+                    label="Stage Names"
+                    icon-name="utility:settings"
+                    onclick={openStageSettings}>
+                </lightning-button>
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    variant="border-filled"
+                    alternative-text="Refresh"
+                    title="Refresh"
+                    onclick={handleRefresh}>
+                </lightning-button-icon>
+            </div>
+        </header>
+
+        <template if:true={hasError}>
+            <div class="error">{error}</div>
+        </template>
+
+        <template if:true={isSaving}>
+            <lightning-spinner alternative-text="Updating" size="small"></lightning-spinner>
+        </template>
+
+        <div class="board">
+            <template for:each={columns} for:item="column">
+                <section
+                    key={column.stage}
+                    class="column"
+                    data-stage={column.stage}
+                    ondragover={handleDragOver}
+                    ondrop={handleDrop}>
+                    <header class="column-header">
+                        <h2 title={column.stage}>{column.label}</h2>
+                        <span>{column.count}</span>
+                    </header>
+
+                    <div class="cards">
+                        <template for:each={column.cards} for:item="lead">
+                            <article
+                                key={lead.id}
+                                class={lead.cardClass}
+                                data-id={lead.id}
+                                data-object-api-name={lead.objectApiName}
+                                draggable="true"
+                                ondragstart={handleDragStart}
+                                onclick={handleEditLead}>
+                                <div class="card-top">
+                                    <button
+                                        class="lead-name"
+                                        data-id={lead.id}
+                                        data-object-api-name={lead.objectApiName}
+                                        title="Edit lead"
+                                        onclick={handleEditLead}>
+                                        {lead.customerName}
+                                    </button>
+                                    <span>{lead.priority}</span>
+                                </div>
+                                <div class="source">{lead.sourceText}</div>
+                                <div class="meta">
+                                    <span>{lead.nextAction}</span>
+                                    <span>{lead.followUpText}</span>
+                                </div>
+                                <div class="vehicle">{lead.vehicleText}</div>
+                                <footer>
+                                    <span>{lead.agentText}</span>
+                                    <span>{lead.clientBadge}</span>
+                                    <span>{lead.appBadge}</span>
+                                    <lightning-button-icon
+                                        class="edit-button"
+                                        data-id={lead.id}
+                                        data-object-api-name={lead.objectApiName}
+                                        icon-name="utility:edit"
+                                        variant="bare"
+                                        alternative-text="Edit lead"
+                                        title="Edit lead"
+                                        onclick={handleEditLead}>
+                                    </lightning-button-icon>
+                                </footer>
+                            </article>
+                        </template>
+                    </div>
+                </section>
+            </template>
+        </div>
+
+        <template if:true={isLeadEditorOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-label="Edit lead" class="modal-backdrop">
+                <div class="modal">
+                    <header class="modal-header">
+                        <h2>Edit Lead</h2>
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="bare"
+                            alternative-text="Close"
+                            title="Close"
+                            onclick={closeLeadEditor}>
+                        </lightning-button-icon>
+                    </header>
+
+                    <lightning-record-edit-form
+                        object-api-name={selectedLeadObjectApiName}
+                        record-id={selectedLeadId}
+                        onsuccess={handleLeadSaved}
+                        onerror={handleLeadSaveError}>
+                        <div class="editor-grid">
+                            <lightning-input-field field-name="Customer_Name__c"></lightning-input-field>
+                            <lightning-input-field field-name="Contact__c"></lightning-input-field>
+                            <lightning-input-field field-name="Inquiry_Status__c"></lightning-input-field>
+                            <lightning-input-field field-name="Lead_Stage__c"></lightning-input-field>
+                            <lightning-input-field field-name="Lead_Priority__c"></lightning-input-field>
+                            <lightning-input-field field-name="Assigned_Agent__c"></lightning-input-field>
+                            <lightning-input-field field-name="Next_Action__c"></lightning-input-field>
+                            <lightning-input-field field-name="Next_Follow_Up_Date__c"></lightning-input-field>
+                            <lightning-input-field field-name="Payment_Intent__c"></lightning-input-field>
+                            <lightning-input-field field-name="Vehicle_Interest_Text__c"></lightning-input-field>
+                            <lightning-input-field field-name="Vehicle_Interested__c"></lightning-input-field>
+                            <lightning-input-field field-name="Channel__c"></lightning-input-field>
+                            <lightning-input-field field-name="Customer_Message__c"></lightning-input-field>
+                        </div>
+                        <footer class="modal-footer">
+                            <lightning-button label="Cancel" onclick={closeLeadEditor}></lightning-button>
+                            <lightning-button type="submit" variant="brand" label="Save Lead"></lightning-button>
+                        </footer>
+                    </lightning-record-edit-form>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isStageSettingsOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-label="Edit stage names" class="modal-backdrop">
+                <div class="modal stage-modal">
+                    <header class="modal-header">
+                        <h2>Edit Stage Names</h2>
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="bare"
+                            alternative-text="Close"
+                            title="Close"
+                            onclick={closeStageSettings}>
+                        </lightning-button-icon>
+                    </header>
+                    <div class="stage-editor">
+                        <template for:each={stageEditorRows} for:item="stage">
+                            <lightning-input
+                                key={stage.value}
+                                label={stage.value}
+                                value={stage.label}
+                                data-stage={stage.value}
+                                onchange={handleStageLabelChange}>
+                            </lightning-input>
+                        </template>
+                    </div>
+                    <footer class="modal-footer">
+                        <lightning-button label="Reset Names" onclick={resetStageLabels}></lightning-button>
+                        <lightning-button variant="brand" label="Save Names" onclick={saveStageLabels}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+        </template>
+    </section>
+</template>

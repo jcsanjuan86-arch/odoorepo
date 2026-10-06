@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Facebook_Inquiry__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Links a conversation to the customer inquiry record used for lead qualification and supervisor review.</description>
+    <label>Customer Inquiry</label>
+    <referenceTo>Facebook_Inquiry__c</referenceTo>
+    <relationshipLabel>Messaging Sessions</relationshipLabel>
+    <relationshipName>Messaging_Sessions</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

@@ -41,7 +41,7 @@ const FIELDS = [
 ];
 
 const RECORD_CONFIG = [
-    { label: 'Facebook Inquiry', field: FACEBOOK_INQUIRY_ID, objectApiName: 'Facebook_Inquiry__c', icon: 'standard:messaging_user' },
+    { label: 'Customer Inquiry', field: FACEBOOK_INQUIRY_ID, objectApiName: 'Facebook_Inquiry__c', icon: 'standard:messaging_user' },
     { label: 'Loan Application', field: AUTO_LOAN_APPLICATION_ID, objectApiName: 'Auto_Loan_Application__c', icon: 'standard:record' },
     { label: 'Contact', field: CONTACT_ID, objectApiName: 'Contact', icon: 'standard:contact' },
     { label: 'Case', field: CASE_ID, objectApiName: 'Case', icon: 'standard:case' }
@@ -85,7 +85,7 @@ export default class AutobotiqueMessagingCrmPanel extends NavigationMixin(Lightn
     loanApplication;
 
     get leadButtonLabel() {
-        return this.facebookInquiryId ? 'Open Autobotique Lead' : 'Create Autobotique Lead';
+        return this.facebookInquiryId ? 'Open Customer Inquiry' : 'Create Customer Inquiry';
     }
 
     get isInquiryConverted() {

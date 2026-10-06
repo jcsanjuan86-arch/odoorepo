@@ -5,7 +5,7 @@
     <description>Agent currently responsible for this lead or inquiry.</description>
     <label>Assigned Agent</label>
     <referenceTo>User</referenceTo>
-    <relationshipLabel>Assigned Facebook Inquiries</relationshipLabel>
+    <relationshipLabel>Assigned Customer Inquiries</relationshipLabel>
     <relationshipName>Assigned_Facebook_Inquiries</relationshipName>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>
