@@ -6,10 +6,14 @@ from odoo.tests.common import TransactionCase, tagged
 class TestManagementDashboard(TransactionCase):
 
     def _vehicle(self, make, state, cost):
-        return self.env["autoboutique.vehicle"].with_context(ab_automating=True).create({
-            "name": f"{make} test", "make": make, "model": "Test", "state": state,
+        vehicle = self.env["autoboutique.vehicle"].with_context(ab_automating=True).create({
+            "name": f"{make} test", "make": make, "model": "Test",
             "acquisition_cost": cost, "company_id": self.env.company.id,
         })
+        # Put the car in the stage directly: the workflow checks are tested elsewhere.
+        self.env.cr.execute("UPDATE autoboutique_vehicle SET state = %s WHERE id = %s", (state, vehicle.id))
+        vehicle.invalidate_recordset(["state"])
+        return vehicle
 
     def test_dashboard_figures(self):
         Dashboard = self.env["autoboutique.dashboard"]
