@@ -38,3 +38,5 @@ access_autoboutique_insurance_admin,autoboutique.insurance.admin,model_autobouti
 access_autoboutique_document_admin,autoboutique.document.admin,model_autoboutique_document,base.group_system,1,1,1,1
 access_autoboutique_commission_admin,autoboutique.commission.admin,model_autoboutique_commission,base.group_system,1,1,1,1
 access_autoboutique_dashboard_admin,autoboutique.dashboard.admin,model_autoboutique_dashboard,base.group_system,1,1,1,1
+access_autoboutique_vehicle_stage_log_user,autoboutique.vehicle.stage.log.user,model_autoboutique_vehicle_stage_log,base.group_user,1,0,0,0
+access_autoboutique_vehicle_stage_log_admin,autoboutique.vehicle.stage.log.admin,model_autoboutique_vehicle_stage_log,base.group_system,1,1,1,1

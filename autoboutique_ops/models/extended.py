@@ -6,6 +6,8 @@ from odoo.exceptions import ValidationError
 STOCK_STATES = ("receiving", "qc", "repair", "detailing", "ready", "reserved")
 SOLD_STATES = ("sold", "payment", "released", "documents")
 AGING_BUCKETS = {"0-30 days": 30, "31-60 days": 60, "61-90 days": 90, "Over 90 days": float("inf")}
+RECEIVABLE_BUCKETS = {"Not yet due": 0, "1-30 days late": 30, "31-60 days late": 60, "61-90 days late": 90,
+                      "Over 90 days late": float("inf")}
 
 
 class VehicleExtension(models.Model):
@@ -51,6 +53,74 @@ class VehicleExtension(models.Model):
             ))
             vehicle.registration_status = vehicle.registration_ids[:1].status if vehicle.registration_ids else False
             vehicle.insurance_status = vehicle.insurance_ids[:1].status if vehicle.insurance_ids else False
+
+    # -- Stage history (turnaround) --------------------------------------------
+
+    stage_log_ids = fields.One2many("autoboutique.vehicle.stage.log", "vehicle_id", string="Stage History")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        vehicles = super().create(vals_list)
+        vehicles._ab_log_stage()
+        return vehicles
+
+    def write(self, vals):
+        before = {vehicle.id: vehicle.state for vehicle in self} if "state" in vals else {}
+        result = super().write(vals)
+        if before:
+            self.filtered(lambda vehicle: vehicle.state != before[vehicle.id])._ab_log_stage()
+        return result
+
+    def _ab_log_stage(self):
+        if self:
+            self.env["autoboutique.vehicle.stage.log"].sudo().create(
+                [{"vehicle_id": vehicle.id, "state": vehicle.state} for vehicle in self])
+
+    def _ab_backfill_stage_log(self):
+        """Rebuild the stage history of cars that existed before it was recorded, from the
+        dates their receiving, QC, repair, detailing, sale, release and registration records hold."""
+        Log = self.env["autoboutique.vehicle.stage.log"].sudo()
+        order = list(STOCK_STATES + SOLD_STATES)
+        for vehicle in self.filtered(lambda v: not v.stage_log_ids):
+            received = vehicle.receiving_id.received_date
+            reservation = vehicle.sales_application_ids.filtered("reservation_date").mapped("reservation_date")
+            registration = vehicle.registration_ids.filtered("completed_date").mapped("completed_date")
+            guesses = {
+                "receiving": fields.Datetime.to_datetime(received) if received else vehicle.create_date,
+                "qc": min(vehicle.qc_ids.mapped("create_date"), default=None),
+                "repair": min(vehicle.repair_ids.mapped("create_date"), default=None),
+                "detailing": min(vehicle.detailing_ids.mapped("create_date"), default=None),
+                "ready": max(vehicle.detailing_ids.mapped("write_date"), default=None),
+                "reserved": min(reservation, default=None),
+                "sold": vehicle.sale_order_id.date_order,
+                "payment": fields.Datetime.to_datetime(vehicle.invoice_id.invoice_date) if vehicle.invoice_id.invoice_date else None,
+                "released": fields.Datetime.to_datetime(vehicle.release_date) if vehicle.release_date else None,
+                "documents": fields.Datetime.to_datetime(min(registration)) if registration else None,
+            }
+            values, last = [], None
+            for state in order[:order.index(vehicle.state) + 1]:
+                date_in = guesses[state]
+                if state == vehicle.state:
+                    # The current stage is always recorded, never before the stage that preceded it.
+                    date_in = max(filter(None, (date_in, last, vehicle.create_date if last is None else None)))
+                if date_in and (last is None or date_in >= last):
+                    values.append({"vehicle_id": vehicle.id, "state": state, "date_in": date_in})
+                    last = date_in
+            Log.create(values)
+
+
+class VehicleStageLog(models.Model):
+    _name = "autoboutique.vehicle.stage.log"
+    _description = "Vehicle Stage History"
+    _order = "date_in, id"
+
+    vehicle_id = fields.Many2one("autoboutique.vehicle", required=True, ondelete="cascade", index=True)
+    company_id = fields.Many2one(related="vehicle_id.company_id", store=True, index=True)
+    state = fields.Selection(selection="_selection_state", required=True)
+    date_in = fields.Datetime("Entered", required=True, default=fields.Datetime.now)
+
+    def _selection_state(self):
+        return self.env["autoboutique.vehicle"]._fields["state"]._description_selection(self.env)
 
 
 class SalesApplication(models.Model):
@@ -281,10 +351,15 @@ class Dashboard(models.Model):
             })
 
     @api.model
-    def get_dashboard_data(self):
-        """Live figures for the Management Dashboard, for the companies selected in the switcher."""
+    def get_dashboard_data(self, date_from=None, date_to=None):
+        """Live figures for the Management Dashboard, for the companies selected in the switcher.
+
+        Sales, applications and turnaround cover the period (default: this month); stock,
+        aging, documents and cash are as of today."""
         Vehicle = self.env["autoboutique.vehicle"]
         today = fields.Date.context_today(self)
+        date_from = fields.Date.to_date(date_from) or today.replace(day=1)
+        date_to = fields.Date.to_date(date_to) or today
         vehicles = Vehicle.search([("company_id", "in", self.env.companies.ids)])
         stock = vehicles.filtered(lambda v: v.state in STOCK_STATES)
         sold = vehicles.filtered(lambda v: v.state in SOLD_STATES)
@@ -297,8 +372,16 @@ class Dashboard(models.Model):
             order_date = vehicle.sale_order_id.date_order
             return vehicle.invoice_id.invoice_date or (order_date and order_date.date()) or vehicle.release_date
 
-        month_start = today.replace(day=1)
-        months = [month_start - relativedelta(months=offset) for offset in range(11, -1, -1)]
+        sold_in_period = sold.filtered(lambda v: sold_on(v) and date_from <= sold_on(v) <= date_to)
+        margins = [v.margin_percent for v in sold_in_period.filtered(lambda v: v.selling_price_untaxed)]
+
+        # Monthly trend: the months of the period, and at least the 6 months up to its end.
+        last_month = date_to.replace(day=1)
+        month = min(date_from.replace(day=1), last_month - relativedelta(months=5))
+        months = []
+        while month <= last_month:
+            months.append(month)
+            month += relativedelta(months=1)
         monthly = {month: {"count": 0, "revenue": 0.0, "profit": 0.0} for month in months}
         for vehicle in sold:
             sale_date = sold_on(vehicle)
@@ -307,7 +390,6 @@ class Dashboard(models.Model):
                 bucket["count"] += 1
                 bucket["revenue"] += vehicle.selling_price_untaxed
                 bucket["profit"] += vehicle.gross_profit
-        this_month = monthly[month_start]
 
         days_in_stock = {vehicle.id: (today - received_on(vehicle)).days for vehicle in stock}
         aging = {label: 0 for label in AGING_BUCKETS}
@@ -320,9 +402,9 @@ class Dashboard(models.Model):
             makes[vehicle.make] = makes.get(vehicle.make, 0) + 1
         top_makes = sorted(makes.items(), key=lambda item: -item[1])[:8]
 
-        year_start = today.replace(month=1, day=1)
-        applications = self.env["autoboutique.sales.application"].search([
-            ("company_id", "in", self.env.companies.ids), ("application_date", ">=", year_start)])
+        Application = self.env["autoboutique.sales.application"]
+        applications = Application.search([("company_id", "in", self.env.companies.ids),
+                                           ("application_date", ">=", date_from), ("application_date", "<=", date_to)])
         agents = {}
         for application in applications.filtered(lambda a: a.state in ("reserved", "sold")):
             agent = agents.setdefault(application.sales_agent_id.name or "Unassigned", {"count": 0, "revenue": 0.0})
@@ -332,19 +414,20 @@ class Dashboard(models.Model):
         open_states = ("draft", "approval", "approved", "reserved")
 
         oldest = sorted(stock, key=lambda v: -days_in_stock[v.id])[:8]
-        margins = [v.margin_percent for v in sold.filtered(lambda v: v.selling_price_untaxed)]
         return {
             "currency": self.env.company.currency_id.name,
+            "period": {"from": fields.Date.to_string(date_from), "to": fields.Date.to_string(date_to)},
             "kpis": {
                 "in_stock": len(stock),
                 "ready": len(stock.filtered(lambda v: v.state == "ready")),
                 "inventory_value": sum(stock.mapped("actual_vehicle_cost")),
                 "avg_days_in_stock": round(sum(days_in_stock.values()) / len(stock)) if stock else 0,
-                "sold_this_month": this_month["count"],
-                "revenue_this_month": this_month["revenue"],
-                "profit_this_month": this_month["profit"],
+                "sold": len(sold_in_period),
+                "revenue": sum(sold_in_period.mapped("selling_price_untaxed")),
+                "profit": sum(sold_in_period.mapped("gross_profit")),
                 "avg_margin": round(sum(margins) / len(margins), 1) if margins else 0.0,
-                "open_applications": len(applications.filtered(lambda a: a.state in open_states)),
+                "open_applications": Application.search_count([
+                    ("company_id", "in", self.env.companies.ids), ("state", "in", open_states)]),
             },
             "pipeline": [{"state": key, "label": state_labels[key], "count": len(vehicles.filtered(lambda v, k=key: v.state == k))}
                          for key in STOCK_STATES + SOLD_STATES],
@@ -361,4 +444,97 @@ class Dashboard(models.Model):
                               "count": len(applications.filtered(lambda a, k=key: a.state == k))} for key in open_states + ("sold",)],
             "oldest": [{"id": v.id, "name": v.name, "state": state_labels[v.state], "days": days_in_stock[v.id],
                         "cost": v.actual_vehicle_cost} for v in oldest],
+            "turnaround": self._dashboard_turnaround(vehicles, date_from, date_to, state_labels),
+            "documents": self._dashboard_documents(vehicles, today),
+            "cash": self._dashboard_cash(today),
+        }
+
+    def _dashboard_turnaround(self, vehicles, date_from, date_to, state_labels):
+        """Average days per stage: stays that ended in the period, and cars waiting there now."""
+        now = fields.Datetime.now()
+        period_start = fields.Datetime.to_datetime(date_from)
+        period_end = fields.Datetime.to_datetime(date_to) + relativedelta(days=1)
+        logs = self.env["autoboutique.vehicle.stage.log"].sudo().search(
+            [("vehicle_id", "in", vehicles.ids)], order="vehicle_id, date_in, id")
+        by_vehicle = {}
+        for log in logs:
+            by_vehicle.setdefault(log.vehicle_id.id, []).append(log)
+        completed = {state: [] for state in STOCK_STATES}
+        waiting = {state: [] for state in STOCK_STATES}
+        cycle = []
+        for history in by_vehicle.values():
+            for log, following in zip(history, history[1:] + [None]):
+                if log.state not in completed:
+                    continue
+                if following is None:
+                    waiting[log.state].append((now - log.date_in).total_seconds() / 86400)
+                elif period_start <= following.date_in < period_end:
+                    completed[log.state].append((following.date_in - log.date_in).total_seconds() / 86400)
+            entered = {log.state: log.date_in for log in history}
+            if "receiving" in entered and "ready" in entered and period_start <= entered["ready"] < period_end:
+                cycle.append((entered["ready"] - entered["receiving"]).total_seconds() / 86400)
+
+        def average(values):
+            return round(sum(values) / len(values), 1) if values else 0.0
+
+        return {
+            "stages": [{"state": state, "label": state_labels[state],
+                        "avg_days": average(completed[state]), "done": len(completed[state]),
+                        "waiting_days": average(waiting[state]), "waiting": len(waiting[state])}
+                       for state in STOCK_STATES],
+            "cycle_days": average(cycle),
+            "cycle_cars": len(cycle),
+        }
+
+    def _dashboard_documents(self, vehicles, today):
+        """Released cars whose OR/CR, plate or insurance is not done yet."""
+        rows = []
+        for vehicle in vehicles.filtered(lambda v: v.state == "released"):
+            registration = vehicle.registration_ids[:1]
+            insurance = vehicle.insurance_ids.sorted("id", reverse=True)[:1]
+            rows.append({
+                "id": vehicle.id,
+                "name": vehicle.name,
+                "customer": vehicle.customer_id.name or vehicle.sale_order_id.partner_id.name or "",
+                "days": (today - vehicle.release_date).days if vehicle.release_date else 0,
+                "orcr": registration.orcr_status == "complete",
+                "plate": registration.plate_status == "complete",
+                "insurance": insurance.status == "active",
+            })
+        return sorted(rows, key=lambda row: -row["days"])
+
+    def _dashboard_cash(self, today):
+        """Receivables by age, payables due and bank balance, for users with accounting access only."""
+        user = self.env.user
+        if not (user.has_group("account.group_account_invoice") or user.has_group("account.group_account_readonly")):
+            return False
+        company_ids = self.env.companies.ids
+        Move = self.env["account.move"]
+        open_domain = [("company_id", "in", company_ids), ("state", "=", "posted"),
+                       ("payment_state", "in", ("not_paid", "partial"))]
+        aging = dict.fromkeys(RECEIVABLE_BUCKETS, 0.0)
+        for invoice in Move.search(open_domain + [("move_type", "=", "out_invoice")]):
+            late = (today - (invoice.invoice_date_due or invoice.invoice_date or today)).days
+            label = next(label for label, limit in RECEIVABLE_BUCKETS.items() if late <= limit)
+            aging[label] += invoice.amount_residual_signed
+        payable_overdue = payable_due_30 = 0.0
+        for bill in Move.search(open_domain + [("move_type", "=", "in_invoice")]):
+            due = bill.invoice_date_due or bill.invoice_date or today
+            if due < today:
+                payable_overdue -= bill.amount_residual_signed
+            elif due <= today + relativedelta(days=30):
+                payable_due_30 -= bill.amount_residual_signed
+        accounts = self.env["account.journal"].search(
+            [("company_id", "in", company_ids), ("type", "in", ("bank", "cash"))]).default_account_id
+        [(bank_balance,)] = self.env["account.move.line"]._read_group(
+            [("account_id", "in", accounts.ids), ("parent_state", "=", "posted"), ("company_id", "in", company_ids)],
+            [], ["balance:sum"])
+        receivable = sum(aging.values())
+        return {
+            "receivable": receivable,
+            "receivable_overdue": receivable - aging["Not yet due"],
+            "aging": [{"label": label, "amount": amount} for label, amount in aging.items()],
+            "payable_overdue": payable_overdue,
+            "payable_due_30": payable_due_30,
+            "bank_balance": bank_balance or 0.0,
         }

@@ -17,10 +17,15 @@ export class ManagementDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({ data: null, loading: true });
+        this.state = useState({ data: null, loading: true, period: "month", dateFrom: "", dateTo: "" });
+        this.periods = [
+            { key: "month", label: "This month" }, { key: "quarter", label: "This quarter" },
+            { key: "year", label: "This year" }, { key: "12m", label: "Last 12 months" }, { key: "custom", label: "Custom" },
+        ];
         this.canvases = {
             pipeline: useRef("pipeline"), monthly: useRef("monthly"), aging: useRef("aging"),
             costs: useRef("costs"), makes: useRef("makes"), agents: useRef("agents"),
+            turnaround: useRef("turnaround"), receivables: useRef("receivables"),
         };
         this.charts = [];
         onWillStart(async () => {
@@ -31,15 +36,79 @@ export class ManagementDashboard extends Component {
         onWillUnmount(() => this.destroyCharts());
     }
 
+    periodDates() {
+        const today = new Date();
+        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        switch (this.state.period) {
+            case "quarter":
+                return [iso(new Date(y, m - (m % 3), 1)), iso(today)];
+            case "year":
+                return [iso(new Date(y, 0, 1)), iso(today)];
+            case "12m":
+                return [iso(new Date(y, m - 11, 1)), iso(today)];
+            case "custom":
+                return [this.state.dateFrom || iso(new Date(y, m, 1)), this.state.dateTo || iso(today)];
+            default:
+                return [iso(new Date(y, m, 1)), iso(today)];
+        }
+    }
+
+    get periodLabel() {
+        return this.periods.find((p) => p.key === this.state.period)?.label.toLowerCase() || "";
+    }
+
     async load() {
         this.state.loading = true;
-        this.state.data = await this.orm.call("autoboutique.dashboard", "get_dashboard_data", []);
+        const [dateFrom, dateTo] = this.periodDates();
+        this.state.data = await this.orm.call("autoboutique.dashboard", "get_dashboard_data", [], {
+            date_from: dateFrom, date_to: dateTo,
+        });
         this.state.loading = false;
     }
 
     async refresh() {
         await this.load();
         this.renderCharts();
+    }
+
+    async setPeriod(key) {
+        this.state.period = key;
+        if (key === "custom") {
+            const [dateFrom, dateTo] = this.periodDates();
+            this.state.dateFrom = this.state.dateFrom || dateFrom;
+            this.state.dateTo = this.state.dateTo || dateTo;
+        }
+        await this.refresh();
+    }
+
+    async setCustomDate(field, ev) {
+        this.state[field] = ev.target.value;
+        if (this.state.dateFrom && this.state.dateTo) {
+            await this.refresh();
+        }
+    }
+
+    openInvoices(moveType, name, extraDomain = []) {
+        this.action.doAction({
+            type: "ir.actions.act_window", name, res_model: "account.move",
+            views: [[false, "list"], [false, "form"]],
+            domain: [["move_type", "=", moveType], ["state", "=", "posted"],
+                ["payment_state", "in", ["not_paid", "partial"]], ...extraDomain],
+        });
+    }
+
+    openReceivables() {
+        this.openInvoices("out_invoice", "Unpaid Customer Invoices");
+    }
+
+    openPayables() {
+        this.openInvoices("in_invoice", "Unpaid Supplier Bills");
+    }
+
+    openReleasedPendingDocs() {
+        this.openVehicles([["state", "=", "released"]], "Released, Documents Pending");
     }
 
     money(value) {
@@ -198,10 +267,56 @@ export class ManagementDashboard extends Component {
                 } },
         });
 
+        const stages = data.turnaround.stages;
+        this.chart("turnaround", {
+            type: "bar",
+            data: {
+                labels: stages.map((s) => s.label),
+                datasets: [
+                    { label: `Average days (cars that moved on, ${this.periodLabel})`, data: stages.map((s) => s.avg_days),
+                        backgroundColor: PALETTE[0], borderRadius: 4 },
+                    { label: "Days so far (cars there now)", data: stages.map((s) => s.waiting_days),
+                        backgroundColor: PALETTE[2], borderRadius: 4 },
+                ],
+            },
+            options: {
+                indexAxis: "y", maintainAspectRatio: false,
+                plugins: { legend: { position: "bottom" }, tooltip: { callbacks: {
+                    label: (ctx) => {
+                        const stage = stages[ctx.dataIndex];
+                        const cars = ctx.datasetIndex === 0 ? stage.done : stage.waiting;
+                        return `${ctx.dataset.label}: ${ctx.raw} days (${cars} cars)`;
+                    },
+                } } },
+                scales: { x: { beginAtZero: true, title: { display: true, text: "days" } } },
+                onClick: (event, elements) => {
+                    if (elements.length) {
+                        const stage = stages[elements[0].index];
+                        this.openVehicles([["state", "=", stage.state]], stage.label);
+                    }
+                },
+            },
+        });
+
+        if (data.cash) {
+            this.chart("receivables", {
+                type: "bar",
+                data: {
+                    labels: data.cash.aging.map((a) => a.label),
+                    datasets: [{ data: data.cash.aging.map((a) => a.amount),
+                        backgroundColor: [PALETTE[4], PALETTE[2], "#E76F51", PALETTE[3], "#9B2226"], borderRadius: 4 }],
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+                    tooltip: { callbacks: { label: (ctx) => this.money(ctx.raw) } } },
+                    scales: { y: { beginAtZero: true, ticks: moneyTicks } },
+                    onClick: () => this.openReceivables() },
+            });
+        }
+
         this.chart("agents", {
             type: "bar",
             data: { labels: data.agents.map((a) => a.label),
-                datasets: [{ label: "Sales this year", data: data.agents.map((a) => a.revenue),
+                datasets: [{ label: "Sales", data: data.agents.map((a) => a.revenue),
                     backgroundColor: PALETTE[1], borderRadius: 4 }] },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false },
                 tooltip: { callbacks: { label: (ctx) =>

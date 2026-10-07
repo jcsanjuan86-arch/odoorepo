@@ -3,14 +3,29 @@
     <t t-name="autoboutique_ops.ManagementDashboard">
         <div class="o_ab_dashboard h-100 overflow-auto bg-view">
             <div class="container-fluid py-3">
-                <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                     <div>
                         <h2 class="mb-0">Management Dashboard</h2>
-                        <div class="text-muted small">Live figures for the companies selected in the company switcher</div>
+                        <div class="text-muted small">Sales, applications and turnaround for the period; stock, documents and cash as of today</div>
                     </div>
-                    <button class="btn btn-secondary" t-on-click="refresh" t-att-disabled="state.loading">
-                        <i class="fa fa-refresh me-1" t-att-class="{'fa-spin': state.loading}"/>Refresh
-                    </button>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="btn-group">
+                            <t t-foreach="periods" t-as="p" t-key="p.key">
+                                <button class="btn btn-sm" t-att-class="state.period === p.key ? 'btn-primary' : 'btn-secondary'"
+                                        t-on-click="() => this.setPeriod(p.key)" t-esc="p.label"/>
+                            </t>
+                        </div>
+                        <t t-if="state.period === 'custom'">
+                            <input type="date" class="form-control form-control-sm o_ab_date" t-att-value="state.dateFrom"
+                                   t-on-change="(ev) => this.setCustomDate('dateFrom', ev)"/>
+                            <span class="text-muted">to</span>
+                            <input type="date" class="form-control form-control-sm o_ab_date" t-att-value="state.dateTo"
+                                   t-on-change="(ev) => this.setCustomDate('dateTo', ev)"/>
+                        </t>
+                        <button class="btn btn-sm btn-secondary" t-on-click="refresh" t-att-disabled="state.loading" title="Refresh">
+                            <i class="fa fa-refresh" t-att-class="{'fa-spin': state.loading}"/>
+                        </button>
+                    </div>
                 </div>
 
                 <t t-set="k" t-value="state.data.kpis"/>
@@ -36,19 +51,28 @@
                     <div class="col-6 col-md-4 col-xl">
                         <div class="o_ab_kpi card h-100" t-on-click="openSold">
                             <div class="card-body">
-                                <div class="text-muted small"><i class="fa fa-handshake-o me-1"/>Sold this month</div>
-                                <div class="o_ab_kpi_value" t-esc="k.sold_this_month"/>
-                                <div class="small text-muted"><t t-esc="money(k.revenue_this_month)"/> before VAT</div>
+                                <div class="text-muted small"><i class="fa fa-handshake-o me-1"/>Sold, <t t-esc="periodLabel"/></div>
+                                <div class="o_ab_kpi_value" t-esc="k.sold"/>
+                                <div class="small text-muted"><t t-esc="money(k.revenue)"/> before VAT</div>
                             </div>
                         </div>
                     </div>
                     <div class="col-6 col-md-4 col-xl">
                         <div class="o_ab_kpi card h-100" t-on-click="openSold">
                             <div class="card-body">
-                                <div class="text-muted small"><i class="fa fa-line-chart me-1"/>Gross profit this month</div>
-                                <div class="o_ab_kpi_value" t-att-class="k.profit_this_month &lt; 0 ? 'text-danger' : 'text-success'"
-                                     t-esc="money(k.profit_this_month)"/>
+                                <div class="text-muted small"><i class="fa fa-line-chart me-1"/>Gross profit, <t t-esc="periodLabel"/></div>
+                                <div class="o_ab_kpi_value" t-att-class="k.profit &lt; 0 ? 'text-danger' : 'text-success'"
+                                     t-esc="money(k.profit)"/>
                                 <div class="small text-muted">avg margin <t t-esc="k.avg_margin"/>%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openStock">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-clock-o me-1"/>Days to make a car ready</div>
+                                <div class="o_ab_kpi_value" t-esc="state.data.turnaround.cycle_days"/>
+                                <div class="small text-muted">receiving to ready, <t t-esc="state.data.turnaround.cycle_cars"/> cars</div>
                             </div>
                         </div>
                     </div>
@@ -60,6 +84,42 @@
                                 <div class="small text-muted">draft to reserved</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <t t-set="cash" t-value="state.data.cash"/>
+                <div t-if="cash" class="row g-3 mb-3">
+                    <div class="col-6 col-xl-3">
+                        <div class="o_ab_kpi o_ab_kpi_cash card h-100" t-on-click="openReceivables">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-arrow-down me-1"/>Customers owe us</div>
+                                <div class="o_ab_kpi_value" t-esc="money(cash.receivable)"/>
+                                <div class="small" t-att-class="cash.receivable_overdue &gt; 0 ? 'text-danger' : 'text-muted'">
+                                    <t t-esc="money(cash.receivable_overdue)"/> overdue
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="o_ab_kpi o_ab_kpi_cash card h-100" t-on-click="openPayables">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-arrow-up me-1"/>Supplier bills overdue</div>
+                                <div class="o_ab_kpi_value" t-att-class="cash.payable_overdue &gt; 0 ? 'text-danger' : ''" t-esc="money(cash.payable_overdue)"/>
+                                <div class="small text-muted"><t t-esc="money(cash.payable_due_30)"/> due in the next 30 days</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6">
+                        <div class="card h-100"><div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">Unpaid customer invoices by age</h5>
+                                <div class="text-end">
+                                    <div class="text-muted small"><i class="fa fa-bank me-1"/>Cash &amp; bank</div>
+                                    <div class="fw-bold fs-5" t-esc="money(cash.bank_balance)"/>
+                                </div>
+                            </div>
+                            <div class="o_ab_chart o_ab_chart_short flex-grow-1"><canvas t-ref="receivables"/></div>
+                        </div></div>
                     </div>
                 </div>
 
@@ -78,8 +138,36 @@
                     </div>
                     <div class="col-12">
                         <div class="card"><div class="card-body">
-                            <h5 class="card-title">Sales and gross profit, last 12 months</h5>
+                            <h5 class="card-title">Turnaround: days per stage
+                                <span class="text-muted small fw-normal">where cars get stuck; click a bar to open the cars</span></h5>
+                            <div class="o_ab_chart"><canvas t-ref="turnaround"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card"><div class="card-body">
+                            <h5 class="card-title">Sales and gross profit by month</h5>
                             <div class="o_ab_chart o_ab_chart_tall"><canvas t-ref="monthly"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card"><div class="card-body">
+                            <h5 class="card-title">Documents follow-up
+                                <span class="text-muted small fw-normal">released cars still waiting for OR/CR, plate or insurance</span></h5>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead><tr><th>Car</th><th>Customer</th><th class="text-end">Days since release</th>
+                                    <th class="text-center">OR/CR</th><th class="text-center">Plate</th><th class="text-center">Insurance</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="state.data.documents" t-as="doc" t-key="doc.id" class="o_ab_row" t-on-click="() => this.openVehicle(doc.id)">
+                                        <td t-esc="doc.name"/>
+                                        <td t-esc="doc.customer"/>
+                                        <td class="text-end" t-att-class="doc.days &gt; 30 ? 'text-danger fw-bold' : (doc.days &gt; 14 ? 'text-warning fw-bold' : '')" t-esc="doc.days"/>
+                                        <td class="text-center"><i t-att-class="doc.orcr ? 'fa fa-check text-success' : 'fa fa-clock-o text-warning'"/></td>
+                                        <td class="text-center"><i t-att-class="doc.plate ? 'fa fa-check text-success' : 'fa fa-clock-o text-warning'"/></td>
+                                        <td class="text-center"><i t-att-class="doc.insurance ? 'fa fa-check text-success' : 'fa fa-clock-o text-warning'"/></td>
+                                    </tr>
+                                    <tr t-if="!state.data.documents.length"><td colspan="6" class="text-muted">All released cars have their documents.</td></tr>
+                                </tbody>
+                            </table>
                         </div></div>
                     </div>
                     <div class="col-12 col-lg-4">
@@ -96,13 +184,13 @@
                     </div>
                     <div class="col-12 col-lg-4">
                         <div class="card h-100"><div class="card-body">
-                            <h5 class="card-title">Sales by agent, this year</h5>
+                            <h5 class="card-title">Sales by agent, <t t-esc="periodLabel"/></h5>
                             <div class="o_ab_chart"><canvas t-ref="agents"/></div>
                         </div></div>
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="card h-100"><div class="card-body">
-                            <h5 class="card-title">Sales applications</h5>
+                            <h5 class="card-title">Sales applications, <t t-esc="periodLabel"/></h5>
                             <div class="o_ab_funnel">
                                 <t t-set="maxApp" t-value="Math.max(1, ...state.data.applications.map((a) => a.count))"/>
                                 <div t-foreach="state.data.applications" t-as="app" t-key="app.state" class="d-flex align-items-center mb-2">
