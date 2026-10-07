@@ -38,6 +38,6 @@
         <field name="name">Management Dashboard</field>
         <field name="tag">autoboutique_management_dashboard</field>
     </record>
-    <menuitem id="menu_dashboard" name="Management Dashboard" parent="menu_root" action="action_management_dashboard" sequence="140"
+    <menuitem id="menu_dashboard" name="Management Dashboard" parent="menu_root" action="action_management_dashboard" sequence="1"
               groups="group_role_operations,group_role_finance_supervisor,group_role_sales_head,base.group_system"/>
 </odoo>
