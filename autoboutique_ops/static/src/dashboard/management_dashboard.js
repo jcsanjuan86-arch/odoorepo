@@ -113,7 +113,7 @@ export class ManagementDashboard extends Component {
         const style = getComputedStyle(document.body);
         Chart.defaults.color = style.color;
         Chart.defaults.borderColor = "rgba(128,128,128,0.18)";
-        const moneyTicks = { callback: (value) => this.shortMoney(value) };
+        const moneyTicks = { precision: 0, callback: (value) => this.shortMoney(value) };
         const noLegend = { legend: { display: false } };
 
         this.chart("pipeline", {
