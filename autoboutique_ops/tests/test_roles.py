@@ -28,10 +28,10 @@ class TestRoles(TransactionCase):
                 visible = self.env["ir.ui.menu"].with_user(user)._visible_menu_ids()
                 self.assertIn(vehicle_menu.id, visible, "Vehicle Master is in the user's menu")
                 Vehicle.check_access("write")
-                if xmlid == "group_role_operations":
+                if xmlid in ("group_role_operations", "group_role_purchaser"):
                     Vehicle.check_access("create")
                 else:
-                    with self.assertRaises(AccessError, msg="Only Operations creates vehicles by hand"):
+                    with self.assertRaises(AccessError, msg="Only Operations and the Purchaser create vehicles by hand"):
                         Vehicle.check_access("create")
                 with self.assertRaises(AccessError, msg="Vehicles are never deleted by staff"):
                     Vehicle.check_access("unlink")

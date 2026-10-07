@@ -4,6 +4,7 @@ access_autoboutique_bid_line_user,autoboutique.bid.line.user,model_autoboutique_
 access_autoboutique_receiving_user,autoboutique.receiving.user,model_autoboutique_receiving,base.group_user,1,1,1,0
 access_autoboutique_vehicle_user,autoboutique.vehicle.user,model_autoboutique_vehicle,base.group_user,1,1,0,0
 access_autoboutique_vehicle_operations,autoboutique.vehicle.operations,model_autoboutique_vehicle,group_role_operations,1,1,1,0
+access_autoboutique_vehicle_purchaser,autoboutique.vehicle.purchaser,model_autoboutique_vehicle,group_role_purchaser,1,1,1,0
 access_autoboutique_qc_user,autoboutique.qc.user,model_autoboutique_qc,base.group_user,1,1,1,0
 access_autoboutique_repair_user,autoboutique.repair.user,model_autoboutique_repair,base.group_user,1,1,1,0
 access_autoboutique_repair_line_user,autoboutique.repair.line.user,model_autoboutique_repair_line,base.group_user,1,1,1,0
