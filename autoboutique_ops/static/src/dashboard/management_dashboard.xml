@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="autoboutique_ops.ManagementDashboard">
+        <div class="o_ab_dashboard h-100 overflow-auto bg-view">
+            <div class="container-fluid py-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h2 class="mb-0">Management Dashboard</h2>
+                        <div class="text-muted small">Live figures for the companies selected in the company switcher</div>
+                    </div>
+                    <button class="btn btn-secondary" t-on-click="refresh" t-att-disabled="state.loading">
+                        <i class="fa fa-refresh me-1" t-att-class="{'fa-spin': state.loading}"/>Refresh
+                    </button>
+                </div>
+
+                <t t-set="k" t-value="state.data.kpis"/>
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openStock">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-car me-1"/>Cars in stock</div>
+                                <div class="o_ab_kpi_value" t-esc="k.in_stock"/>
+                                <div class="small text-muted"><t t-esc="k.ready"/> ready for sale</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openStock">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-cubes me-1"/>Inventory value (cost)</div>
+                                <div class="o_ab_kpi_value" t-esc="money(k.inventory_value)"/>
+                                <div class="small text-muted">avg <t t-esc="k.avg_days_in_stock"/> days in stock</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openSold">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-handshake-o me-1"/>Sold this month</div>
+                                <div class="o_ab_kpi_value" t-esc="k.sold_this_month"/>
+                                <div class="small text-muted"><t t-esc="money(k.revenue_this_month)"/> before VAT</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openSold">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-line-chart me-1"/>Gross profit this month</div>
+                                <div class="o_ab_kpi_value" t-att-class="k.profit_this_month &lt; 0 ? 'text-danger' : 'text-success'"
+                                     t-esc="money(k.profit_this_month)"/>
+                                <div class="small text-muted">avg margin <t t-esc="k.avg_margin"/>%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="o_ab_kpi card h-100" t-on-click="openApplications">
+                            <div class="card-body">
+                                <div class="text-muted small"><i class="fa fa-file-text-o me-1"/>Open sales applications</div>
+                                <div class="o_ab_kpi_value" t-esc="k.open_applications"/>
+                                <div class="small text-muted">draft to reserved</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-xl-7">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Vehicle pipeline <span class="text-muted small fw-normal">click a bar to open the cars</span></h5>
+                            <div class="o_ab_chart"><canvas t-ref="pipeline"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-xl-5">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Where the money in stock sits</h5>
+                            <div class="o_ab_chart"><canvas t-ref="costs"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card"><div class="card-body">
+                            <h5 class="card-title">Sales and gross profit, last 12 months</h5>
+                            <div class="o_ab_chart o_ab_chart_tall"><canvas t-ref="monthly"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Stock aging</h5>
+                            <div class="o_ab_chart"><canvas t-ref="aging"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Stock by make</h5>
+                            <div class="o_ab_chart"><canvas t-ref="makes"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Sales by agent, this year</h5>
+                            <div class="o_ab_chart"><canvas t-ref="agents"/></div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Sales applications</h5>
+                            <div class="o_ab_funnel">
+                                <t t-set="maxApp" t-value="Math.max(1, ...state.data.applications.map((a) => a.count))"/>
+                                <div t-foreach="state.data.applications" t-as="app" t-key="app.state" class="d-flex align-items-center mb-2">
+                                    <div class="o_ab_funnel_label small" t-esc="app.label"/>
+                                    <div class="flex-grow-1">
+                                        <div class="o_ab_funnel_bar" t-attf-style="width: {{ Math.max(4, 100 * app.count / maxApp) }}%"/>
+                                    </div>
+                                    <div class="o_ab_funnel_count fw-bold" t-esc="app.count"/>
+                                </div>
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100"><div class="card-body">
+                            <h5 class="card-title">Longest in stock</h5>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead><tr><th>Car</th><th>Stage</th><th class="text-end">Days</th><th class="text-end">Cost</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="state.data.oldest" t-as="car" t-key="car.id" class="o_ab_row" t-on-click="() => this.openVehicle(car.id)">
+                                        <td t-esc="car.name"/>
+                                        <td t-esc="car.state"/>
+                                        <td class="text-end" t-att-class="car.days &gt; 90 ? 'text-danger fw-bold' : (car.days &gt; 60 ? 'text-warning fw-bold' : '')" t-esc="car.days"/>
+                                        <td class="text-end" t-esc="money(car.cost)"/>
+                                    </tr>
+                                    <tr t-if="!state.data.oldest.length"><td colspan="4" class="text-muted">No cars in stock.</td></tr>
+                                </tbody>
+                            </table>
+                        </div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

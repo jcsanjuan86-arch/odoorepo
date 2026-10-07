@@ -1,0 +1,46 @@
+.o_ab_dashboard {
+    .o_ab_kpi {
+        cursor: pointer;
+        border-left: 4px solid #714B67;
+        transition: transform 0.1s ease-in-out;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+
+    .o_ab_kpi_value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0.25rem 0;
+    }
+
+    .o_ab_chart {
+        position: relative;
+        height: 260px;
+    }
+
+    .o_ab_chart_tall {
+        height: 320px;
+    }
+
+    .o_ab_funnel_label {
+        width: 110px;
+    }
+
+    .o_ab_funnel_bar {
+        height: 22px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #714B67, #017E84);
+    }
+
+    .o_ab_funnel_count {
+        width: 40px;
+        text-align: right;
+    }
+
+    .o_ab_row {
+        cursor: pointer;
+    }
+}

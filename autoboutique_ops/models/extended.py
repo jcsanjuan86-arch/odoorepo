@@ -1,5 +1,11 @@
+from dateutil.relativedelta import relativedelta
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+STOCK_STATES = ("receiving", "qc", "repair", "detailing", "ready", "reserved")
+SOLD_STATES = ("sold", "payment", "released", "documents")
+AGING_BUCKETS = {"0-30 days": 30, "31-60 days": 60, "61-90 days": 90, "Over 90 days": float("inf")}
 
 
 class VehicleExtension(models.Model):
@@ -273,3 +279,86 @@ class Dashboard(models.Model):
                 "sales_revenue": sum(vehicles.mapped("selling_price")),
                 "gross_profit": sum(vehicles.mapped("gross_profit")),
             })
+
+    @api.model
+    def get_dashboard_data(self):
+        """Live figures for the Management Dashboard, for the companies selected in the switcher."""
+        Vehicle = self.env["autoboutique.vehicle"]
+        today = fields.Date.context_today(self)
+        vehicles = Vehicle.search([("company_id", "in", self.env.companies.ids)])
+        stock = vehicles.filtered(lambda v: v.state in STOCK_STATES)
+        sold = vehicles.filtered(lambda v: v.state in SOLD_STATES)
+        state_labels = dict(Vehicle._fields["state"]._description_selection(self.env))
+
+        def received_on(vehicle):
+            return vehicle.receiving_id.received_date or vehicle.create_date.date()
+
+        def sold_on(vehicle):
+            order_date = vehicle.sale_order_id.date_order
+            return vehicle.invoice_id.invoice_date or (order_date and order_date.date()) or vehicle.release_date
+
+        month_start = today.replace(day=1)
+        months = [month_start - relativedelta(months=offset) for offset in range(11, -1, -1)]
+        monthly = {month: {"count": 0, "revenue": 0.0, "profit": 0.0} for month in months}
+        for vehicle in sold:
+            sale_date = sold_on(vehicle)
+            bucket = monthly.get(sale_date.replace(day=1)) if sale_date else None
+            if bucket is not None:
+                bucket["count"] += 1
+                bucket["revenue"] += vehicle.selling_price_untaxed
+                bucket["profit"] += vehicle.gross_profit
+        this_month = monthly[month_start]
+
+        days_in_stock = {vehicle.id: (today - received_on(vehicle)).days for vehicle in stock}
+        aging = {label: 0 for label in AGING_BUCKETS}
+        for days in days_in_stock.values():
+            label = next(label for label, limit in AGING_BUCKETS.items() if days <= limit)
+            aging[label] += 1
+
+        makes = {}
+        for vehicle in stock:
+            makes[vehicle.make] = makes.get(vehicle.make, 0) + 1
+        top_makes = sorted(makes.items(), key=lambda item: -item[1])[:8]
+
+        year_start = today.replace(month=1, day=1)
+        applications = self.env["autoboutique.sales.application"].search([
+            ("company_id", "in", self.env.companies.ids), ("application_date", ">=", year_start)])
+        agents = {}
+        for application in applications.filtered(lambda a: a.state in ("reserved", "sold")):
+            agent = agents.setdefault(application.sales_agent_id.name or "Unassigned", {"count": 0, "revenue": 0.0})
+            agent["count"] += 1
+            agent["revenue"] += application.selling_price
+        application_labels = dict(applications._fields["state"]._description_selection(self.env))
+        open_states = ("draft", "approval", "approved", "reserved")
+
+        oldest = sorted(stock, key=lambda v: -days_in_stock[v.id])[:8]
+        margins = [v.margin_percent for v in sold.filtered(lambda v: v.selling_price_untaxed)]
+        return {
+            "currency": self.env.company.currency_id.name,
+            "kpis": {
+                "in_stock": len(stock),
+                "ready": len(stock.filtered(lambda v: v.state == "ready")),
+                "inventory_value": sum(stock.mapped("actual_vehicle_cost")),
+                "avg_days_in_stock": round(sum(days_in_stock.values()) / len(stock)) if stock else 0,
+                "sold_this_month": this_month["count"],
+                "revenue_this_month": this_month["revenue"],
+                "profit_this_month": this_month["profit"],
+                "avg_margin": round(sum(margins) / len(margins), 1) if margins else 0.0,
+                "open_applications": len(applications.filtered(lambda a: a.state in open_states)),
+            },
+            "pipeline": [{"state": key, "label": state_labels[key], "count": len(vehicles.filtered(lambda v, k=key: v.state == k))}
+                         for key in STOCK_STATES + SOLD_STATES],
+            "monthly": [{"label": month.strftime("%b %Y"), **values} for month, values in monthly.items()],
+            "aging": [{"label": label, "count": count} for label, count in aging.items()],
+            "costs": {
+                "Acquisition": sum(stock.mapped("acquisition_cost")),
+                "Repairs & parts": sum(stock.mapped("repair_actual_cost")),
+                "Detailing": sum(stock.mapped("detailing_actual_cost")),
+            },
+            "makes": [{"label": make or "Unknown", "count": count} for make, count in top_makes],
+            "agents": [{"label": name, **values} for name, values in sorted(agents.items(), key=lambda item: -item[1]["revenue"])],
+            "applications": [{"state": key, "label": application_labels[key],
+                              "count": len(applications.filtered(lambda a, k=key: a.state == k))} for key in open_states + ("sold",)],
+            "oldest": [{"id": v.id, "name": v.name, "state": state_labels[v.state], "days": days_in_stock[v.id],
+                        "cost": v.actual_vehicle_cost} for v in oldest],
+        }
