@@ -1,3 +1,4 @@
+from odoo.exceptions import AccessError
 from odoo.tests.common import TransactionCase, tagged
 
 ROLES = [
@@ -26,3 +27,11 @@ class TestRoles(TransactionCase):
                 Vehicle.search([])
                 visible = self.env["ir.ui.menu"].with_user(user)._visible_menu_ids()
                 self.assertIn(vehicle_menu.id, visible, "Vehicle Master is in the user's menu")
+                Vehicle.check_access("write")
+                if xmlid == "group_role_operations":
+                    Vehicle.check_access("create")
+                else:
+                    with self.assertRaises(AccessError, msg="Only Operations creates vehicles by hand"):
+                        Vehicle.check_access("create")
+                with self.assertRaises(AccessError, msg="Vehicles are never deleted by staff"):
+                    Vehicle.check_access("unlink")

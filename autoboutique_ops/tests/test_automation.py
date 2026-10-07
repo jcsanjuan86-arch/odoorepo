@@ -135,6 +135,28 @@ class TestVehicleAutomation(TransactionCase):
         self.assertAlmostEqual(vehicle.selling_price_untaxed, 1000000, places=2)
         self.assertAlmostEqual(vehicle.gross_profit, 1000000 - vehicle.actual_vehicle_cost, places=2)
 
+    def test_receiving_creates_vehicle_for_staff_without_create_right(self):
+        """QA/QC may not create vehicles by hand, but receiving a car still makes its Vehicle Master."""
+        inspector = self.env["res.users"].create({
+            "name": "Role QA/QC", "login": "ab.role.qaqc@example.com",
+            "company_id": self.company.id, "company_ids": [(6, 0, [self.company.id])],
+            "group_ids": [(6, 0, [self.env.ref("autoboutique_ops.group_role_qaqc").id])],
+        })
+        bid = self._approved_bid()
+        bid.purchase_order_id.button_confirm()
+        receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "in", bid.line_ids.ids)])
+        picking = receiving.receipt_id.with_user(inspector)
+        move = picking.move_ids
+        if not move.move_line_ids:
+            move.quantity = 1
+        if not move.move_line_ids.lot_id and not move.move_line_ids.lot_name:
+            move.move_line_ids.lot_name = VIN
+        move.move_line_ids.quantity = 1
+        move.picked = True
+        picking.button_validate()
+        self.assertTrue(receiving.vehicle_id, "The Vehicle Master is created when the inspector validates the receipt")
+        self.assertEqual(receiving.vehicle_id.vin, VIN)
+
     def test_repair_parts_create_material_request(self):
         receiving = self._receive(self._approved_bid())
         vehicle = receiving.vehicle_id

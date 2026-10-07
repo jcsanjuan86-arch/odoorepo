@@ -136,7 +136,9 @@ class Receiving(models.Model):
             bid_line = receiving.bid_line_id
             if not bid_line.vin:
                 raise ValidationError("Enter the VIN / chassis number on the bid-line first.")
-            vehicle = self.env["autoboutique.vehicle"].create({
+            # Created by the system: receiving a car makes its Vehicle Master even for
+            # users who may not create vehicles by hand.
+            vehicle = self.env["autoboutique.vehicle"].sudo().create({
                 "name": " ".join(filter(None, [bid_line.make, bid_line.model, bid_line.vin])),
                 "vin": bid_line.vin,
                 "make": bid_line.make,

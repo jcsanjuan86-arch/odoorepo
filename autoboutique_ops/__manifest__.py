@@ -1,15 +1,15 @@
 {
     "name": "Autoboutique Vehicle Operations",
-    "version": "19.0.1.7.0",
+    "version": "19.0.1.7.1",
     "summary": "Vehicle acquisition, inspection, repair, materials, and detailing",
     "author": "Prime Auto Boutique",
     "category": "Inventory",
     "license": "LGPL-3",
     "depends": ["base", "mail", "product", "purchase", "stock", "sale_management", "account"],
     "data": [
+        "security/roles.xml",
         "security/ir.model.access.csv",
         "security/company_rules.xml",
-        "security/roles.xml",
         "data/ir_cron.xml",
         "data/qc_checklist_data.xml",
         "views/operations_views.xml",
