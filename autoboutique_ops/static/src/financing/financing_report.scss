@@ -1,0 +1,29 @@
+.o_ab_financing {
+    .o_ab_fin_input {
+        width: 170px;
+    }
+
+    .o_ab_fin_table {
+        width: auto;
+        white-space: nowrap;
+
+        th {
+            background-color: #f1eef0;
+        }
+
+        .o_ab_fin_title {
+            background-color: #714B67;
+            color: #fff;
+            text-transform: uppercase;
+        }
+    }
+
+    .o_ab_fin_total td {
+        font-weight: 700;
+    }
+
+    .o_ab_fin_section td {
+        font-weight: 700;
+        background-color: #e6f2f3;
+    }
+}

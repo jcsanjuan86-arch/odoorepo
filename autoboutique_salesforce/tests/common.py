@@ -74,6 +74,9 @@ class FakeSalesforce:
         if "FROM Vehicle_Inventory__c WHERE VIN__c" in soql:
             vin = soql.split("VIN__c = '")[1].split("'")[0]
             return [dict(row, Id=rid) for rid, row in self.vehicles.items() if row.get("VIN__c") == vin]
+        if "FROM Vehicle_Inventory__c WHERE Plate_Number__c" in soql:
+            plate = soql.split("Plate_Number__c = '")[1].split("'")[0]
+            return [dict(row, Id=rid) for rid, row in self.vehicles.items() if row.get("Plate_Number__c") == plate]
         if "FROM Vehicle_Inventory__c WHERE Odoo_Vehicle_ID__c" in soql:
             ext = soql.split("Odoo_Vehicle_ID__c = '")[1].split("'")[0]
             return [{"Id": rid} for rid, row in self.vehicles.items() if row.get("Odoo_Vehicle_ID__c") == ext]

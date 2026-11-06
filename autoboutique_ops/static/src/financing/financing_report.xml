@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="autoboutique_ops.FinancingReport">
+        <div class="o_ab_financing o_action p-3 h-100 overflow-auto">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <h3 class="mb-0 me-auto" t-esc="state.data?.title"/>
+                <input t-if="picker === 'day'" type="date" class="form-control o_ab_fin_input" t-att-value="state.day"
+                       t-on-change="(ev) => this.onChange('day', ev)"/>
+                <input t-if="picker === 'month'" type="month" class="form-control o_ab_fin_input" t-att-value="state.month"
+                       t-on-change="(ev) => this.onChange('month', ev)"/>
+                <select t-if="picker === 'quarter'" class="form-select o_ab_fin_input" t-on-change="(ev) => this.onChange('quarter', ev)">
+                    <t t-foreach="[1, 2, 3, 4]" t-as="quarter" t-key="quarter">
+                        <option t-att-value="quarter" t-att-selected="quarter === state.quarter">Quarter <t t-esc="quarter"/></option>
+                    </t>
+                </select>
+                <input t-if="picker === 'year' or picker === 'quarter'" type="number" class="form-control o_ab_fin_input"
+                       t-att-value="state.year" t-on-change="(ev) => this.onChange('year', ev)"/>
+            </div>
+            <div t-if="state.data" class="d-flex flex-wrap gap-4 align-items-start">
+                <t t-foreach="state.data.tables" t-as="table" t-key="table_index">
+                    <div t-att-class="table.wide ? 'w-100 overflow-auto' : 'overflow-auto'">
+                        <table class="table table-sm table-bordered o_ab_fin_table mb-0">
+                            <thead>
+                                <tr><th class="o_ab_fin_title" t-att-colspan="table.headers.length" t-esc="table.title"/></tr>
+                                <tr t-if="table.header_groups">
+                                    <t t-foreach="table.header_groups" t-as="group" t-key="group_index">
+                                        <th class="text-center" t-att-colspan="group.span" t-esc="group.label"/>
+                                    </t>
+                                </tr>
+                                <tr t-if="table.headers.some((header) => header)">
+                                    <t t-foreach="table.headers" t-as="header" t-key="header_index">
+                                        <th t-esc="header"/>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="table.rows" t-as="row" t-key="row_index">
+                                    <tr t-att-class="row.kind ? 'o_ab_fin_' + row.kind : ''">
+                                        <t t-foreach="row.cells" t-as="cell" t-key="cell_index">
+                                            <td t-att-class="table.formats[cell_index] === 'text' ? '' : 'text-end'"
+                                                t-esc="format(cell, table.formats[cell_index])"/>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

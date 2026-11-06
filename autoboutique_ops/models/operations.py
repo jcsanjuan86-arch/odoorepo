@@ -79,7 +79,8 @@ class BidLine(models.Model):
 
     name = fields.Char("Description", required=True)
     bid_id = fields.Many2one("autoboutique.bid", required=True, ondelete="cascade")
-    vin = fields.Char("VIN / Chassis")
+    plate_number = fields.Char("Plate Number", help="Plate, or the conduction sticker until the plate arrives.")
+    vin = fields.Char("Chassis No.")
     make = fields.Char(required=True)
     model = fields.Char(required=True)
     model_year = fields.Integer("Year")
@@ -88,6 +89,11 @@ class BidLine(models.Model):
     selected = fields.Boolean("Selected for Purchase")
     purchase_order_line_id = fields.Many2one("purchase.order.line")
     vehicle_id = fields.Many2one("autoboutique.vehicle")
+
+    def _ab_serial(self):
+        """The stock serial of the car: its plate number, or the chassis number of older lines."""
+        self.ensure_one()
+        return self.plate_number or self.vin
 
     @api.constrains("bid_id", "company_id")
     def _check_bid_company(self):
@@ -105,7 +111,7 @@ class Receiving(models.Model):
     bid_line_id = fields.Many2one("autoboutique.bid.line", required=True)
     purchase_order_id = fields.Many2one("purchase.order")
     receipt_id = fields.Many2one("stock.picking")
-    lot_id = fields.Many2one("stock.lot", string="VIN Serial / Lot")
+    lot_id = fields.Many2one("stock.lot", string="Plate / Serial")
     product_id = fields.Many2one("product.product", string="Inventory Product")
     received_date = fields.Date(default=fields.Date.context_today)
     actual_mileage = fields.Integer()
@@ -134,12 +140,13 @@ class Receiving(models.Model):
             if receiving.vehicle_id:
                 continue
             bid_line = receiving.bid_line_id
-            if not bid_line.vin:
-                raise ValidationError("Enter the VIN / chassis number on the bid-line first.")
+            if not bid_line._ab_serial():
+                raise ValidationError("Enter the plate number on the bid-line first.")
             # Created by the system: receiving a car makes its Vehicle Master even for
             # users who may not create vehicles by hand.
             vehicle = self.env["autoboutique.vehicle"].sudo().create({
-                "name": " ".join(filter(None, [bid_line.make, bid_line.model, bid_line.vin])),
+                "name": " ".join(filter(None, [bid_line.make, bid_line.model, bid_line._ab_serial()])),
+                "plate_number": bid_line.plate_number,
                 "vin": bid_line.vin,
                 "make": bid_line.make,
                 "model": bid_line.model,
@@ -164,14 +171,15 @@ class Vehicle(models.Model):
     _description = "Vehicle Master"
     _inherit = "autoboutique.company.mixin"
     _order = "id desc"
+    _rec_names_search = ["name", "plate_number", "vin"]
 
     name = fields.Char(required=True)
-    vin = fields.Char(index=True)
+    plate_number = fields.Char("Plate Number", index=True)
+    vin = fields.Char("Chassis No.", index=True)
     make = fields.Char(required=True)
     model = fields.Char(required=True)
     model_year = fields.Integer("Year")
     variant = fields.Char()
-    plate_number = fields.Char()
     mileage = fields.Integer()
     supplier_id = fields.Many2one("res.partner")
     bid_id = fields.Many2one("autoboutique.bid")
@@ -180,7 +188,7 @@ class Vehicle(models.Model):
     purchase_order_id = fields.Many2one("purchase.order")
     purchase_order_line_id = fields.Many2one("purchase.order.line")
     product_id = fields.Many2one("product.product", string="Inventory Product")
-    lot_id = fields.Many2one("stock.lot", string="VIN Serial / Lot")
+    lot_id = fields.Many2one("stock.lot", string="Plate / Serial")
     sale_order_id = fields.Many2one("sale.order", string="Sales Order")
     invoice_id = fields.Many2one("account.move", string="Customer Invoice")
     payment_received = fields.Boolean(readonly=True)
@@ -285,7 +293,17 @@ class Vehicle(models.Model):
                 ("company_id", "=", vehicle.company_id.id),
                 ("id", "!=", vehicle.id),
             ]):
-                raise ValidationError("VIN must be unique within a company.")
+                raise ValidationError("Chassis number must be unique within a company.")
+
+    @api.constrains("plate_number", "company_id")
+    def _check_unique_plate(self):
+        for vehicle in self.filtered("plate_number"):
+            if self.search_count([
+                ("plate_number", "=", vehicle.plate_number),
+                ("company_id", "=", vehicle.company_id.id),
+                ("id", "!=", vehicle.id),
+            ]):
+                raise ValidationError("Plate number %s is already on another vehicle." % vehicle.plate_number)
 
     @api.constrains("state", "documents_verified", "ready_for_sale_approved")
     def _check_ready_for_sale(self):

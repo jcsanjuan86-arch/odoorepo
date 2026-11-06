@@ -62,6 +62,13 @@ class TestDuplicatePrevention(SalesforceCase):
         self.assertEqual(self.fake.vehicles[SAMPLE_SF_VEHICLE_ID]["Stock_Number__c"], "12",
                          "The agent's stock number is kept")
 
+    def test_existing_salesforce_vehicle_with_same_plate_is_adopted(self):
+        self.fake.vehicles[SAMPLE_SF_VEHICLE_ID] = {"Plate_Number__c": "NIC 7909", "Stock_Number__c": "12"}
+        vehicle = self._make_ready(self._vehicle(plate_number="NIC 7909"))
+        self._run_jobs()
+        self.assertEqual(vehicle.salesforce_vehicle_id, SAMPLE_SF_VEHICLE_ID)
+        self.assertEqual(len(self.fake.vehicles), 1)
+
     def test_vehicle_deleted_in_salesforce_is_recreated_once(self):
         vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))
         self._run_jobs()

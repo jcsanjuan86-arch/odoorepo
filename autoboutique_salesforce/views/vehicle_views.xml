@@ -84,6 +84,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="plate_number"/>
                 <field name="vin"/>
                 <field name="salesforce_vehicle_id" groups="autoboutique_salesforce.group_salesforce_user"/>
                 <filter name="sf_published" string="Published to Salesforce"

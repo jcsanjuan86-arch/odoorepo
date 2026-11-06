@@ -253,26 +253,27 @@ class SalesforceSync(models.AbstractModel):
 
     @api.model
     def _link_existing_by_vin(self, client, vehicle, external_id, payload):
-        """Adopt the Vehicle_Inventory__c that already carries this VIN.
+        """Adopt the Vehicle_Inventory__c that already carries this chassis or plate number.
 
         Prevents a second Salesforce record for a car that agents already
         listed by hand.  Returns the adopted record ID, or False when there is
         no match and the caller should create the record.
         """
-        if not vehicle.vin:
+        field, value = ("VIN__c", vehicle.vin) if vehicle.vin else ("Plate_Number__c", vehicle.plate_number)
+        if not value:
             return False
-        rows = client.query("SELECT Id, %s FROM %s WHERE VIN__c = %s LIMIT 2" % (
-            VEHICLE_EXTERNAL_ID, VEHICLE_OBJECT, soql_quote(vehicle.vin)))
+        rows = client.query("SELECT Id, %s FROM %s WHERE %s = %s LIMIT 2" % (
+            VEHICLE_EXTERNAL_ID, VEHICLE_OBJECT, field, soql_quote(value)))
         if not rows:
             return False
         if len(rows) > 1:
             raise SalesforceError(
-                "VIN %s exists on more than one Salesforce vehicle. Merge them in Salesforce, "
-                "then sync again." % vehicle.vin, code="DUPLICATE_VIN")
+                "%s exists on more than one Salesforce vehicle. Merge them in Salesforce, "
+                "then sync again." % value, code="DUPLICATE_VIN")
         linked = rows[0].get(VEHICLE_EXTERNAL_ID)
         if linked and linked != external_id:
             raise SalesforceError(
-                "VIN %s is already linked to another Odoo vehicle (ID %s)." % (vehicle.vin, linked),
+                "%s is already linked to another Odoo vehicle (ID %s)." % (value, linked),
                 code="VIN_LINKED_ELSEWHERE")
         client.update(VEHICLE_OBJECT, rows[0]["Id"], dict(payload, **{VEHICLE_EXTERNAL_ID: external_id}))
         return rows[0]["Id"]
@@ -364,6 +365,7 @@ class SalesforceSync(models.AbstractModel):
         if settings["create_quotation"]:
             self._ensure_quotation(application)
         self._log_inbound("success", message, sf_id, job=job, application=application)
+        application._ab_ensure_financing_account()
         return application
 
     @api.model

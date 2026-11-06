@@ -56,3 +56,14 @@ The following operational models are now rebuilt in Python: Sales Application, V
 5. Only after reconciliation, repeat the approved import into production with a fresh pre-import backup.
 
 The source ZIP and its filestore stay outside the Git repository. Do not commit customer or vehicle records to Git.
+
+## Financing tracker
+
+Autoboutique > Financing replaces the financing spreadsheet. Accounts holds one line per borrower and unit, with one bank submission per bank; the reports (Daily Report, Monthly Performance, Overall Monthly, Average, Financing %, Quarterly Average) are always calculated from the accounts.
+
+- A loan application from Salesforce creates its account automatically.
+- Approved reserves the car through its sales application.
+- Approving the vehicle release marks the account Released.
+- A lost account (decline, CMAP, cancelled) cancels the application and returns a reserved car to Ready for Sale.
+
+Cars are identified by plate number, which is also the stock serial. The chassis number is optional.

@@ -13,7 +13,7 @@
         <field name="arch" type="xml">
             <form string="Vehicle Bid Lot"><header><button name="action_approve_bid" type="object" string="Approve Bid" class="btn-primary" invisible="state not in ('draft', 'submitted')"/><field name="state" widget="statusbar" statusbar_visible="draft,submitted,won,lost"/></header><sheet>
                 <group><group><field name="name"/><field name="supplier_id"/><field name="bid_date"/></group><group><field name="state"/><field name="total_bid"/><field name="company_id" groups="base.group_multi_company"/></group></group>
-                <notebook><page string="Cars in Lot"><field name="line_ids"><list editable="bottom"><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="allocated_cost"/><field name="selected"/></list></field></page><page string="Notes"><field name="notes"/></page></notebook>
+                <notebook><page string="Cars in Lot"><field name="line_ids"><list editable="bottom"><field name="name"/><field name="plate_number"/><field name="vin" optional="hide"/><field name="make"/><field name="model"/><field name="model_year"/><field name="allocated_cost"/><field name="selected"/></list></field></page><page string="Notes"><field name="notes"/></page></notebook>
             </sheet></form>
         </field>
     </record>
@@ -27,7 +27,7 @@
     </record>
     <record id="view_vehicle_list" model="ir.ui.view">
         <field name="name">autoboutique.vehicle.list</field><field name="model">autoboutique.vehicle</field>
-        <field name="arch" type="xml"><list><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="state"/><field name="product_id"/><field name="lot_id"/></list></field>
+        <field name="arch" type="xml"><list><field name="name"/><field name="plate_number"/><field name="vin" optional="hide"/><field name="make"/><field name="model"/><field name="model_year"/><field name="state"/><field name="product_id"/><field name="lot_id"/></list></field>
     </record>
     <record id="view_vehicle_form" model="ir.ui.view">
         <field name="name">autoboutique.vehicle.form</field><field name="model">autoboutique.vehicle</field>
@@ -42,7 +42,7 @@
             <button name="action_release_vehicle" type="object" string="Release Vehicle" class="btn-primary" invisible="state != 'payment'"/>
             <button name="action_complete_documents" type="object" string="Complete Documents" class="btn-primary" invisible="state != 'released'"/>
             <field name="state" widget="statusbar" statusbar_visible="receiving,qc,repair,detailing,ready,reserved,sold,payment,released,documents"/>
-        </header><sheet><group><group><field name="name"/><field name="vin"/><field name="make"/><field name="model"/><field name="model_year"/><field name="variant"/><field name="plate_number"/><field name="mileage"/></group><group><field name="supplier_id"/><field name="acquisition_cost"/><field name="actual_vehicle_cost" readonly="1"/><field name="documents_verified"/><field name="ready_for_sale_approved"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+        </header><sheet><group><group><field name="name"/><field name="plate_number"/><field name="make"/><field name="model"/><field name="model_year"/><field name="variant"/><field name="vin"/><field name="mileage"/></group><group><field name="supplier_id"/><field name="acquisition_cost"/><field name="actual_vehicle_cost" readonly="1"/><field name="documents_verified"/><field name="ready_for_sale_approved"/><field name="company_id" groups="base.group_multi_company"/></group></group>
             <notebook><page string="Acquisition"><group><field name="bid_id"/><field name="bid_line_id"/><field name="receiving_id"/><field name="purchase_order_id"/><field name="purchase_order_line_id"/><field name="product_id"/><field name="lot_id"/></group></page>
             <page string="QC"><field name="qc_ids"><list><field name="name"/><field name="inspection_date"/><field name="inspection_type"/><field name="result"/><field name="repair_id"/></list></field></page>
             <page string="Repair"><field name="repair_ids"><list><field name="name"/><field name="qc_id"/><field name="state"/></list></field></page>

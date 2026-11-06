@@ -112,17 +112,17 @@ class Bid(models.Model):
         self.purchase_order_id = order
         self.message_post(body="Draft RFQ %s created for %d car(s)." % (order.name, len(lines)))
         schedule_todo(order, "purchase", "Confirm vehicle RFQ",
-                      note="Created from bid lot %s. Confirming it prepares the receipt with each VIN." % self.name)
+                      note="Created from bid lot %s. Confirming it prepares the receipt with each plate number." % self.name)
 
 
 class BidLine(models.Model):
     _inherit = "autoboutique.bid.line"
 
     def _ab_description(self):
-        return " ".join(filter(None, [self.name, "VIN %s" % self.vin if self.vin else ""]))
+        return " ".join(filter(None, [self.name, "Plate %s" % self._ab_serial() if self._ab_serial() else ""]))
 
     def _ab_vehicle_product(self):
-        """One serial-tracked, storable product per year/make/model; each car is a VIN lot."""
+        """One serial-tracked, storable product per year/make/model; each car is a serial named after its plate."""
         name = " ".join(filter(None, [str(self.model_year or ""), self.make, self.model])).strip()
         Product = self.env["product.product"].with_company(self.company_id)
         product = Product.search([
@@ -165,12 +165,12 @@ class PurchaseOrder(models.Model):
                 "product_id": move.product_id.id,
                 "state": "expected" if receiving.state == "draft" else receiving.state,
             })
-            vin = receiving.bid_line_id.vin
+            serial = receiving.bid_line_id._ab_serial()
             move_line = move.move_line_ids[:1]
-            if vin and move.product_id.tracking == "serial" and move_line and not move_line.lot_id and not move_line.lot_name:
-                move_line.lot_name = vin
+            if serial and move.product_id.tracking == "serial" and move_line and not move_line.lot_id and not move_line.lot_name:
+                move_line.lot_name = serial
             receiving._ab_todo("warehouse", "Receive car and validate receipt",
-                               note="Receipt %s, VIN %s." % (move.picking_id.name, vin or "not set"))
+                               note="Receipt %s, plate %s." % (move.picking_id.name, serial or "not set"))
 
 
 # --- Receipt -> Vehicle Master -> initial QC ------------------------------------
@@ -184,10 +184,10 @@ class Receiving(models.Model):
         picking = self.receipt_id
         if picking.state != "done":
             return
-        vin = self.bid_line_id.vin
+        serial = self.bid_line_id._ab_serial()
         move_lines = picking.move_line_ids.filtered(
             lambda ml: ml.lot_id and (not self.product_id or ml.product_id == self.product_id))
-        lot = (move_lines.filtered(lambda ml: ml.lot_id.name == vin) or move_lines)[:1].lot_id
+        lot = (move_lines.filtered(lambda ml: ml.lot_id.name == serial) or move_lines)[:1].lot_id
         values = {"state": "received", "received_date": fields.Date.context_today(self)}
         if lot and not self.lot_id:
             values["lot_id"] = lot.id
@@ -195,9 +195,9 @@ class Receiving(models.Model):
             values["product_id"] = lot.product_id.id
         self.write(values)
         self._ab_done("Receive car and validate receipt")
-        if not vin:
-            self._ab_todo("warehouse", "Enter VIN and create Vehicle Master",
-                          note="Add the VIN on the bid line, then press Create Vehicle Master.")
+        if not serial:
+            self._ab_todo("warehouse", "Enter plate number and create Vehicle Master",
+                          note="Add the plate number on the bid line, then press Create Vehicle Master.")
             return
         self.action_create_vehicle_master()
         self.vehicle_id._ab_start_initial_qc()
@@ -481,7 +481,7 @@ class SalesApplication(models.Model):
                     "product_id": vehicle.product_id.id,
                     "product_uom_qty": 1,
                     "price_unit": self.selling_price,
-                    "name": " ".join(filter(None, [vehicle.name, "VIN %s" % vehicle.vin if vehicle.vin else ""])),
+                    "name": " ".join(filter(None, [vehicle.name, "Plate %s" % vehicle.plate_number if vehicle.plate_number else ""])),
                 })],
             })
             self.sale_order_id = order

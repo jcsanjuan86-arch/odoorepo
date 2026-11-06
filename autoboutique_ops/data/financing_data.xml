@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- The tracker's banks and partners, so every report shows its rows from day one.
+         Staff manage them under Financing > Configuration. -->
+    <record id="financing_bank_afc" model="autoboutique.financing.bank"><field name="name">AFC</field><field name="sequence">10</field></record>
+    <record id="financing_bank_tfs" model="autoboutique.financing.bank"><field name="name">TFS</field><field name="sequence">20</field></record>
+    <record id="financing_bank_netbank" model="autoboutique.financing.bank"><field name="name">NETBANK</field><field name="sequence">30</field></record>
+    <record id="financing_bank_safc" model="autoboutique.financing.bank"><field name="name">SAFC</field><field name="sequence">40</field></record>
+    <record id="financing_bank_jaccs" model="autoboutique.financing.bank"><field name="name">JACCS</field><field name="sequence">50</field></record>
+    <record id="financing_bank_oricco" model="autoboutique.financing.bank"><field name="name">ORICCO</field><field name="sequence">60</field></record>
+    <record id="financing_bank_cbfc" model="autoboutique.financing.bank"><field name="name">CBFC</field><field name="sequence">70</field></record>
+    <record id="financing_bank_gdfi" model="autoboutique.financing.bank"><field name="name">GDFI</field><field name="sequence">80</field></record>
+    <record id="financing_bank_global" model="autoboutique.financing.bank"><field name="name">GLOBAL</field><field name="sequence">90</field></record>
+    <record id="financing_bank_cash" model="autoboutique.financing.bank"><field name="name">CASH BUYER</field><field name="sequence">100</field><field name="is_cash" eval="True"/></record>
+
+    <record id="financing_partner_manny" model="autoboutique.financing.partner"><field name="name">MANNY</field><field name="sequence">10</field></record>
+    <record id="financing_partner_eric" model="autoboutique.financing.partner"><field name="name">ERIC</field><field name="sequence">20</field></record>
+    <record id="financing_partner_noel" model="autoboutique.financing.partner"><field name="name">NOEL</field><field name="sequence">30</field><field name="team">Team Bulacan</field></record>
+    <record id="financing_partner_mhel" model="autoboutique.financing.partner"><field name="name">MHEL</field><field name="sequence">40</field><field name="team">Team Bulacan</field></record>
+    <record id="financing_partner_jayson" model="autoboutique.financing.partner"><field name="name">JAYSON</field><field name="sequence">50</field><field name="team">Team Bulacan</field></record>
+    <record id="financing_partner_allan" model="autoboutique.financing.partner"><field name="name">ALLAN</field><field name="sequence">60</field><field name="team">Team Bulacan</field></record>
+    <record id="financing_partner_mirvic" model="autoboutique.financing.partner"><field name="name">MIRVIC</field><field name="sequence">70</field><field name="team">Team Bulacan</field></record>
+    <record id="financing_partner_mykel" model="autoboutique.financing.partner"><field name="name">MYKEL</field><field name="sequence">80</field><field name="team">Team Uno</field></record>
+    <record id="financing_partner_carms" model="autoboutique.financing.partner"><field name="name">CARMS</field><field name="sequence">90</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_emil" model="autoboutique.financing.partner"><field name="name">EMIL</field><field name="sequence">100</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_joseph" model="autoboutique.financing.partner"><field name="name">JOSEPH</field><field name="sequence">110</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_nia" model="autoboutique.financing.partner"><field name="name">NIA</field><field name="sequence">120</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_thel" model="autoboutique.financing.partner"><field name="name">THEL</field><field name="sequence">130</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_billy" model="autoboutique.financing.partner"><field name="name">BILLY</field><field name="sequence">140</field><field name="team">Inhouse</field><field name="source">inhouse</field></record>
+    <record id="financing_partner_referral" model="autoboutique.financing.partner"><field name="name">WALK IN / REFERRAL</field><field name="sequence">150</field><field name="source">referral</field></record>
+</odoo>

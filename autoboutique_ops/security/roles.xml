@@ -2,10 +2,16 @@
 <odoo>
     <!-- Job roles. Every role is an internal user, which gives the Autoboutique app and the
          Vehicle Master; the implied groups add the other apps the job needs. -->
+    <record id="group_financing" model="res.groups">
+        <field name="name">Autoboutique: Financing Tracker</field>
+        <field name="comment">Borrower accounts, bank submissions and financing reports. Holds private credit details.</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
     <record id="group_role_operations" model="res.groups">
         <field name="name">Autoboutique Role: Operations Manager</field>
         <field name="comment">Bid lots to release: Vehicle Master, receiving, inventory and purchase approvals.</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('stock.group_stock_manager')), (4, ref('purchase.group_purchase_user')), (4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('stock.group_stock_manager')), (4, ref('purchase.group_purchase_user')), (4, ref('sales_team.group_sale_salesman_all_leads')), (4, ref('group_financing'))]"/>
     </record>
 
     <record id="group_role_qaqc" model="res.groups">
@@ -29,13 +35,13 @@
     <record id="group_role_accounting_staff" model="res.groups">
         <field name="name">Autoboutique Role: Accounting Staff</field>
         <field name="comment">Vehicle Master, customer invoices, vendor bills and payments.</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('account.group_account_invoice')), (4, ref('purchase.group_purchase_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('account.group_account_invoice')), (4, ref('purchase.group_purchase_user')), (4, ref('group_financing'))]"/>
     </record>
 
     <record id="group_role_finance_supervisor" model="res.groups">
         <field name="name">Autoboutique Role: Finance Supervisor</field>
         <field name="comment">Vehicle Master and full accounting (journal entries, reconciliation, reports).</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('account.group_account_user')), (4, ref('purchase.group_purchase_user')), (4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('account.group_account_user')), (4, ref('purchase.group_purchase_user')), (4, ref('sales_team.group_sale_salesman_all_leads')), (4, ref('group_financing'))]"/>
     </record>
 
     <record id="group_role_accounting_head" model="res.groups">
@@ -47,6 +53,6 @@
     <record id="group_role_sales_head" model="res.groups">
         <field name="name">Autoboutique Role: Sales Head</field>
         <field name="comment">Vehicle Master, sales applications, quotations and orders of all salespeople, commissions.</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('sales_team.group_sale_manager'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('sales_team.group_sale_manager')), (4, ref('group_financing'))]"/>
     </record>
 </odoo>
