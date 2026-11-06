@@ -167,6 +167,8 @@ class TestFinancing(TransactionCase):
         self.assertEqual(self._value(self._table(daily, "Financing Release"), "Zz Bank"), 1)
         self.assertEqual(self._value(self._table(daily, "Source of Account"), "REFERRAL"), 2)
         self.assertEqual(self._value(self._table(daily, "Bonus Earned This Month"), "Zz Officer", 2), 200)
+        self.assertEqual(self._value(self._table(daily, "Bonus Earned This Month"), "TOTAL", 2), 200,
+                         "A release without an account officer earns no bonus")
 
         monthly = self.Account.get_report("monthly", anchor)
         performance = self._table(monthly, "Monthly Performance")

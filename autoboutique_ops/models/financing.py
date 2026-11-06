@@ -390,8 +390,8 @@ class FinancingAccount(models.Model):
         source_rows = [self._row([label.upper(), len(released.filtered(lambda a: a.source == key))])
                        for key, label in SOURCES]
         officers = defaultdict(int)
-        for account in released:
-            officers[account.officer_id.name or "(No AO)"] += 1
+        for account in released.filtered("officer_id"):
+            officers[account.officer_id.name] += 1
         officer_rows = [self._row([name, officers[name], officer_bonus(officers[name])]) for name in sorted(officers)]
         return {"title": "As of %s" % day.strftime("%B %d, %Y"), "tables": [
             {"title": "Application Status", "headers": ["", ""], "formats": ["text", "int"], "rows": status_rows},
@@ -406,7 +406,7 @@ class FinancingAccount(models.Model):
                           "total")]},
             {"title": "Bonus Earned This Month", "headers": ["Account Officer", "Releases", "Bonus"],
              "formats": ["text", "int", "money"], "rows": officer_rows + [self._row(
-                 ["TOTAL", len(released), sum(officer_bonus(number) for number in officers.values())], "total")]},
+                 ["TOTAL", sum(officers.values()), sum(officer_bonus(number) for number in officers.values())], "total")]},
         ]}
 
     def _partner_counts(self, accounts):
