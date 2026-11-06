@@ -25,6 +25,7 @@ class TestFinancing(TransactionCase):
         vehicle = self.env["autoboutique.vehicle"].with_context(ab_automating=True).create({
             "name": "Zz Vios", "make": "Toyota", "model": "Vios", "variant": "XLE", "model_year": 2025,
             "plate_number": plate, "selling_price": 700000, "company_id": self.env.company.id,
+            "documents_verified": True, "ready_for_sale_approved": True,
         })
         self.env.cr.execute("UPDATE autoboutique_vehicle SET state = %s WHERE id = %s", (state, vehicle.id))
         vehicle.invalidate_recordset(["state"])
