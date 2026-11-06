@@ -27,6 +27,13 @@ class TestFinancing(TransactionCase):
             "plate_number": plate, "selling_price": 700000, "company_id": self.env.company.id,
             "documents_verified": True, "ready_for_sale_approved": True,
         })
+        self.env["autoboutique.qc"].create({
+            "name": "Final QC", "vehicle_id": vehicle.id, "inspection_type": "final", "result": "pass",
+        })
+        self.env["autoboutique.detailing"].create({
+            "name": "Detailing", "vehicle_id": vehicle.id, "state": "approved",
+            "exterior_done": True, "interior_done": True, "supervisor_id": self.env.user.id,
+        })
         self.env.cr.execute("UPDATE autoboutique_vehicle SET state = %s WHERE id = %s", (state, vehicle.id))
         vehicle.invalidate_recordset(["state"])
         return vehicle
