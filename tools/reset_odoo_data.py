@@ -45,7 +45,7 @@ PROTECTED_TABLES = """
 """.split()
 
 # References from these never make a contact or product worth keeping.
-NOISE_PREFIXES = ("mail_", "discuss_", "bus_", "res_partner", "product_", "ir_", "website_visitor", "payment_token")
+NOISE_PREFIXES = ("mail_", "discuss_", "bus_", "res_partner", "product_", "ir_", "website_visitor", "website_track", "payment_token")
 
 
 def existing(tables):
@@ -79,12 +79,13 @@ def wipe_tables(tables):
 
 
 def outside_references(table, wiped):
-    """Ids of `table` still used by a kept table, ignoring references that clear themselves."""
+    """Ids of `table` used by a kept table. Self-clearing references only count for HR records."""
     env.cr.execute("""
         SELECT c.conrelid::regclass::text, a.attname
           FROM pg_constraint c
           JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = c.conkey[1]
-         WHERE c.contype = 'f' AND c.confrelid = %s::regclass AND c.confdeltype != 'n'
+         WHERE c.contype = 'f' AND c.confrelid = %s::regclass
+           AND (c.confdeltype != 'n' OR c.conrelid::regclass::text LIKE 'hr_%%')
            AND array_length(c.conkey, 1) = 1
     """, [table])
     used = set()
