@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Financing_Partner__c</fullName>
+    <description>Who brought this buyer. Odoo uses it as the Partner on the Financing Tracker account.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Who brought this buyer. It fills the Partner column of the Financing Tracker in Odoo.</inlineHelpText>
+    <label>Financing Partner</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>MANNY</fullName><default>false</default><label>MANNY</label></value>
+            <value><fullName>ERIC</fullName><default>false</default><label>ERIC</label></value>
+            <value><fullName>NOEL</fullName><default>false</default><label>NOEL</label></value>
+            <value><fullName>MHEL</fullName><default>false</default><label>MHEL</label></value>
+            <value><fullName>JAYSON</fullName><default>false</default><label>JAYSON</label></value>
+            <value><fullName>ALLAN</fullName><default>false</default><label>ALLAN</label></value>
+            <value><fullName>MIRVIC</fullName><default>false</default><label>MIRVIC</label></value>
+            <value><fullName>MYKEL</fullName><default>false</default><label>MYKEL</label></value>
+            <value><fullName>CARMS</fullName><default>false</default><label>CARMS</label></value>
+            <value><fullName>EMIL</fullName><default>false</default><label>EMIL</label></value>
+            <value><fullName>JOSEPH</fullName><default>false</default><label>JOSEPH</label></value>
+            <value><fullName>NIA</fullName><default>false</default><label>NIA</label></value>
+            <value><fullName>THEL</fullName><default>false</default><label>THEL</label></value>
+            <value><fullName>BILLY</fullName><default>false</default><label>BILLY</label></value>
+            <value><fullName>WALK IN / REFERRAL</fullName><default>false</default><label>WALK IN / REFERRAL</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

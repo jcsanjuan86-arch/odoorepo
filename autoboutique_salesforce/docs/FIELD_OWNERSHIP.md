@@ -9,14 +9,14 @@ holds a read-only copy or does not hold it at all.
 | --- | --- | --- | --- |
 | `id` | `Odoo_Vehicle_ID__c` (External ID, unique) | Odoo | Upsert key |
 | `id` (as `ODOO-<id>`) | `Stock_Number__c` | Odoo on create; Salesforce afterwards | Required and unique in Salesforce. Sent only when Odoo creates the record; stock numbers already typed by agents are kept |
-| `vin` | `VIN__c` | Odoo | Also used to adopt a Salesforce vehicle created by hand |
+| `vin` | `VIN__c` (labelled Chassis No.) | Odoo | Also used to adopt a Salesforce vehicle created by hand |
 | `model_year make model variant` | `Vehicle_Name__c` | Odoo | Truncated to 120 characters |
 | `make` | `Brand__c` | Odoo | |
 | `model` + `variant` | `Model__c` | Odoo | |
 | `model_year` | `Year__c` | Odoo | Required before publishing |
 | `condition` | `Condition__c` | Odoo | Brand New / Used (default Used) |
 | `mileage` | `Odometer__c` | Odoo | |
-| `plate_number` | `Plate_Number__c` | Odoo | |
+| `plate_number` | `Plate_Number__c` | Odoo | Adopts a hand-made Salesforce vehicle when there is no chassis number |
 | `color` | `Color__c` | Odoo | New Odoo field |
 | `selling_price` | `Selling_Price__c` and `Selling_Price_PHP__c` | Odoo | Required before publishing; both Salesforce price fields are kept equal |
 | `state` + `publish_to_salesforce` | `Inventory_Status__c` | Odoo | Ready for Sale → Available; Reserved → Reserved; Sold / Payment / Released / Documents → Sold; unpublished or not yet ready → Inactive |
@@ -48,6 +48,23 @@ overwrites it. Pressing **Sync to Salesforce** forces that push immediately.
 
 **Not imported**: TIN, SSS, mother's maiden name, income, co-borrower data,
 and other sensitive loan fields. They stay in Salesforce.
+
+## Financing tracker (Odoo `autoboutique.financing.account` ↔ Salesforce `Auto_Loan_Application__c`)
+
+Every sales application gets one account. Bank submissions, account officers,
+remarks and release paperwork stay in Odoo.
+
+| Odoo field | Salesforce field | Owner | Notes |
+| --- | --- | --- | --- |
+| `partner_id` | `Financing_Partner__c` | Salesforce until set | Fills an empty Partner; a partner finance already chose is kept. The picklist repeats the Odoo partner names, so add new partners in both |
+| `status` (label) | `Financing_Status__c` | Odoo | Read-only for agents |
+| `bank_id` (name) | `Financing_Bank__c` | Odoo | Read-only for agents |
+| `amount_approved` | `Financing_Amount_Approved__c` | Odoo | Read-only for agents |
+| `release_date` | `Financing_Release_Date__c` | Odoo | Read-only for agents |
+
+Odoo writes through the `AutobotiqueFinancingService` Apex endpoint, because the
+integration user has no edit access to loan applications. Deploy the Salesforce
+side first: Odoo reads `Financing_Partner__c` on every application pull.
 
 ## States that only Odoo can change
 

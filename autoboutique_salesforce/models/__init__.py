@@ -6,3 +6,4 @@ from . import salesforce_sync
 from . import res_partner
 from . import vehicle
 from . import sales_application
+from . import financing

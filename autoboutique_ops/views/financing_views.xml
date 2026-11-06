@@ -37,6 +37,9 @@
                            statusbar_visible="for_interview,for_approval,approved,for_release,released"/>
                 </header>
                 <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="status != 'released' or (bank_id and amount_approved)">
+                        Released without a bank or amount. Enter both so the reports count this account correctly.
+                    </div>
                     <div class="oe_title"><label for="name"/><h1><field name="name"/></h1></div>
                     <group>
                         <group>
@@ -127,6 +130,8 @@
                         domain="[('status', 'in', ('checking_docs', 'hold_lacking', 'for_interview', 'for_ci', 'for_cam', 'for_approval'))]"/>
                 <filter name="approved" string="Approved" domain="[('status', 'in', ('approved', 'for_release'))]"/>
                 <filter name="released" string="Released" domain="[('status', '=', 'released')]"/>
+                <filter name="incomplete_release" string="Released, Missing Details"
+                        domain="[('status', '=', 'released'), '|', ('bank_id', '=', False), ('amount_approved', '=', 0)]"/>
                 <filter name="lost" string="Lost"
                         domain="[('status', 'in', ('decline', 'cmap_low', 'cancelled', 'cancelled_approved', 'cancelled_unresponsive'))]"/>
                 <group>
@@ -213,6 +218,25 @@
         <field name="view_mode">list</field>
     </record>
 
+    <!-- Unit quotes: the SRP table of the brand new tab. -->
+    <record id="view_financing_quote_list" model="ir.ui.view">
+        <field name="name">autoboutique.financing.quote.list</field>
+        <field name="model">autoboutique.financing.quote</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="unit"/>
+                <field name="srp"/>
+                <field name="downpayment"/>
+                <field name="monthly_amortization"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_financing_quote" model="ir.actions.act_window">
+        <field name="name">Unit Quotes</field>
+        <field name="res_model">autoboutique.financing.quote</field>
+        <field name="view_mode">list</field>
+    </record>
+
     <!-- Configuration -->
     <record id="view_financing_bank_list" model="ir.ui.view">
         <field name="name">autoboutique.financing.bank.list</field>
@@ -251,6 +275,7 @@
     <menuitem id="menu_financing_percent" name="Financing %" parent="menu_financing" action="action_financing_percent" sequence="70"/>
     <menuitem id="menu_financing_quarter" name="Quarterly Average" parent="menu_financing" action="action_financing_quarter" sequence="80"/>
     <menuitem id="menu_financing_evaluation" name="TFS Evaluation" parent="menu_financing" action="action_financing_evaluation" sequence="90"/>
+    <menuitem id="menu_financing_quote" name="Unit Quotes" parent="menu_financing" action="action_financing_quote" sequence="95"/>
     <menuitem id="menu_financing_config" name="Configuration" parent="menu_financing" sequence="100"/>
     <menuitem id="menu_financing_banks" name="Banks" parent="menu_financing_config" action="action_financing_banks" sequence="10"/>
     <menuitem id="menu_financing_partners" name="Partners" parent="menu_financing_config" action="action_financing_partners" sequence="20"/>

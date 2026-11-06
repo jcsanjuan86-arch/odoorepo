@@ -56,7 +56,7 @@ APPLICATION_FIELDS = [
     "Application_Date__c", "Borrower_First_Name__c", "Borrower_Middle_Name__c", "Borrower_Last_Name__c",
     "Borrower_Email__c", "Borrower_Mobile_Number__c", "Client__c", "Vehicle_Price__c",
     "Selected_Vehicle__c", "Selected_Vehicle__r.VIN__c", "Selected_Vehicle__r.Odoo_Vehicle_ID__c",
-    "Assigned_Agent__r.Email", "Final_Reviewer__r.Name", "Final_Reviewer__r.Email",
+    "Assigned_Agent__r.Email", "Final_Reviewer__r.Name", "Final_Reviewer__r.Email", "Financing_Partner__c",
 ]
 INQUIRY_OBJECT = "Facebook_Inquiry__c"
 PAYMENT_INTENT = {"cash": "Cash", "financing": "Financing"}
@@ -366,7 +366,17 @@ class SalesforceSync(models.AbstractModel):
             self._ensure_quotation(application)
         self._log_inbound("success", message, sf_id, job=job, application=application)
         application._ab_ensure_financing_account()
+        self._apply_financing_partner(application, data.get("Financing_Partner__c"))
         return application
+
+    @api.model
+    def _apply_financing_partner(self, application, name):
+        """The partner the agent picked fills the tracker; one finance already set is kept."""
+        if not name:
+            return
+        partner = self.env["autoboutique.financing.partner"].sudo().search([("name", "=ilike", name)], limit=1)
+        if partner:
+            application.financing_account_ids.filtered(lambda a: not a.partner_id).write({"partner_id": partner.id})
 
     @api.model
     def _reserve_approved_application(self, application, data):
@@ -457,6 +467,47 @@ class SalesforceSync(models.AbstractModel):
             application.company_id, "outbound", "application_release", "success",
             "Application marked Released in Salesforce.", sales_application_id=application.id,
             vehicle_id=vehicle.id, job_id=job.id if job else False,
+            salesforce_record_id=application.salesforce_application_id)
+        return True
+
+    # -- outbound: financing status --------------------------------------------------
+
+    @api.model
+    def _enqueue_financing(self, application):
+        settings = self._settings()
+        Job = self.env["autoboutique.salesforce.job"]
+        if (not settings["active"] or application.company_id != settings["company"]
+                or not application.salesforce_application_id):
+            return Job
+        return Job._enqueue("financing_push", application.company_id, application=application)
+
+    @api.model
+    def _prepare_financing_payload(self, application):
+        """What agents see of the tracker: credit details and bank submissions stay in Odoo."""
+        account = application.financing_account_ids[:1]
+        statuses = dict(account._fields["status"].selection)
+        return {
+            "applicationId": application.salesforce_application_id,
+            "status": statuses.get(account.status),
+            "bank": account.bank_id.name or None,
+            "amountApproved": account.amount_approved or None,
+            "releaseDate": fields.Date.to_string(account.release_date) or None,
+        }
+
+    @api.model
+    def _push_financing(self, application, job=None):
+        """Show the tracker's status on the Salesforce application."""
+        application = application.sudo()
+        if not application.exists() or not application.salesforce_application_id \
+                or not application.financing_account_ids:
+            return False
+        # Loan applications are private in Salesforce: a dedicated Apex endpoint
+        # (AutobotiqueFinancingService) writes only the Financing fields.
+        self._get_client().apex_post("autobotique/financing", self._prepare_financing_payload(application))
+        self.env["autoboutique.salesforce.log"]._record(
+            application.company_id, "outbound", "financing_push", "success",
+            "Financing details updated in Salesforce.", sales_application_id=application.id,
+            vehicle_id=application.vehicle_id.id, job_id=job.id if job else False,
             salesforce_record_id=application.salesforce_application_id)
         return True
 

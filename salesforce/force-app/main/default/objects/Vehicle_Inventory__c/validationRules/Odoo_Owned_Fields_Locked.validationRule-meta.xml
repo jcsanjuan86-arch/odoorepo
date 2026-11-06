@@ -28,5 +28,5 @@
         ISCHANGED(Listing_URL__c)
     )
 )</errorConditionFormula>
-    <errorMessage>This vehicle is managed in Odoo. Change its VIN, specs, price or status in the Odoo Vehicle Master; the update syncs here automatically.</errorMessage>
+    <errorMessage>This vehicle is managed in Odoo. Change its plate number, chassis number, specs, price or status in the Odoo Vehicle Master; the update syncs here automatically.</errorMessage>
 </ValidationRule>

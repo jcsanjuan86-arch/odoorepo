@@ -38,6 +38,56 @@ class TestProcessSync(SalesforceCase):
         self.assertEqual(sent["Vehicle_Plate_Number__c"], "NIC 7909")
         self.assertEqual(sent["Vehicle_Odometer__c"], 42000)
 
+    def _financing_posts(self):
+        return [call[2] for call in self.fake.calls if call[:2] == ("apex_post", "autobotique/financing")]
+
+    def test_loan_application_creates_the_tracker_account(self):
+        vehicle, application = self._approved()
+        account = application.financing_account_ids
+        self.assertEqual(len(account), 1)
+        self.assertEqual(account.status, "approved")
+        self.assertEqual(account.vehicle_id, vehicle)
+        self.assertEqual(account.plate_number, "NIC 7909")
+        self.assertEqual(account.customer_id, application.customer_id)
+
+    def test_partner_picked_in_salesforce_fills_the_tracker(self):
+        vehicle = self._make_ready(self._vehicle(vin=SAMPLE_VIN))
+        self._run_jobs()
+        sync = self.env["autoboutique.salesforce.sync"]
+        data = dict(loan_application(vehicle.salesforce_vehicle_id), Financing_Partner__c="CARMS")
+        account = sync._apply_loan_application(data).financing_account_ids
+        carms = self.env.ref("autoboutique_ops.financing_partner_carms")
+        self.assertEqual(account.partner_id, carms)
+        self.assertEqual(account.source, "inhouse")
+        manny = self.env.ref("autoboutique_ops.financing_partner_manny")
+        account.partner_id = manny
+        sync._apply_loan_application(dict(data, SystemModstamp="2026-09-02T02:36:56.000+0000"))
+        self.assertEqual(account.partner_id, manny, "Finance's choice is kept")
+
+    def test_tracker_changes_reach_the_salesforce_application(self):
+        _vehicle, application = self._approved()
+        self._run_jobs()
+        bank = self.env.ref("autoboutique_ops.financing_bank_tfs")
+        application.financing_account_ids.write({"bank_id": bank.id, "amount_approved": 550000})
+        self.assertEqual(len(self._jobs(job_type="financing_push", state="pending")), 1)
+        self._run_jobs()
+        self.assertEqual(self._financing_posts()[-1], {
+            "applicationId": SAMPLE_SF_APPLICATION_ID, "status": "Approved", "bank": "TFS",
+            "amountApproved": 550000, "releaseDate": None,
+        })
+
+    def test_released_account_shows_in_salesforce(self):
+        _vehicle, application = self._approved()
+        account = application.financing_account_ids
+        account.status = "released"
+        self._run_jobs()
+        self.assertEqual(self._financing_posts()[-1]["status"], "Released")
+        self.assertEqual(self._financing_posts()[-1]["releaseDate"], str(account.release_date))
+
+    def test_account_without_salesforce_application_stays_in_odoo(self):
+        self.env["autoboutique.financing.account"].create({"name": "Zz Walk In", "company_id": self.autoboutique.id})
+        self.assertFalse(self._jobs(job_type="financing_push"))
+
     def test_mobile_numbers_match_salesforce_format(self):
         sync = self.env["autoboutique.salesforce.sync"]
         self.assertEqual(sync._normalize_mobile("+63 917 123 4567"), "09171234567")

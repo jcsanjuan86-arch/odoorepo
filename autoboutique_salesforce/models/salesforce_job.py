@@ -31,7 +31,8 @@ class SalesforceJob(models.Model):
     company_id = fields.Many2one("res.company", required=True, index=True, readonly=True)
     job_type = fields.Selection(
         [("vehicle_push", "Push Vehicle"), ("application_pull", "Pull Loan Application"),
-         ("application_release", "Mark Application Released"), ("inquiry_push", "Push Website Inquiry")],
+         ("application_release", "Mark Application Released"), ("inquiry_push", "Push Website Inquiry"),
+         ("financing_push", "Push Financing Status")],
         required=True, readonly=True)
     vehicle_id = fields.Many2one("autoboutique.vehicle", index=True, readonly=True, ondelete="cascade")
     sales_application_id = fields.Many2one("autoboutique.sales.application", index=True, readonly=True,
@@ -135,6 +136,8 @@ class SalesforceJob(models.Model):
                     sync._push_vehicle(self.vehicle_id, force=self.force, job=self)
                 elif self.job_type == "application_release":
                     sync._push_application_release(self.sales_application_id, job=self)
+                elif self.job_type == "financing_push":
+                    sync._push_financing(self.sales_application_id, job=self)
                 elif self.job_type == "inquiry_push":
                     sync._push_website_inquiry(self._target_record(), job=self)
                 else:

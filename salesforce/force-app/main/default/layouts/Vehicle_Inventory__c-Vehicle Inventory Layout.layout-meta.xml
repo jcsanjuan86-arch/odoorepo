@@ -90,7 +90,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>VIN__c</field>
+                <field>Plate_Number__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -104,7 +104,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Plate_Number__c</field>
+                <field>VIN__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

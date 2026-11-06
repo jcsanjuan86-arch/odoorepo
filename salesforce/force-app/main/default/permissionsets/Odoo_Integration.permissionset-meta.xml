@@ -11,6 +11,10 @@
         <apexClass>AutobotiqueReleaseService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>AutobotiqueFinancingService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <hasActivationRequired>false</hasActivationRequired>
     <objectPermissions>
         <object>Vehicle_Inventory__c</object>
@@ -88,4 +92,5 @@
     <fieldPermissions><field>Auto_Loan_Application__c.Vehicle_Price__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Selected_Vehicle__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Auto_Loan_Application__c.Assigned_Agent__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Auto_Loan_Application__c.Financing_Partner__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
 </PermissionSet>

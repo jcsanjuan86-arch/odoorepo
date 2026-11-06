@@ -55,6 +55,7 @@ UNIT_GROUPS = [
 BONUS_PER_RELEASE = 200
 BONUS_LEVELS = [(10, 10000), (8, 3500), (5, 2500)]
 MONTHLY_RELEASE_TARGET = 20
+INCOMPLETE_RELEASE = "Complete the released account"
 
 # TFS evaluation of a used car, as a share of the brand-new price.
 EVALUATION_RATES = {"2026": 0.85, "2025": 0.80, "2024": 0.753, "2023": 0.65}
@@ -141,6 +142,17 @@ class FinancingEvaluation(models.Model):
                 evaluation = row.brand_new_price * rate
                 row["evaluation_" + year] = evaluation
                 row["approval_" + year] = evaluation * POSSIBLE_APPROVAL_RATE
+
+
+class FinancingQuote(models.Model):
+    _name = "autoboutique.financing.quote"
+    _description = "Unit Quote"
+    _order = "unit"
+
+    unit = fields.Char(required=True)
+    srp = fields.Float("SRP", digits=(16, 2))
+    downpayment = fields.Float(digits=(16, 2))
+    monthly_amortization = fields.Float("Monthly Amort", digits=(16, 2))
 
 
 class FinancingSubmission(models.Model):
@@ -273,6 +285,8 @@ class FinancingAccount(models.Model):
         result = super().write(vals)
         if before:
             self.filtered(lambda account: account.status != before[account.id])._ab_on_status_change()
+        if {"bank_id", "amount_approved"} & set(vals):
+            self.filtered(lambda account: account.bank_id and account.amount_approved)._ab_done(INCOMPLETE_RELEASE)
         return result
 
     def _ab_on_status_change(self):
@@ -282,8 +296,19 @@ class FinancingAccount(models.Model):
             elif account.status == "released":
                 if not account.release_date:
                     account.release_date = fields.Date.context_today(account)
+                run_safely(account, "flag missing release details", account._ab_flag_incomplete_release)
             elif account.status in LOST:
                 run_safely(account, "free the car", account._ab_free_car)
+
+    def _ab_flag_incomplete_release(self):
+        """Released without a bank or amount would be counted wrongly in the reports."""
+        self.ensure_one()
+        missing = [label for label, value in (("the bank", self.bank_id), ("the amount approved", self.amount_approved))
+                   if not value]
+        if missing:
+            self._ab_todo("accounting", INCOMPLETE_RELEASE,
+                          note="%s was released without %s. Enter it so the reports count it correctly."
+                               % (self.name, " and ".join(missing)))
 
     def _ab_reserve_car(self):
         """Approved by the bank: the car goes to this buyer through the normal reservation."""
@@ -295,7 +320,7 @@ class FinancingAccount(models.Model):
             return
         application = self.sales_application_id.sudo()
         if not application:
-            application = self.env["autoboutique.sales.application"].sudo().create({
+            application = self.env["autoboutique.sales.application"].sudo().with_context(ab_has_financing_account=True).create({
                 "name": "Financing - %s" % self.name, "vehicle_id": vehicle.id, "customer_id": self.customer_id.id,
                 "selling_price": vehicle.selling_price, "company_id": self.company_id.id, "state": "approval",
             })
@@ -430,13 +455,15 @@ class FinancingAccount(models.Model):
             teams[partner.team].append(partner)
         rows, unit_rows = [], []
         group_labels = [label for label, _keys in UNIT_GROUPS]
-        unit_counts = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+        unit_counts = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))
         for account in accounts:
             group = unit_group(account.unit)
             if group and account.status in ON_PROCESS:
                 unit_counts[account.partner_id.id][group][0] += 1
-            elif group and account.status == "released":
+            elif group and account.status in APPROVED:
                 unit_counts[account.partner_id.id][group][1] += 1
+            elif group and account.status == "released":
+                unit_counts[account.partner_id.id][group][2] += 1
 
         def partner_row(label, values):
             total = sum(values)
@@ -448,7 +475,7 @@ class FinancingAccount(models.Model):
         for team in order:
             if team:
                 rows.append(self._row([team.upper()] + [""] * 6, "section"))
-                unit_rows.append(self._row([team.upper()] + [""] * (2 * len(group_labels)), "section"))
+                unit_rows.append(self._row([team.upper()] + [""] * (3 * len(group_labels)), "section"))
             for partner in teams[team]:
                 rows.append(self._row(partner_row(partner.name, counts[partner.id])))
                 unit_rows.append(self._row(unit_row(partner.name, partner.id)))
@@ -458,16 +485,16 @@ class FinancingAccount(models.Model):
         totals = [sum(values[i] for values in counts.values()) for i in range(4)]
         rows.append(self._row(partner_row("TOTAL", totals), "total"))
         unit_totals = [sum(unit_counts[pid][group][i] for pid in unit_counts)
-                       for group in group_labels for i in range(2)]
+                       for group in group_labels for i in range(3)]
         unit_rows.append(self._row(["TOTAL"] + unit_totals, "total"))
         return {"title": day.strftime("%B %Y").upper(), "tables": [
             {"title": "Monthly Performance",
              "headers": ["Partners", "On Process", "Cancelled / Decline", "Approved", "Released", "Total Endorsed", "%"],
              "formats": ["text", "int", "int", "int", "int", "int", "pct"], "rows": rows},
             {"title": "Per Unit", "wide": True,
-             "header_groups": [{"label": "", "span": 1}] + [{"label": label, "span": 2} for label in group_labels],
-             "headers": ["Partners"] + ["On Process", "Released"] * len(group_labels),
-             "formats": ["text"] + ["int"] * (2 * len(group_labels)), "rows": unit_rows},
+             "header_groups": [{"label": "", "span": 1}] + [{"label": label, "span": 3} for label in group_labels],
+             "headers": ["Partners"] + ["On Process", "Approved", "Released"] * len(group_labels),
+             "formats": ["text"] + ["int"] * (3 * len(group_labels)), "rows": unit_rows},
         ]}
 
     def _year_figures(self, year):
@@ -596,6 +623,13 @@ class SalesApplication(models.Model):
 
     financing_account_ids = fields.One2many("autoboutique.financing.account", "sales_application_id")
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        applications = super().create(vals_list)
+        if not self.env.context.get("ab_has_financing_account"):
+            applications._ab_ensure_financing_account()
+        return applications
+
     def write(self, vals):
         result = super().write(vals)
         if "state" in vals:
@@ -613,7 +647,7 @@ class SalesApplication(models.Model):
                 accounts.filtered(lambda a: a.status in ON_PROCESS + APPROVED).write({"status": status})
 
     def _ab_ensure_financing_account(self):
-        """Loan applications from Salesforce appear in the tracker without anyone typing them."""
+        """Every sales application appears in the tracker without anyone typing it."""
         Account = self.env["autoboutique.financing.account"].sudo()
         Partner = self.env["autoboutique.financing.partner"].sudo()
         for application in self.sudo():

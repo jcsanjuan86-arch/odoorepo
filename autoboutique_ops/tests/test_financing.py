@@ -1,10 +1,13 @@
+from unittest.mock import patch
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
-from odoo.addons.autoboutique_ops.models.financing import officer_bonus, unit_group
+from odoo.addons.autoboutique_ops.models import extended
+from odoo.addons.autoboutique_ops.models.financing import UNIT_GROUPS, officer_bonus, unit_group
 
 
 @tagged("post_install", "-at_install")
@@ -112,6 +115,61 @@ class TestFinancing(TransactionCase):
         application.state = "rejected"
         self.assertEqual(account.status, "decline")
 
+    def test_application_made_in_odoo_reaches_the_tracker(self):
+        vehicle = self._vehicle()
+        application = self.env["autoboutique.sales.application"].create({
+            "name": "Zz Direct", "vehicle_id": vehicle.id, "customer_id": self.customer.id, "selling_price": 700000,
+        })
+        self.assertEqual(len(application.financing_account_ids), 1)
+        self.assertEqual(application.financing_account_ids.status, "for_approval")
+
+    def test_reservation_from_the_tracker_keeps_one_account(self):
+        vehicle = self._vehicle()
+        account = self._account(vehicle_id=vehicle.id, customer_id=self.customer.id, status="approved")
+        self.assertEqual(account.sales_application_id.financing_account_ids, account)
+
+    def test_release_without_details_is_flagged_until_filled(self):
+        summary = "Complete the released account"
+        account = self._account(status="for_release")
+        account.status = "released"
+        self.assertIn(summary, account.activity_ids.mapped("summary"))
+        account.bank_id = self.bank
+        self.assertIn(summary, account.activity_ids.mapped("summary"), "The amount is still missing")
+        account.amount_approved = 500000
+        self.assertNotIn(summary, account.activity_ids.mapped("summary"))
+
+    def test_complete_release_is_not_flagged(self):
+        account = self._account(status="for_release", bank_id=self.bank.id, amount_approved=500000)
+        account.status = "released"
+        self.assertFalse(account.activity_ids.filtered(lambda a: a.summary == "Complete the released account"))
+
+    def test_prices_of_the_brand_new_tab_are_loaded(self):
+        self.assertEqual(self.env.ref("autoboutique_ops.financing_evaluation_1").brand_new_price, 908000)
+        self.assertEqual(self.env.ref("autoboutique_ops.financing_evaluation_26").unit, "Hiace")
+        self.assertEqual(self.env.ref("autoboutique_ops.financing_evaluation_3").unit, "Raize",
+                         "A blank unit cell repeats the row above")
+        self.assertEqual(self.env.ref("autoboutique_ops.financing_quote_8").monthly_amortization, 38826)
+
+    def test_vehicle_release_marks_the_account_released(self):
+        vehicle = self._vehicle()
+        application = self.env["autoboutique.sales.application"].create({
+            "name": "Zz Release", "vehicle_id": vehicle.id, "customer_id": self.customer.id, "selling_price": 700000,
+        })
+        account = application.financing_account_ids
+        account.write({"status": "approved", "bank_id": self.bank.id, "amount_approved": 500000})
+        release = self.env["autoboutique.vehicle.release"].create({
+            "name": "Zz Release", "vehicle_id": vehicle.id, "sales_application_id": application.id,
+            "customer_id": self.customer.id,
+            "sale_order_id": self.env["sale.order"].create({"partner_id": self.customer.id}).id,
+            "invoice_id": self.env["account.move"].create({
+                "move_type": "out_invoice", "partner_id": self.customer.id}).id,
+        })
+        # The payment and checklist gates have their own tests; this checks what follows them.
+        with patch.object(extended.VehicleRelease, "action_approve_release", return_value=True):
+            release.action_approve_release()
+        self.assertEqual(account.status, "released")
+        self.assertEqual(account.release_date, self.today)
+
     def test_release_date_is_recorded(self):
         account = self._account(status="for_release")
         account.status = "released"
@@ -174,6 +232,11 @@ class TestFinancing(TransactionCase):
         performance = self._table(monthly, "Monthly Performance")
         self.assertEqual(next(row["cells"] for row in performance["rows"] if row["cells"][0] == "Zz Partner"),
                          ["Zz Partner", 3, 1, 1, 2, 7, 2 / 7])
+
+        per_unit = self._table(monthly, "Per Unit")
+        vios = 1 + 3 * [label for label, _keys in UNIT_GROUPS].index("VIOS")
+        self.assertEqual(per_unit["headers"][vios:vios + 3], ["On Process", "Approved", "Released"])
+        self.assertEqual(per_unit["rows"][-1]["cells"][vios:vios + 3], [0, 1, 1])
 
         overall = self._table(self.Account.get_report("overall", anchor), "Overall Monthly")
         month = overall["rows"][self.today.month - 1]["cells"]
