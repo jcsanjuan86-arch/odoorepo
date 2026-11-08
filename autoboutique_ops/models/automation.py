@@ -127,19 +127,6 @@ class BidLine(models.Model):
     def _ab_description(self):
         return " ".join(filter(None, [self.name, "Plate %s" % self._ab_serial() if self._ab_serial() else ""]))
 
-    def _ab_vehicle_product(self):
-        """One serial-tracked, storable product per year/make/model; each car is a serial named after its plate."""
-        name = " ".join(filter(None, [str(self.model_year or ""), self.make, self.model])).strip()
-        Product = self.env["product.product"].with_company(self.company_id)
-        product = Product.search([
-            ("name", "=", name), ("tracking", "=", "serial"),
-            ("company_id", "in", [self.company_id.id, False]),
-        ], limit=1)
-        return product or Product.create({
-            "name": name, "type": "consu", "is_storable": True, "tracking": "serial",
-            "company_id": self.company_id.id, "purchase_ok": True, "sale_ok": True,
-            "invoice_policy": "order",
-        })
 
 
 class PurchaseOrder(models.Model):
@@ -194,6 +181,9 @@ class Receiving(models.Model):
         move_lines = picking.move_line_ids.filtered(
             lambda ml: ml.lot_id and (not self.product_id or ml.product_id == self.product_id))
         lot = (move_lines.filtered(lambda ml: ml.lot_id.name == serial) or move_lines)[:1].lot_id
+        if not serial and lot and self.bid_line_id:
+            # The serial typed on the receipt is the plate: no need to enter it twice.
+            self.bid_line_id.plate_number = serial = lot.name
         values = {"state": "received", "received_date": fields.Date.context_today(self)}
         if lot and not self.lot_id:
             values["lot_id"] = lot.id
