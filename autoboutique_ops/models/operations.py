@@ -145,8 +145,10 @@ class Receiving(models.Model):
             # Created by the system: receiving a car makes its Vehicle Master even for
             # users who may not create vehicles by hand.
             vehicle = self.env["autoboutique.vehicle"].sudo().create({
-                "name": " ".join(filter(None, [bid_line.make, bid_line.model, bid_line._ab_serial()])),
+                # The name is built from the details below (see autofill.py).
                 "plate_number": bid_line.plate_number,
+                "color": bid_line.color,
+                "transmission": bid_line.transmission,
                 "vin": bid_line.vin,
                 "make": bid_line.make,
                 "model": bid_line.model,

@@ -33,6 +33,37 @@ class TestAutofill(TransactionCase):
         self.assertEqual(receiving.plate_number, "NBC1234")
         self.assertEqual(receiving.product_id.name, "2023 Toyota Vios", "The product is ready before the car arrives")
 
+    def test_color_and_transmission_follow_the_car(self):
+        bid = self.env["autoboutique.bid"].create({
+            "name": "AUTOFILL-COLOR", "supplier_id": self.supplier.id, "company_id": self.company.id,
+            "line_ids": [(0, 0, {
+                "plate_number": "CLR1234", "make": "Mitsubishi", "model": "L300", "model_year": 2025,
+                "color": "White", "transmission": "MT",
+                "allocated_cost": 700000, "selected": True, "company_id": self.company.id,
+            })],
+        })
+        line = bid.line_ids
+        self.assertEqual(line.name, "2025 Mitsubishi L300 White MT")
+        bid.action_approve_bid()
+        receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "=", line.id)])
+        self.assertEqual(receiving.product_id.name, "2025 Mitsubishi L300 White MT")
+        self.assertIn("2025 Mitsubishi L300 White MT", line.purchase_order_line_id.name)
+        receiving.action_mark_received()
+        vehicle = receiving.vehicle_id
+        self.assertEqual(vehicle.name, "2025 Mitsubishi L300 White MT CLR1234")
+        self.assertEqual((vehicle.color, vehicle.transmission), ("White", "MT"))
+
+        with Form(self.env["autoboutique.bid"]) as form:
+            form.name = "AUTOFILL-ONCHANGE"
+            form.supplier_id = self.supplier
+            with form.line_ids.new() as new_line:
+                new_line.model_year = 2025
+                new_line.make = "Mitsubishi"
+                new_line.model = "L300"
+                new_line.color = "White"
+                new_line.transmission = "MT"
+                self.assertEqual(new_line.name, "2025 Mitsubishi L300 White MT")
+
     def test_total_bid_adds_up_the_cars(self):
         bid = self.env["autoboutique.bid"].create({
             "name": "AUTOFILL-TOTAL", "supplier_id": self.supplier.id, "company_id": self.company.id,
@@ -66,7 +97,7 @@ class TestAutofill(TransactionCase):
             "make": "Honda", "model": "City", "model_year": 2022, "plate_number": "XYZ111",
             "company_id": self.company.id,
         })
-        self.assertEqual(vehicle.name, "Honda City XYZ111")
+        self.assertEqual(vehicle.name, "2022 Honda City XYZ111")
         self.assertEqual(vehicle.product_id.name, "2022 Honda City")
         self.assertEqual(vehicle.product_id.tracking, "serial")
         again = self.env["autoboutique.vehicle"].create({

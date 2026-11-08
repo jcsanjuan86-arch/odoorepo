@@ -47,7 +47,7 @@ STOCK_NUMBER_PREFIX = "ODOO-"
 # (costs, supplier, repairs, MRFs, notes...) can never trigger or reach a push.
 VEHICLE_TRACKED_FIELDS = {
     "name", "vin", "make", "model", "model_year", "variant", "plate_number", "mileage",
-    "color", "condition", "selling_price", "state", "publish_to_salesforce", "listing_url",
+    "color", "transmission", "condition", "selling_price", "state", "publish_to_salesforce", "listing_url",
     "ready_for_sale_date",
 }
 
@@ -131,7 +131,8 @@ class SalesforceSync(models.AbstractModel):
         """
         price = vehicle.selling_price or None
         title = " ".join(str(part) for part in (
-            vehicle.model_year or "", vehicle.make, vehicle.model, vehicle.variant or "") if part)
+            vehicle.model_year or "", vehicle.make, vehicle.model, vehicle.variant or "",
+            vehicle.transmission or "") if part)
         return {
             # Stock_Number__c is required and unique in Salesforce.  It is only
             # sent when Odoo creates the record (see _push_vehicle), so stock

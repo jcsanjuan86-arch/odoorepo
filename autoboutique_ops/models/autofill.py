@@ -11,9 +11,17 @@ def _join(*parts):
     return " ".join(str(part) for part in parts if part)
 
 
-def vehicle_product(env, company, year, make, model):
-    """One serial-tracked, storable product per year/make/model; each car is a serial named after its plate."""
-    name = _join(year, make, model).strip()
+TRANSMISSIONS = [("AT", "AT"), ("MT", "MT"), ("CVT", "CVT")]
+
+
+def car_title(year, make, model, color=None, transmission=None):
+    """How a car is named everywhere, e.g. 2025 Mitsubishi L300 White MT."""
+    return _join(year, make, model, color, transmission)
+
+
+def vehicle_product(env, company, year, make, model, color=None, transmission=None):
+    """One serial-tracked, storable product per year/make/model/colour/transmission; each car is a serial named after its plate."""
+    name = car_title(year, make, model, color, transmission).strip()
     Product = env["product.product"].with_company(company)
     product = Product.search([
         ("name", "=", name), ("tracking", "=", "serial"),
@@ -44,10 +52,13 @@ class BidLine(models.Model):
     _inherit = "autoboutique.bid.line"
 
     name = fields.Char("Description", required=False,
-                       help="Filled from Year, Make and Model; change it only to add details.")
+                       help="Filled from Year, Make, Model, Color and Transmission; change it only to add details.")
+    color = fields.Char()
+    transmission = fields.Selection(TRANSMISSIONS)
 
     def _ab_auto_name(self, vals):
-        return _join(vals.get("model_year"), vals.get("make"), vals.get("model"))
+        return car_title(vals.get("model_year"), vals.get("make"), vals.get("model"),
+                         vals.get("color"), vals.get("transmission"))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -56,13 +67,14 @@ class BidLine(models.Model):
                 vals["name"] = self._ab_auto_name(vals) or "Car"
         return super().create(vals_list)
 
-    @api.onchange("model_year", "make", "model")
+    @api.onchange("model_year", "make", "model", "color", "transmission")
     def _onchange_ab_name(self):
         for line in self:
-            line.name = _join(line.model_year, line.make, line.model) or line.name
+            line.name = car_title(line.model_year, line.make, line.model, line.color, line.transmission) or line.name
 
     def _ab_vehicle_product(self):
-        return vehicle_product(self.env, self.company_id, self.model_year, self.make, self.model)
+        return vehicle_product(self.env, self.company_id, self.model_year, self.make, self.model,
+                               self.color, self.transmission)
 
 
 class Receiving(models.Model):
@@ -95,24 +107,32 @@ class Receiving(models.Model):
 class Vehicle(models.Model):
     _inherit = "autoboutique.vehicle"
 
-    name = fields.Char(required=False, help="Filled from Make, Model and Plate.")
+    name = fields.Char(required=False, help="Filled from Year, Make, Model, Color, Transmission and Plate.")
+    color = fields.Char()
+    transmission = fields.Selection(TRANSMISSIONS)
 
     @api.model_create_multi
     def create(self, vals_list):
         companies = self.env["res.company"]
         for vals in vals_list:
             if not vals.get("name"):
-                vals["name"] = _join(vals.get("make"), vals.get("model"), vals.get("plate_number") or vals.get("vin")) or "Car"
+                vals["name"] = _join(
+                    car_title(vals.get("model_year"), vals.get("make"), vals.get("model"),
+                              vals.get("color"), vals.get("transmission")),
+                    vals.get("plate_number") or vals.get("vin")) or "Car"
             if not vals.get("product_id") and vals.get("make") and vals.get("model"):
                 company = companies.browse(vals.get("company_id")) or self.env.company
                 vals["product_id"] = vehicle_product(
-                    self.env, company, vals.get("model_year"), vals["make"], vals["model"]).id
+                    self.env, company, vals.get("model_year"), vals["make"], vals["model"],
+                    vals.get("color"), vals.get("transmission")).id
         return super().create(vals_list)
 
-    @api.onchange("make", "model", "plate_number")
+    @api.onchange("model_year", "make", "model", "color", "transmission", "plate_number")
     def _onchange_ab_name(self):
         for vehicle in self:
-            vehicle.name = _join(vehicle.make, vehicle.model, vehicle.plate_number or vehicle.vin) or vehicle.name
+            vehicle.name = _join(
+                car_title(vehicle.model_year, vehicle.make, vehicle.model, vehicle.color, vehicle.transmission),
+                vehicle.plate_number or vehicle.vin) or vehicle.name
 
 
 class SalesApplication(models.Model):

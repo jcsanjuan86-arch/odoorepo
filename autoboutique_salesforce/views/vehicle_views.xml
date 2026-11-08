@@ -12,7 +12,6 @@
                         invisible="not salesforce_is_sync_company or not (publish_to_salesforce or salesforce_vehicle_id)"/>
             </xpath>
             <xpath expr="//field[@name='mileage']" position="after">
-                <field name="color"/>
                 <field name="condition"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
