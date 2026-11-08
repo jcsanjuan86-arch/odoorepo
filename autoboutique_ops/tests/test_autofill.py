@@ -33,6 +33,19 @@ class TestAutofill(TransactionCase):
         self.assertEqual(receiving.plate_number, "NBC1234")
         self.assertEqual(receiving.product_id.name, "2023 Toyota Vios", "The product is ready before the car arrives")
 
+    def test_total_bid_adds_up_the_cars(self):
+        bid = self.env["autoboutique.bid"].create({
+            "name": "AUTOFILL-TOTAL", "supplier_id": self.supplier.id, "company_id": self.company.id,
+            "line_ids": [(0, 0, {"make": "Toyota", "model": "Vios", "allocated_cost": cost,
+                                 "company_id": self.company.id}) for cost in (450000, 300000)],
+        })
+        self.assertEqual(bid.total_bid, 750000, "Nothing selected yet: every car counts")
+        bid.line_ids[0].selected = True
+        self.assertEqual(bid.total_bid, 450000, "Only the cars selected for purchase")
+        bid.line_ids[1].allocated_cost = 310000
+        bid.line_ids[1].selected = True
+        self.assertEqual(bid.total_bid, 760000)
+
     def test_serial_on_receipt_becomes_the_plate(self):
         """No plate at bid time: the serial typed on the receipt is used, so it is not entered twice."""
         bid = self._bid()

@@ -26,6 +26,20 @@ def vehicle_product(env, company, year, make, model):
     }).sudo(False)
 
 
+class Bid(models.Model):
+    _inherit = "autoboutique.bid"
+
+    total_bid = fields.Monetary(
+        compute="_compute_total_bid", store=True, readonly=True,
+        help="Sum of the cost of the cars selected for purchase (all cars while none is selected yet).")
+
+    @api.depends("line_ids.allocated_cost", "line_ids.selected")
+    def _compute_total_bid(self):
+        for bid in self:
+            lines = bid.line_ids.filtered("selected") or bid.line_ids
+            bid.total_bid = sum(lines.mapped("allocated_cost"))
+
+
 class BidLine(models.Model):
     _inherit = "autoboutique.bid.line"
 
