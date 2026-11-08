@@ -47,8 +47,6 @@ class TestVehicleAutomation(TransactionCase):
         return bid
 
     def _receive(self, bid):
-        order = bid.purchase_order_id
-        order.button_confirm()
         receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "in", bid.line_ids.ids)])
         move = receiving.receipt_id.move_ids
         if not move.move_line_ids:
@@ -79,15 +77,13 @@ class TestVehicleAutomation(TransactionCase):
     def test_bid_to_ready_for_sale(self):
         bid = self._approved_bid()
         order = bid.purchase_order_id
-        self.assertEqual(order.state, "draft", "The RFQ is only drafted")
+        self.assertEqual(order.state, "purchase", "Approving the bid confirms the purchase order")
         self.assertEqual(order.partner_id, self.supplier)
         self.assertEqual(order.order_line.price_unit, 500000)
         self.assertEqual(order.order_line.product_id.tracking, "serial")
-        self.assertTrue(self._todo(order, "Confirm vehicle RFQ"))
+        self.assertFalse(self._todo(order, "Confirm vehicle RFQ"))
         receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "in", bid.line_ids.ids)])
         self.assertEqual(receiving.purchase_order_id, order)
-
-        order.button_confirm()
         self.assertEqual(receiving.receipt_id, order.picking_ids)
         prefilled = receiving.receipt_id.move_ids.move_line_ids
         if prefilled:
@@ -143,7 +139,6 @@ class TestVehicleAutomation(TransactionCase):
             "group_ids": [(6, 0, [self.env.ref("autoboutique_ops.group_role_qaqc").id])],
         })
         bid = self._approved_bid()
-        bid.purchase_order_id.button_confirm()
         receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "in", bid.line_ids.ids)])
         picking = receiving.receipt_id.with_user(inspector)
         move = picking.move_ids

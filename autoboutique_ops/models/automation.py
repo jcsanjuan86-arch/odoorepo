@@ -2,8 +2,9 @@
 
 Every hand-off creates the next record and a to-do for the responsible person
 (Settings > Autoboutique Automation). Documents that post stock or accounting
-entries (purchase orders, receipts, sales orders, invoices, payments) are only
-ever *drafted*; people confirm them, and the vehicle then advances by itself.
+entries (receipts, sales orders, invoices, payments) are only ever *drafted*; people
+confirm them, and the vehicle then advances by itself. The one exception is the
+vehicle purchase order, confirmed when its bid is approved.
 
 Automation that runs inside a native action (validating a receipt, confirming
 a sale, registering a payment) never blocks that action: failures are rolled
@@ -110,7 +111,12 @@ class Bid(models.Model):
             line.purchase_order_line_id = order_line
             receivings[line.id].write({"purchase_order_id": order.id, "product_id": order_line.product_id.id})
         self.purchase_order_id = order
-        self.message_post(body="Draft RFQ %s created for %d car(s)." % (order.name, len(lines)))
+        # A won bid is a committed purchase: confirm it so the receipt with each plate is ready.
+        run_safely(order, "confirm the vehicle purchase order", order.button_confirm)
+        if order.state in ("purchase", "done"):
+            self.message_post(body="Purchase order %s confirmed for %d car(s)." % (order.name, len(lines)))
+            return
+        self.message_post(body="RFQ %s created for %d car(s); it still needs confirming." % (order.name, len(lines)))
         schedule_todo(order, "purchase", "Confirm vehicle RFQ",
                       note="Created from bid lot %s. Confirming it prepares the receipt with each plate number." % self.name)
 
