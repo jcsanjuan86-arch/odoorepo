@@ -209,6 +209,11 @@ class StockPicking(models.Model):
             ("state", "not in", ("received", "verified", "rejected", "cancelled")),
         ])
         for receiving in receivings:
+            move = receiving._ab_receipt_move()
+            if move and move.state != "done":
+                # One receipt holds the whole lot: a car not received yet follows its move to the backorder.
+                receiving.receipt_id = move.picking_id
+                continue
             receiving = receiving.sudo(False).with_company(receiving.company_id)
             run_safely(receiving, "create the Vehicle Master", receiving._ab_on_receipt_done)
         return result

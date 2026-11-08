@@ -81,3 +81,26 @@ class TestAutofill(TransactionCase):
             form.vehicle_id = vehicle
             self.assertEqual(form.plate_number, "PQR555")
             self.assertEqual(form.customer_id, self.customer)
+
+    def test_mark_received_validates_only_that_car(self):
+        """Two cars in one lot: Mark Received receives one car; the other stays expected."""
+        bid = self.env["autoboutique.bid"].create({
+            "name": "AUTOFILL-TWO", "supplier_id": self.supplier.id, "company_id": self.company.id,
+            "line_ids": [(0, 0, {
+                "plate_number": plate, "make": "Toyota", "model": "Vios", "model_year": 2023,
+                "allocated_cost": 450000, "selected": True, "company_id": self.company.id,
+            }) for plate in ("TWO1111", "TWO2222")],
+        })
+        bid.action_approve_bid()
+        first, second = self.env["autoboutique.receiving"].search(
+            [("bid_line_id", "in", bid.line_ids.ids)], order="id")
+        first.action_mark_received()
+        self.assertEqual(first.state, "received")
+        self.assertEqual(first.vehicle_id.plate_number, "TWO1111")
+        self.assertEqual(first.vehicle_id.lot_id.name, "TWO1111")
+        self.assertEqual(second.state, "expected", "The other car is not received yet")
+        self.assertNotEqual(second.receipt_id.state, "done", "It waits on the backorder")
+
+        second.action_mark_received()
+        self.assertEqual(second.vehicle_id.plate_number, "TWO2222")
+        self.assertEqual(second.vehicle_id.state, "qc")

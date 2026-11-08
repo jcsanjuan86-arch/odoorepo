@@ -4,6 +4,7 @@ Forms fill in as soon as the source is picked (onchange), and records created wi
 name get one on save, so nobody retypes a car's year, make, model, plate or customer.
 """
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 def _join(*parts):
@@ -207,3 +208,52 @@ class Commission(models.Model):
             commission.sale_order_id = commission.sale_order_id or vehicle.sale_order_id
             commission.invoice_id = commission.invoice_id or vehicle.invoice_id
             commission.sales_agent_id = commission.sales_agent_id or vehicle.sales_agent_id
+
+
+class ReceivingReceipt(models.Model):
+    """Mark Received validates this car's line on the receipt: no trip to Inventory."""
+    _inherit = "autoboutique.receiving"
+
+    def _ab_receipt_move(self):
+        self.ensure_one()
+        order_line = self.bid_line_id.purchase_order_line_id
+        moves = (self.purchase_order_id.picking_ids | self.receipt_id).move_ids
+        if order_line:
+            moves = moves.filtered(lambda m: m.purchase_line_id == order_line)
+        elif self.product_id:
+            moves = moves.filtered(lambda m: m.product_id == self.product_id)
+        else:
+            return moves.browse()
+        return moves.filtered(lambda m: m.state not in ("done", "cancel"))[:1] or moves.filtered(
+            lambda m: m.state == "done")[:1]
+
+    def action_mark_received(self):
+        for receiving in self.filtered(lambda r: r.state not in ("received", "verified")):
+            order = receiving.purchase_order_id
+            if order and order.state in ("draft", "sent"):
+                order.button_confirm()
+            move = receiving._ab_receipt_move()
+            if not move:
+                raise ValidationError("This car has no purchase order yet. Approve its bid first.")
+            if move.state == "done":
+                receiving.receipt_id = move.picking_id
+                receiving._ab_on_receipt_done()
+                continue
+            serial = receiving.plate_number or receiving.bid_line_id.vin
+            if move.product_id.tracking == "serial" and not serial:
+                raise ValidationError("Enter the plate number (or conduction sticker) first.")
+            picking = move.picking_id
+            receiving.receipt_id = picking
+            others = picking.move_ids - move
+            others.picked = False
+            if not move.move_line_ids:
+                move.quantity = 1
+            move.move_line_ids[1:].unlink()
+            move_line = move.move_line_ids
+            if move.product_id.tracking == "serial" and not move_line.lot_id:
+                move_line.lot_name = serial
+            move_line.quantity = 1
+            move.picked = True
+            # Other cars in the lot stay expected on a backorder.
+            picking.with_context(skip_backorder=True, skip_sms=True, skip_immediate=True).button_validate()
+        return True
