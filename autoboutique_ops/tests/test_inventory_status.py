@@ -50,3 +50,28 @@ class TestInventoryStatus(TransactionCase):
         self.assertIn("TOYOTA", sections)
         vios = next(cells for cells in rows if cells[2] == "INV321")
         self.assertEqual(vios[18], "REPAIR", "Not ready: shows where the car is")
+
+    def test_bid_bank_becomes_bank_from(self):
+        auction = self.env["res.partner"].create({"name": "Test Auction House"})
+        bid = self.env["autoboutique.bid"].create({
+            "name": "BANK-LOT", "supplier_id": auction.id, "bank_id": self.bank.id, "company_id": self.company.id,
+            "line_ids": [(0, 0, {"plate_number": "BNK1234", "make": "Toyota", "model": "Wigo", "model_year": 2022,
+                                 "allocated_cost": 300000, "selected": True, "company_id": self.company.id})],
+        })
+        bid.action_approve_bid()
+        receiving = self.env["autoboutique.receiving"].search([("bid_line_id", "=", bid.line_ids.id)])
+        receiving.action_mark_received()
+        self.assertEqual(receiving.vehicle_id.bank_from, "BDO Test Bank", "The lot's bank, not the auction house")
+
+    def test_financing_shows_on_the_vehicle(self):
+        bank = self.env["autoboutique.financing.bank"].create({"name": "Zz Inventory Bank"})
+        Account = self.env["autoboutique.financing.account"]
+        Account.create({"name": "Lost Buyer", "vehicle_id": self.creta.id, "bank_id": bank.id, "status": "decline"})
+        self.assertFalse(self.creta.financing_bank, "A declined account is not the car's financing")
+        Account.create({"name": "Buyer", "vehicle_id": self.creta.id, "bank_id": bank.id,
+                        "status": "for_approval", "amount_approved": 500000})
+        self.creta.invalidate_recordset(["financing_bank", "financing_status", "financing_amount"])
+        self.assertEqual(self.creta.financing_bank, "Zz Inventory Bank")
+        self.assertEqual(self.creta.financing_status, "for_approval")
+        self.assertEqual(self.creta.financing_amount, 500000)
+        self.assertEqual(self.creta._ab_status_row()[14], "Zz Inventory Bank", "FINANCING PARTNER column")

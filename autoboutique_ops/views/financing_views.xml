@@ -147,6 +147,48 @@
         </field>
     </record>
 
+    <!-- Financing on the Vehicle Master: the buyer's bank and status for everyone, the accounts for Financing. -->
+    <record id="view_vehicle_form_financing" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.financing</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="view_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group/group/field[@name='supplier_id']" position="after">
+                <field name="financing_bank" invisible="not financing_bank"/>
+                <field name="financing_status" invisible="not financing_status"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Financing" name="financing">
+                    <group>
+                        <group>
+                            <field name="financing_bank"/>
+                            <field name="financing_status"/>
+                            <field name="financing_amount"/>
+                        </group>
+                        <group>
+                            <button name="action_view_financing" type="object" string="Open Financing Accounts"
+                                    class="btn-secondary" icon="fa-bank" colspan="2"
+                                    groups="autoboutique_ops.group_financing"/>
+                        </group>
+                    </group>
+                    <field name="financing_account_ids" readonly="1" groups="autoboutique_ops.group_financing">
+                        <list decoration-success="status == 'released'" decoration-info="status in ('approved', 'for_release')"
+                              decoration-muted="status in ('decline', 'cmap_low', 'cancelled', 'cancelled_approved', 'cancelled_unresponsive')">
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="bank_id"/>
+                            <field name="officer_id"/>
+                            <field name="amount_approved" sum="Total"/>
+                            <field name="status"/>
+                            <field name="release_date"/>
+                            <field name="proceed_amount"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
     <record id="action_financing_accounts" model="ir.actions.act_window">
         <field name="name">Financing Accounts</field>
         <field name="res_model">autoboutique.financing.account</field>

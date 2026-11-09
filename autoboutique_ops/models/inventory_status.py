@@ -54,7 +54,7 @@ class Vehicle(models.Model):
     amortization_4y = fields.Monetary("4 Yrs", compute="_compute_amortization", currency_field="currency_id")
     amortization_5y = fields.Monetary("5 Yrs", compute="_compute_amortization", currency_field="currency_id")
     bank_from = fields.Char("Bank From", compute="_compute_bank_from", store=True, readonly=False,
-                            help="Where the unit came from; filled from the supplier.")
+                            help="Bank the unit came from; filled from the bid lot's bank, else the supplier.")
     bidder = fields.Char()
     operations_remarks = fields.Char("Operations Remarks")
     paper_status = fields.Char()
@@ -69,10 +69,10 @@ class Vehicle(models.Model):
             (vehicle.amortization_3y, vehicle.amortization_4y,
              vehicle.amortization_5y) = amortization(vehicle.selling_price, vehicle.downpayment)
 
-    @api.depends("supplier_id")
+    @api.depends("bid_id.bank_id", "supplier_id")
     def _compute_bank_from(self):
         for vehicle in self:
-            vehicle.bank_from = vehicle.bank_from or vehicle.supplier_id.name
+            vehicle.bank_from = vehicle.bank_from or vehicle.bid_id.bank_id.name or vehicle.supplier_id.name
 
     # -- report --------------------------------------------------------------------
 
@@ -92,11 +92,7 @@ class Vehicle(models.Model):
         return work or label.upper()
 
     def _ab_financing_partner(self):
-        account = self.env["autoboutique.financing.account"].sudo().search(
-            [("vehicle_id", "=", self.id), ("status", "not in", ("decline", "cancelled", "cancelled_unresponsive",
-                                                                  "cmap_low", "cancelled_approved"))],
-            order="id desc", limit=1)
-        return account.bank_id.name or ""
+        return self.financing_bank or ""
 
     def _ab_date_sold(self):
         order = self.sale_order_id
@@ -155,7 +151,7 @@ class Vehicle(models.Model):
             cells[2] = line.plate_number or ""
             cells[3] = "AWARDED" if receiving.state == "draft" else "DELIVERY"
             cells[4] = cells[5] = "N/A"
-            cells[15] = line.bid_id.supplier_id.name or ""
+            cells[15] = line.bid_id.bank_id.name or line.bid_id.supplier_id.name or ""
             rows.append(self._ab_row(cells))
         return rows
 

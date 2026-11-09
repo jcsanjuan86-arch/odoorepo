@@ -679,3 +679,33 @@ class VehicleRelease(models.Model):
             accounts = release.sudo().sales_application_id.financing_account_ids
             accounts.filtered(lambda a: a.status not in LOST + ("released",)).write({"status": "released"})
         return result
+
+
+class Vehicle(models.Model):
+    _inherit = "autoboutique.vehicle"
+
+    financing_account_ids = fields.One2many("autoboutique.financing.account", "vehicle_id",
+                                            string="Financing Accounts", groups="autoboutique_ops.group_financing")
+    financing_bank = fields.Char("Financing", compute="_compute_financing", compute_sudo=True,
+                                 help="Bank of the buyer's current financing account.")
+    financing_status = fields.Selection(STATUSES, compute="_compute_financing", compute_sudo=True)
+    financing_amount = fields.Float("Amount Approved", digits=(16, 2), compute="_compute_financing",
+                                    compute_sudo=True)
+
+    def _compute_financing(self):
+        Account = self.env["autoboutique.financing.account"].sudo()
+        for vehicle in self:
+            account = Account.search([("vehicle_id", "=", vehicle.id), ("status", "not in", LOST)],
+                                     order="id desc", limit=1) if vehicle.id else Account
+            vehicle.financing_bank = account.bank_id.name or False
+            vehicle.financing_status = account.status or False
+            vehicle.financing_amount = account.amount_approved
+
+    def action_view_financing(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window", "name": "Financing", "res_model": "autoboutique.financing.account",
+            "view_mode": "list,form", "domain": [("vehicle_id", "=", self.id)],
+            "context": {"default_vehicle_id": self.id, "default_customer_id": self.customer_id.id,
+                        "default_name": self.customer_id.name or ""},
+        }

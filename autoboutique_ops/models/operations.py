@@ -35,6 +35,7 @@ class Bid(models.Model):
 
     name = fields.Char("Bid / Lot", required=True)
     supplier_id = fields.Many2one("res.partner", string="Supplier")
+    bank_id = fields.Many2one("res.partner", string="Bank", help="Bank that owns the cars in this lot; shown as Bank From on each car.")
     bid_date = fields.Date(default=fields.Date.context_today)
     state = fields.Selection(
         [("draft", "Draft"), ("submitted", "Submitted"),
