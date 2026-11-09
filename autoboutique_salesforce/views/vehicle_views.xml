@@ -80,22 +80,20 @@
     <record id="view_vehicle_search_salesforce" model="ir.ui.view">
         <field name="name">autoboutique.vehicle.search.salesforce</field>
         <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="autoboutique_ops.view_vehicle_search"/>
         <field name="arch" type="xml">
-            <search>
-                <field name="name"/>
-                <field name="plate_number"/>
-                <field name="vin"/>
+            <xpath expr="//field[@name='vin']" position="after">
                 <field name="salesforce_vehicle_id" groups="autoboutique_salesforce.group_salesforce_user"/>
+            </xpath>
+            <xpath expr="//filter[@name='in_stock']" position="before">
                 <filter name="sf_published" string="Published to Salesforce"
                         domain="[('publish_to_salesforce', '=', True)]"
                         groups="autoboutique_salesforce.group_salesforce_user"/>
                 <filter name="sf_error" string="Salesforce Sync Errors"
                         domain="[('salesforce_sync_status', '=', 'error')]"
                         groups="autoboutique_salesforce.group_salesforce_user"/>
-                <group>
-                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                </group>
-            </search>
+                <separator/>
+            </xpath>
         </field>
     </record>
 </odoo>
