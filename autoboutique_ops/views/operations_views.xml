@@ -19,7 +19,11 @@
     </record>
     <record id="view_receiving_list" model="ir.ui.view">
         <field name="name">autoboutique.receiving.list</field><field name="model">autoboutique.receiving</field>
-        <field name="arch" type="xml"><list><field name="name"/><field name="bid_line_id"/><field name="purchase_order_id"/><field name="receipt_id"/><field name="vehicle_id"/><field name="state"/></list></field>
+        <field name="arch" type="xml"><list><field name="name"/><field name="plate_number"/><field name="bid_line_id"/><field name="purchase_order_id"/><field name="receipt_id"/><field name="vehicle_id"/><field name="state"/></list></field>
+    </record>
+    <record id="view_receiving_search" model="ir.ui.view">
+        <field name="name">autoboutique.receiving.search</field><field name="model">autoboutique.receiving</field>
+        <field name="arch" type="xml"><search><field name="plate_number"/><field name="name"/><field name="bid_line_id"/><field name="purchase_order_id"/><filter name="to_receive" string="To Receive" domain="[('state', 'in', ('draft', 'expected', 'arrived', 'checking', 'confirmed'))]"/><filter name="received" string="Received" domain="[('state', 'in', ('received', 'verified'))]"/><group><filter name="group_state" string="Status" context="{'group_by': 'state'}"/></group></search></field>
     </record>
     <record id="view_receiving_form" model="ir.ui.view">
         <field name="name">autoboutique.receiving.form</field><field name="model">autoboutique.receiving</field>
