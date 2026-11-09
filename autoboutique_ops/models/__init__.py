@@ -7,3 +7,4 @@ from . import financing
 from . import qc_checklist
 from . import repair_flow
 from . import autofill
+from . import inventory_status

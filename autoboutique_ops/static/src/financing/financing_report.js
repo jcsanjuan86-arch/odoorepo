@@ -14,6 +14,7 @@ export class FinancingReport extends Component {
         this.orm = useService("orm");
         const now = new Date();
         this.tab = this.props.action.params?.tab || "daily";
+        this.model = this.props.action.params?.model || "autoboutique.financing.account";
         this.state = useState({
             data: null,
             day: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
@@ -25,7 +26,7 @@ export class FinancingReport extends Component {
     }
 
     get picker() {
-        return { daily: "day", monthly: "month", financing: "month", overall: "year", average: "year", quarter: "quarter" }[this.tab];
+        return { daily: "day", monthly: "month", financing: "month", inventory: "month", overall: "year", average: "year", quarter: "quarter" }[this.tab];
     }
 
     get anchor() {
@@ -42,7 +43,7 @@ export class FinancingReport extends Component {
     }
 
     async load() {
-        this.state.data = await this.orm.call("autoboutique.financing.account", "get_report", [this.tab], {
+        this.state.data = await this.orm.call(this.model, "get_report", [this.tab], {
             anchor: this.anchor,
         });
     }

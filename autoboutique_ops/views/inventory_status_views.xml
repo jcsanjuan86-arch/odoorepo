@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_vehicle_form_inventory_status" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.form.inventory.status</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="inherit_id" ref="view_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Inventory Status" name="inventory_status">
+                    <group>
+                        <group string="Unit">
+                            <field name="stock_owner"/>
+                            <field name="location"/>
+                            <field name="marketing_status"/>
+                            <field name="bank_from"/>
+                            <field name="bidder"/>
+                            <field name="operations_remarks"/>
+                        </group>
+                        <group string="Price and Monthly Amortization">
+                            <field name="selling_price"/>
+                            <field name="downpayment"/>
+                            <field name="amortization_3y"/>
+                            <field name="amortization_4y"/>
+                            <field name="amortization_5y"/>
+                        </group>
+                        <group string="Papers">
+                            <field name="papers"/>
+                            <field name="paper_status"/>
+                            <field name="plate_status"/>
+                            <field name="transfer_status"/>
+                            <field name="inventory_remarks"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- One editable row per car, in the sheet's column order, to keep the status current. -->
+    <record id="view_vehicle_list_inventory_status" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.list.inventory.status</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="false" default_group_by="make">
+                <field name="stock_owner"/>
+                <field name="name" readonly="1"/>
+                <field name="plate_number"/>
+                <field name="location"/>
+                <field name="marketing_status"/>
+                <field name="state" readonly="1"/>
+                <field name="selling_price" sum="Total"/>
+                <field name="downpayment"/>
+                <field name="amortization_3y" optional="show"/>
+                <field name="amortization_4y" optional="show"/>
+                <field name="amortization_5y" optional="show"/>
+                <field name="customer_id" optional="hide"/>
+                <field name="sales_agent_id" optional="hide"/>
+                <field name="bank_from"/>
+                <field name="bidder"/>
+                <field name="mileage"/>
+                <field name="operations_remarks"/>
+                <field name="paper_status" optional="show"/>
+                <field name="papers"/>
+                <field name="plate_status" optional="show"/>
+                <field name="transfer_status" optional="show"/>
+                <field name="inventory_remarks" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_vehicle_search_inventory_status" model="ir.ui.view">
+        <field name="name">autoboutique.vehicle.search.inventory.status</field>
+        <field name="model">autoboutique.vehicle</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="plate_number"/>
+                <field name="bidder"/>
+                <filter name="in_stock" string="In Stock"
+                        domain="[('state', 'in', ('receiving', 'qc', 'repair', 'detailing', 'ready', 'reserved'))]"/>
+                <filter name="autoboutique" string="Auto Boutique" domain="[('stock_owner', '=', 'autoboutique')]"/>
+                <filter name="bdo" string="BDO" domain="[('stock_owner', '=', 'bdo')]"/>
+                <filter name="to_shoot" string="To Shoot" domain="[('marketing_status', '=', 'to_shoot')]"/>
+                <filter name="without_papers" string="Without Papers" domain="[('papers', '=', 'without')]"/>
+                <group>
+                    <filter name="group_make" string="Brand" context="{'group_by': 'make'}"/>
+                    <filter name="group_model" string="Model" context="{'group_by': 'model'}"/>
+                    <filter name="group_owner" string="Inventory Of" context="{'group_by': 'stock_owner'}"/>
+                    <filter name="group_location" string="Location" context="{'group_by': 'location'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_inventory_status_dashboard" model="ir.actions.client">
+        <field name="name">Inventory Status</field>
+        <field name="tag">autoboutique_financing_report</field>
+        <field name="params" eval="{'tab': 'inventory', 'model': 'autoboutique.vehicle'}"/>
+    </record>
+
+    <record id="action_inventory_status_units" model="ir.actions.act_window">
+        <field name="name">Update Inventory Status</field>
+        <field name="res_model">autoboutique.vehicle</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_vehicle_list_inventory_status')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_vehicle_form')})]"/>
+        <field name="search_view_id" ref="view_vehicle_search_inventory_status"/>
+        <field name="context">{'search_default_in_stock': 1}</field>
+    </record>
+
+    <menuitem id="menu_inventory_status" name="Inventory Status" parent="menu_root" sequence="2"
+              groups="group_role_operations,group_role_finance_supervisor,group_role_sales_head,base.group_system"/>
+    <menuitem id="menu_inventory_status_dashboard" name="Dashboard" parent="menu_inventory_status"
+              action="action_inventory_status_dashboard" sequence="10"/>
+    <menuitem id="menu_inventory_status_units" name="Update Units" parent="menu_inventory_status"
+              action="action_inventory_status_units" sequence="20"/>
+</odoo>
