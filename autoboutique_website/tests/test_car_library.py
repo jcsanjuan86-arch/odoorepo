@@ -59,3 +59,17 @@ class TestCarLibrary(TransactionCase):
         car = self._car(model="Zz Unknown")
         self.assertFalse(car.library_id)
         self.assertFalse(car.website_menu_image)
+
+    def test_simple_colour_and_variant_names_match(self):
+        self.library.color_ids = [(0, 0, {"name": "Super White II", "image": RED}),
+                                  (0, 0, {"name": "Grayish Blue Mica Metallic", "image": BLUE})]
+        car = self._car(model="Zz Vios 1.3 XLE CVT", color="White")
+        self.assertEqual(car.library_id, self.library, "Variant words after the model still match")
+        self.assertEqual(car.library_color_id.name, "Super White II")
+        self.assertEqual(self._car(plate_number="LIB5678", color="grey blue").library_color_id.name,
+                         "Grayish Blue Mica Metallic")
+
+    def test_toyota_photos_are_loaded(self):
+        vios = self.env.ref("autoboutique_website.lib_toyota_vios")
+        self.assertEqual(vios.name, "Toyota Vios")
+        self.assertTrue(vios.color_ids and all(vios.color_ids.mapped("image")))

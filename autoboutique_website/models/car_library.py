@@ -5,11 +5,28 @@ feature rows. A car on the Vehicle Master picks its model and colour (matched
 automatically from make, model and colour) and gets the cut-out, listing photo,
 tagline, description and feature rows without anyone uploading photos per car.
 """
+import re
+
 from odoo import api, fields, models
 
 
 def _key(value):
     return " ".join((value or "").lower().split())
+
+
+def _words(value):
+    return set(re.findall(r"[a-z0-9]+", _key(value).replace("grey", "gray")))
+
+
+def _match_color(colors, typed):
+    """Same name, else the simplest name holding every word typed ('White' -> 'Super White II')."""
+    exact = colors.filtered(lambda c: _key(c.name) == _key(typed))
+    if exact:
+        return exact[:1]
+    words = _words(typed)
+    near = colors.filtered(lambda c: words and all(
+        any(name_word.startswith(word) for name_word in _words(c.name)) for word in words))
+    return near.sorted(lambda c: (len(c.name), c.sequence))[:1]
 
 
 class CarLibrary(models.Model):
@@ -36,8 +53,11 @@ class CarLibrary(models.Model):
     @api.model
     def _ab_match(self, make, model, variant=None):
         """Library entry for a car: same make and model, preferring the same variant."""
-        candidates = self.search([]).filtered(
-            lambda lib: _key(lib.make) == _key(make) and _key(lib.model) == _key(model))
+        same_make = self.search([]).filtered(lambda lib: _key(lib.make) == _key(make))
+        candidates = same_make.filtered(lambda lib: _key(lib.model) == _key(model))
+        if not candidates:  # e.g. "Vios 1.3 XLE": the longest library model the name starts with
+            candidates = same_make.filtered(lambda lib: (_key(model) + " ").startswith(_key(lib.model) + " "))
+            candidates = candidates.sorted(lambda lib: -len(lib.model))
         exact = candidates.filtered(lambda lib: variant and _key(lib.variant) == _key(variant))
         return (exact or candidates.filtered(lambda lib: not lib.variant) or candidates)[:1]
 
@@ -89,7 +109,7 @@ class Vehicle(models.Model):
             colors = library.color_ids
             color = vehicle.library_color_id if vehicle.library_color_id in colors else colors[:0]
             if vehicle.color and (not color or _key(color.name) != _key(vehicle.color)):
-                color = colors.filtered(lambda c: _key(c.name) == _key(vehicle.color))[:1] or color
+                color = _match_color(colors, vehicle.color) or color
             vehicle.library_id = library
             vehicle.library_color_id = color
 

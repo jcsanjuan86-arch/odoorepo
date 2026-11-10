@@ -1,6 +1,6 @@
 {
     "name": "Autoboutique Website",
-    "version": "19.0.2.2.1",
+    "version": "19.0.2.3.0",
     "summary": "Prime Auto Boutique website with live vehicle listings from the Vehicle Master",
     "author": "Autoboutique",
     "category": "Website",
@@ -15,6 +15,7 @@
         "views/pages.xml",
         "views/backend_views.xml",
         "views/car_library_views.xml",
+        "data/car_library_data.xml",
     ],
     "assets": {
         "web.assets_frontend": [
