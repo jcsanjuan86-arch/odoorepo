@@ -5,3 +5,6 @@ access_vehicle_feature_user,autoboutique.vehicle.feature.user,model_autoboutique
 access_vehicle_gallery_user,autoboutique.vehicle.gallery.user,model_autoboutique_vehicle_gallery,base.group_user,1,1,1,1
 access_website_inquiry_user,autoboutique.website.inquiry.user,model_autoboutique_website_inquiry,base.group_user,1,1,1,0
 access_website_inquiry_admin,autoboutique.website.inquiry.admin,model_autoboutique_website_inquiry,base.group_system,1,1,1,1
+access_car_library_user,autoboutique.car.library.user,model_autoboutique_car_library,base.group_user,1,1,1,1
+access_car_library_color_user,autoboutique.car.library.color.user,model_autoboutique_car_library_color,base.group_user,1,1,1,1
+access_car_library_feature_user,autoboutique.car.library.feature.user,model_autoboutique_car_library_feature,base.group_user,1,1,1,1
