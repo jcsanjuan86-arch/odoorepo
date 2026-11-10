@@ -9,7 +9,7 @@
                 <field name="make"/>
                 <field name="model"/>
                 <field name="variant"/>
-                <field name="color_ids" widget="many2many_tags" string="Colours"/>
+                <field name="color_ids" string="Colours"/>
             </list>
         </field>
     </record>
@@ -23,7 +23,6 @@
                     <t t-name="card">
                         <field name="image" widget="image" options="{'size': [220, 130]}" class="text-center"/>
                         <field name="name" class="fw-bold"/>
-                        <field name="color_ids" widget="many2many_tags"/>
                     </t>
                 </templates>
             </kanban>
@@ -125,7 +124,7 @@
         <field name="model">autoboutique.vehicle</field>
         <field name="inherit_id" ref="view_vehicle_form_website"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@string='Photos']" position="before">
+            <xpath expr="//field[@name='website_card_image']/.." position="before">
                 <group string="Car Library" name="car_library">
                     <group>
                         <field name="library_id" options="{'no_create': True}"/>
