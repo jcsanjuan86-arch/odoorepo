@@ -38,7 +38,7 @@ class TestInventoryStatus(TransactionCase):
         self.assertGreaterEqual(owners["AUTO BOUTIQUE"], 1)
 
         units = tables["Units"]
-        self.assertEqual(len(units["headers"]), 26)
+        self.assertEqual(len(units["headers"]), 30)
         rows = [row["cells"] for row in units["rows"]]
         creta = next(cells for cells in rows if cells[2] == "INV152")
         self.assertEqual(creta[:6], ["BDO", "2023 HYUNDAI CRETA WHITE", "INV152", "AB SHOWROOM", "DONE", "N/A"])
@@ -50,6 +50,32 @@ class TestInventoryStatus(TransactionCase):
         self.assertIn("TOYOTA", sections)
         vios = next(cells for cells in rows if cells[2] == "INV321")
         self.assertEqual(vios[18], "REPAIR", "Not ready: shows where the car is")
+
+    def test_papers_aging_from_pullout(self):
+        from datetime import timedelta
+        from odoo import fields
+        today = fields.Date.context_today(self.vios)
+        self.vios.write({"pullout_date": today - timedelta(days=45), "papers": "without",
+                         "plate": "without", "registered": "not_registered"})
+        self.assertEqual(self.vios.papers_aging_days, 45, "Counting since pull-out while waiting")
+
+        Vehicle = self.env["autoboutique.vehicle"]
+        over_30 = [("papers", "!=", "with"), ("pullout_date", "<=", today - timedelta(days=30))]
+        self.assertIn(self.vios, Vehicle.search(over_30))
+
+        report = Vehicle.get_report("inventory")
+        tables = {table["title"]: table for table in report["tables"]}
+        aging = {row["cells"][0]: row["cells"][1] for row in tables["Waiting for Papers (days from pull-out)"]["rows"]}
+        self.assertGreaterEqual(aging["31-60 DAYS"], 1)
+        row = next(r["cells"] for r in tables["Units"]["rows"] if r["cells"][2] == "INV321")
+        self.assertEqual(row[21:26], ["WAITING FOR PAPERS", (today - timedelta(days=45)).strftime("%m/%d/%Y"),
+                                      45, "WITHOUT PLATE", "NOT REGISTERED"])
+
+        # Papers arrive: the day is stamped and the aging stops.
+        self.vios.papers = "with"
+        self.assertEqual(self.vios.papers_received_date, today)
+        self.assertEqual(self.vios.papers_aging_days, 45)
+        self.assertNotIn(self.vios, Vehicle.search(over_30))
 
     def test_bid_bank_becomes_bank_from(self):
         auction = self.env["res.partner"].create({"name": "Test Auction House"})

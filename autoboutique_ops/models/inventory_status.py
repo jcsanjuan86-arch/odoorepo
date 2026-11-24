@@ -22,7 +22,11 @@ LOCATIONS = [
     ("awarded", "Awarded"), ("other", "Other"),
 ]
 MARKETING = [("to_shoot", "To Shoot"), ("done", "Done")]
-PAPERS = [("with", "With Papers"), ("without", "Without Papers")]
+PAPERS = [("with", "With Papers"), ("without", "Waiting for Papers")]
+PLATE = [("with", "With Plate"), ("without", "Without Plate")]
+REGISTERED = [("registered", "Registered"), ("not_registered", "Not Registered")]
+# Days since pull-out for cars still waiting for papers.
+PAPER_AGING = [("0-30 DAYS", 30), ("31-60 DAYS", 60), ("61-90 DAYS", 90), ("OVER 90 DAYS", float("inf"))]
 
 HEADERS = [
     ("INV", "text"), ("TYPE OF CAR", "text"), ("PLATE", "text"), ("LOCATION", "text"),
@@ -31,7 +35,8 @@ HEADERS = [
     ("SOLD TO", "text"), ("DATE SOLD", "text"), ("AGENT", "text"), ("FINANCING PARTNER", "text"),
     ("BANK FROM", "text"), ("BIDDER", "text"), ("ODO", "int"), ("UNIT STATUS BY: OPERATIONS", "text"),
     ("OPERATIONS: REMARKS", "text"), ("PAPER STATUS", "text"), ("WITH / WITHOUT PAPERS", "text"),
-    ("PLATE STATUS", "text"), ("REGISTRATION STATUS", "text"), ("TRANSFER STATUS", "text"), ("REMARKS", "text"),
+    ("PULL-OUT DATE", "text"), ("DAYS WITHOUT PAPERS", "int"), ("WITH / WITHOUT PLATE", "text"),
+    ("REGISTERED / NOT REGISTERED", "text"), ("PLATE STATUS", "text"), ("REGISTRATION STATUS", "text"), ("TRANSFER STATUS", "text"), ("REMARKS", "text"),
 ]
 
 
@@ -59,6 +64,16 @@ class Vehicle(models.Model):
     operations_remarks = fields.Char("Operations Remarks")
     paper_status = fields.Char()
     papers = fields.Selection(PAPERS, "With / Without Papers")
+    pullout_date = fields.Date("Pull-out Date", compute="_compute_pullout_date", store=True, readonly=False,
+                               help="Day the unit was pulled out from the bank or auction; "
+                                    "filled from the receiving date. Papers aging counts from here.")
+    papers_received_date = fields.Date("Papers Received",
+                                       help="Filled when the unit is set to With Papers.")
+    papers_aging_days = fields.Integer("Days Without Papers", compute="_compute_papers_aging",
+                                       help="Days since pull-out while still waiting for papers; "
+                                            "for units with papers, the days it took.")
+    plate = fields.Selection(PLATE, "With / Without Plate")
+    registered = fields.Selection(REGISTERED, "Registered / Not Registered")
     plate_status = fields.Char()
     transfer_status = fields.Char(help="By the liaison officer / document controller.")
     inventory_remarks = fields.Char("Remarks")
@@ -73,6 +88,31 @@ class Vehicle(models.Model):
     def _compute_bank_from(self):
         for vehicle in self:
             vehicle.bank_from = vehicle.bank_from or vehicle.bid_id.bank_id.name or vehicle.supplier_id.name
+
+    @api.depends("receiving_id.received_date")
+    def _compute_pullout_date(self):
+        for vehicle in self:
+            vehicle.pullout_date = vehicle.pullout_date or vehicle.receiving_id.received_date
+
+    @api.depends("papers", "pullout_date", "papers_received_date")
+    def _compute_papers_aging(self):
+        today = fields.Date.context_today(self)
+        for vehicle in self:
+            end = vehicle.papers_received_date if vehicle.papers == "with" else today
+            vehicle.papers_aging_days = (end - vehicle.pullout_date).days \
+                if vehicle.pullout_date and end and end >= vehicle.pullout_date else 0
+
+    def write(self, vals):
+        if vals.get("papers") == "with" and "papers_received_date" not in vals:
+            # Stamp the day papers arrived, so the aging stops there.
+            waiting = self.filtered(lambda v: v.papers != "with" and not v.papers_received_date)
+            result = super().write(vals)
+            waiting.papers_received_date = fields.Date.context_today(self)
+            return result
+        return super().write(vals)
+
+    def _ab_waiting_for_papers(self):
+        return self.filtered(lambda v: v.papers != "with")
 
     # -- report --------------------------------------------------------------------
 
@@ -113,7 +153,10 @@ class Vehicle(models.Model):
             self.customer_id.name or "", sold.strftime("%m/%d/%Y") if sold else "", self.sales_agent_id.name or "",
             self._ab_financing_partner(), self.bank_from or "", self.bidder or "", self.mileage or "",
             self._ab_operations_status(), self.operations_remarks or "", self.paper_status or "",
-            label("papers").upper(), self.plate_status or "",
+            label("papers").upper(),
+            self.pullout_date.strftime("%m/%d/%Y") if self.pullout_date else "",
+            self.papers_aging_days if self.pullout_date and self.papers != "with" else "",
+            label("plate").upper(), label("registered").upper(), self.plate_status or "",
             dict(self._fields["registration_status"].selection).get(self.registration_status, "")
             if self.registration_status else "",
             self.transfer_status or "", self.inventory_remarks or "",
@@ -178,10 +221,26 @@ class Vehicle(models.Model):
             return {"title": title, "headers": ["", ""], "formats": ["text", "int"],
                     "rows": rows + [self._ab_row(["TOTAL", len(records)], "total")]}
 
+        def papers_aging_table(records):
+            waiting = records._ab_waiting_for_papers()
+            counts = defaultdict(int)
+            for vehicle in waiting.filtered("pullout_date"):
+                counts[next(label for label, limit in PAPER_AGING if vehicle.papers_aging_days <= limit)] += 1
+            rows = [self._ab_row([label, counts[label]]) for label, _limit in PAPER_AGING]
+            undated = len(waiting.filtered(lambda v: not v.pullout_date))
+            if undated:
+                rows.append(self._ab_row(["NO PULL-OUT DATE", undated]))
+            return {"title": "Waiting for Papers (days from pull-out)", "headers": ["", ""],
+                    "formats": ["text", "int"], "rows": rows + [self._ab_row(["TOTAL", len(waiting)], "total")]}
+
         return {"title": "CAR INVENTORY - %s" % day.strftime("%B %Y").upper(), "tables": [
             count_table("Inventory Of", "stock_owner", stock),
             count_table("Location", "location", stock),
             count_table("Marketing Status", "marketing_status", stock),
+            count_table("Papers", "papers", stock),
+            papers_aging_table(stock),
+            count_table("Plate", "plate", stock),
+            count_table("Registration", "registered", stock),
             {"title": "Summary", "headers": ["", ""], "formats": ["text", "int"], "rows": [
                 self._ab_row(["IN STOCK", len(stock)], "total"),
                 self._ab_row(["RESERVED", len(stock.filtered(lambda v: v.state == "reserved"))]),

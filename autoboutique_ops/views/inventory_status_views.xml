@@ -23,8 +23,15 @@
                             <field name="amortization_4y"/>
                             <field name="amortization_5y"/>
                         </group>
-                        <group string="Papers">
+                        <group string="Papers, Plate and Registration">
                             <field name="papers"/>
+                            <field name="pullout_date"/>
+                            <field name="papers_received_date" invisible="papers != 'with'"/>
+                            <field name="papers_aging_days" invisible="not pullout_date"
+                                   decoration-danger="papers != 'with' and papers_aging_days &gt; 60"
+                                   decoration-warning="papers != 'with' and papers_aging_days &gt; 30"/>
+                            <field name="plate" widget="radio" options="{'horizontal': true}"/>
+                            <field name="registered" widget="radio" options="{'horizontal': true}"/>
                             <field name="paper_status"/>
                             <field name="plate_status"/>
                             <field name="transfer_status"/>
@@ -63,6 +70,12 @@
                 <field name="mileage" optional="hide"/>
                 <field name="operations_remarks" optional="hide"/>
                 <field name="papers" optional="show"/>
+                <field name="pullout_date" optional="show"/>
+                <field name="papers_aging_days" optional="show" string="Days w/o Papers"
+                       invisible="papers == 'with' or not pullout_date"
+                       decoration-danger="papers_aging_days &gt; 60" decoration-warning="papers_aging_days &gt; 30"/>
+                <field name="plate" optional="show"/>
+                <field name="registered" optional="show"/>
                 <field name="paper_status" optional="hide"/>
                 <field name="plate_status" optional="hide"/>
                 <field name="transfer_status" optional="hide"/>
@@ -93,8 +106,26 @@
                 <filter name="autoboutique" string="Auto Boutique" domain="[('stock_owner', '=', 'autoboutique')]"/>
                 <filter name="bdo" string="BDO" domain="[('stock_owner', '=', 'bdo')]"/>
                 <filter name="to_shoot" string="To Shoot" domain="[('marketing_status', '=', 'to_shoot')]"/>
-                <filter name="without_papers" string="Without Papers" domain="[('papers', '=', 'without')]"/>
+                <separator/>
+                <filter name="with_papers" string="With Papers" domain="[('papers', '=', 'with')]"/>
+                <filter name="without_papers" string="Waiting for Papers" domain="[('papers', '!=', 'with')]"/>
+                <separator/>
+                <filter name="papers_over_30" string="No Papers &gt; 30 Days"
+                        domain="[('papers', '!=', 'with'), ('pullout_date', '&lt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="papers_over_60" string="No Papers &gt; 60 Days"
+                        domain="[('papers', '!=', 'with'), ('pullout_date', '&lt;=', (context_today() - relativedelta(days=60)).strftime('%Y-%m-%d'))]"/>
+                <filter name="papers_over_90" string="No Papers &gt; 90 Days"
+                        domain="[('papers', '!=', 'with'), ('pullout_date', '&lt;=', (context_today() - relativedelta(days=90)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="with_plate" string="With Plate" domain="[('plate', '=', 'with')]"/>
+                <filter name="without_plate" string="Without Plate" domain="[('plate', '!=', 'with')]"/>
+                <separator/>
+                <filter name="is_registered" string="Registered" domain="[('registered', '=', 'registered')]"/>
+                <filter name="not_registered" string="Not Registered" domain="[('registered', '!=', 'registered')]"/>
                 <group>
+                    <filter name="group_papers" string="Papers" context="{'group_by': 'papers'}"/>
+                    <filter name="group_plate" string="Plate" context="{'group_by': 'plate'}"/>
+                    <filter name="group_registered" string="Registration" context="{'group_by': 'registered'}"/>
                     <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
                     <filter name="group_make" string="Brand" context="{'group_by': 'make'}"/>
                     <filter name="group_model" string="Model" context="{'group_by': 'model'}"/>
