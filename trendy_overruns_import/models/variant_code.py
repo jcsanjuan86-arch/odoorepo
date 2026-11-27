@@ -12,7 +12,8 @@ class VariantCode(models.Model):
     code = fields.Char(required=True, index=True)
     product_tmpl_id = fields.Many2one("product.template", required=True, ondelete="cascade", index=True)
     value_ids = fields.Many2many(
-        "product.template.attribute.value", string="Size / Colour",
+        "product.template.attribute.value", "trendy_variant_code_value_rel", "code_id", "value_id",
+        string="Size / Colour",
         help="The attribute values the POS selects when this code is scanned.")
     label = fields.Char(compute="_compute_label", store=True)
 
