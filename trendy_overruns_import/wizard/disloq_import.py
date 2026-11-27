@@ -325,6 +325,16 @@ class DisloqImport(models.TransientModel):
                 updated += 1
         for start in range(0, len(to_create), 1000):
             Code.create(to_create[start:start + 1000])
+
+        # Refresh the searchable codes text on the products (also tells open POS screens to reload them).
+        touched = self.env["product.template"].browse({template_id for template_id, _values in wanted.values()})
+        codes_by_template = {}
+        for row in Code.search_read([("product_tmpl_id", "in", touched.ids)], ["code", "product_tmpl_id"]):
+            codes_by_template.setdefault(row["product_tmpl_id"][0], []).append(row["code"])
+        for template in touched:
+            text = " ".join(sorted(codes_by_template.get(template.id, []))) or False
+            if template.disloq_variant_codes != text:
+                template.write({"disloq_variant_codes": text})
         return len(to_create), updated, unmatched
 
     def _set_stock(self, items, templates):

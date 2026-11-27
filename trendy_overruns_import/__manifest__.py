@@ -1,6 +1,6 @@
 {
     "name": "Trendy Overruns Disloq Import",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.1.1",
     "summary": "Load products, branch stock, variant codes and customers exported from Disloq into Odoo POS",
     "author": "Trendy Overruns Boutique",
     "category": "Sales/Point of Sale",

@@ -1,4 +1,5 @@
 import { patch } from "@web/core/utils/patch";
+import { useExternalListener } from "@odoo/owl";
 import { normalize } from "@web/core/l10n/utils";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
@@ -15,6 +16,22 @@ patch(ProductTemplate.prototype, {
 });
 
 patch(ProductScreen.prototype, {
+    setup() {
+        super.setup(...arguments);
+        // Odoo only searches the server from the "Search more" button; a typed variant code
+        // followed by Enter adds the item straight away.
+        useExternalListener(window, "keydown", async (event) => {
+            const input = event.target;
+            const text = input?.tagName === "INPUT" ? input.value.trim() : "";
+            if (event.key === "Enter" && VARIANT_CODE.test(text) && input.closest(".pos-rightheader")) {
+                if (await this.addDisloqVariant(text)) {
+                    this.pos.searchProductWord = "";
+                    input.value = "";
+                }
+            }
+        });
+    },
+
     async _barcodeProductAction(code) {
         if (await this.addDisloqVariant(code.base_code, { code })) {
             return;
@@ -35,6 +52,13 @@ patch(ProductScreen.prototype, {
         if (!text || !VARIANT_CODE.test(text)) {
             return false;
         }
+        // A scanner typing into the focused search box sends the code twice (scan + Enter).
+        const now = Date.now();
+        if (this._lastDisloqCode === text && now - this._lastDisloqAt < 1500) {
+            return true;
+        }
+        this._lastDisloqCode = text;
+        this._lastDisloqAt = now;
         const match = await this.pos.data.silentCall("trendy.overruns.variant.code", "pos_find", [text]);
         if (!match) {
             return false;
