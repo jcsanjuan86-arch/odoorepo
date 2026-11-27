@@ -168,6 +168,10 @@ html:has(.to-site) {
     body { color: #111111; }
     a:not(.btn):not(.nav-link) { color: #111111; }
     a:not(.btn):not(.nav-link):hover { color: #b8952a; }
+    // Footer links stay white/gold on black.
+    .to-footer a:not(.btn) { color: #FFFFFF; }
+    .to-footer a:not(.btn):hover { color: #D4AF37; }
+    .to-footer .to-footer__tiktok { color: #D4AF37; }
 
     .btn-primary, .btn-primary:focus {
         background-color: #111111; border-color: #111111; border-radius: 0; color: #FFFFFF;

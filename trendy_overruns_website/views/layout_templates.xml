@@ -69,6 +69,12 @@
             </t>
             <t t-else="">$0</t>
         </xpath>
+        <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]" position="replace">
+            <t t-if="website._to_is_overruns()">
+                <span class="o_footer_copyright_name me-2 small">© Trendy Overruns Boutique. All rights reserved.</span>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
     </template>
 
     <!-- Contact Us: the branches instead of "My Company" sample details. -->

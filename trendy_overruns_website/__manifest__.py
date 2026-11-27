@@ -1,6 +1,6 @@
 {
     "name": "Trendy Overruns Boutique Storefront",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.2.1",
     "summary": "Custom responsive eCommerce homepage for Trendy Overruns Boutique",
     "author": "Trendy Overruns Boutique",
     "category": "Website",
