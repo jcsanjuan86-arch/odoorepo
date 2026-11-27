@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_disloq_import_manager,trendy.overruns.disloq.import.manager,model_trendy_overruns_disloq_import,stock.group_stock_manager,1,1,1,1
+access_variant_code_user,trendy.overruns.variant.code.user,model_trendy_overruns_variant_code,base.group_user,1,0,0,0
+access_variant_code_manager,trendy.overruns.variant.code.manager,model_trendy_overruns_variant_code,stock.group_stock_manager,1,1,1,1

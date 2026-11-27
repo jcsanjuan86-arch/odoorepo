@@ -84,6 +84,25 @@ class TestDisloqImport(TransactionCase):
         self.assertFalse(plain.attribute_line_ids)
         self.assertEqual(self.on_hand(plain), 5)
 
+        # Variant codes: the dash SKU finds the product and selects its size and colour.
+        Code = self.env["trendy.overruns.variant.code"]
+        code = Code.search([("code", "=", "TO-SKU-001-2")])
+        self.assertEqual(code.product_tmpl_id, denim)
+        self.assertEqual(sorted(code.value_ids.mapped("name")), ["2", "LIGHT DENIM"])
+        found = Code.pos_find(" to-sku-001-2 ")
+        self.assertEqual(found["product_tmpl_id"], denim.id)
+        self.assertEqual(sorted(found["value_ids"]), sorted(code.value_ids.ids))
+        self.assertFalse(Code.pos_find("NOPE-1"))
+        self.assertIn("TO-SKU-001-1", denim.disloq_variant_codes)
+        self.assertEqual(Template.search([("display_name", "ilike", "TO-SKU-001-2")]), denim)
+        self.assertEqual(self.env["product.product"].search([("display_name", "ilike", "TO-SKU-001-2")]),
+                         denim.product_variant_id)
+        self.assertIn("Variant codes: 3 added", result)
+
+        # "Variant codes only" never touches stock.
+        self.run_import(PRODUCTS.replace('"5","",', '"99","",'), import_type="codes", warehouse_id=self.warehouse.id)
+        self.assertEqual(self.on_hand(plain), 5)
+
         # Importing again (with a recount) updates instead of duplicating.
         self.run_import(PRODUCTS.replace('"5","",', '"8","",'), import_type="products", warehouse_id=self.warehouse.id)
         self.assertEqual(Template.search_count([("default_code", "in", ["TO-SKU-001", "TO-SKU-002", "TO-SKU-003"])]), 3)

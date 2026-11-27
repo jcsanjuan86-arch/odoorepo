@@ -101,17 +101,23 @@ def parse_products(rows):
             "stock": to_float(column(row, "Stock in hand (O)")),
             "pos": column(row, "Available on POS (Y/N)").strip().upper() == "Y",
             "attributes": {},
+            "codes": {},
         })
         item["price"] = item["price"] or to_float(column(row, "Retail Price (R)"))
         item["cost"] = item["cost"] or to_float(column(row, "Item Cost (R)")) or to_float(column(row, "Purchase Cost"))
         names = column(row, "Variant Name (O)").split(";")
         options = column(row, "Variant Options (O)").split(";")
+        variant_code = clean(column(row, "Variant SKU (O)")).upper()
+        pairs = []
         for raw_name, raw_value in zip(names, options):
             attribute, value = attribute_name(raw_name), clean(raw_value).upper()
             if attribute and value:
+                pairs.append((attribute, value))
                 values = item["attributes"].setdefault(attribute, [])
                 if value not in values:
                     values.append(value)
+        if variant_code and variant_code not in item["codes"]:
+            item["codes"][variant_code] = pairs
     return items
 
 
@@ -120,7 +126,9 @@ class DisloqImport(models.TransientModel):
     _description = "Import from Disloq"
 
     import_type = fields.Selection(
-        [("products", "Products and branch stock"), ("customers", "Customers")],
+        [("products", "Products and branch stock"),
+         ("codes", "Variant codes only (stock not changed)"),
+         ("customers", "Customers")],
         required=True, default="products")
     warehouse_id = fields.Many2one(
         "stock.warehouse", string="Branch / Warehouse",
@@ -139,6 +147,8 @@ class DisloqImport(models.TransientModel):
             if not self.warehouse_id:
                 raise UserError(_("Choose the branch / warehouse the stock belongs to."))
             self.result = self._import_products(rows)
+        elif self.import_type == "codes":
+            self.result = self._import_products(rows, set_stock=False)
         else:
             self.result = self._import_customers(rows)
         self.data_file = False
@@ -186,8 +196,8 @@ class DisloqImport(models.TransientModel):
             result[name] = (attribute, known)
         return result
 
-    def _import_products(self, rows):
-        company = self.warehouse_id.company_id
+    def _import_products(self, rows, set_stock=True):
+        company = self.warehouse_id.company_id or self.company_id
         items = parse_products(rows)
         if not items:
             raise UserError(_("No products found. Upload the Disloq products export (goods.csv or its zip)."))
@@ -262,13 +272,21 @@ class DisloqImport(models.TransientModel):
             created_count += len(batch)
             existing.update({t.default_code: t for t in batch})
 
-        stock_set, units, negatives = self._set_stock(items, existing)
+        codes_created, codes_updated, codes_unmatched = self._load_variant_codes(items, existing)
 
         report = [
-            _("%(branch)s: %(count)s products in the file.", branch=self.warehouse_id.name, count=len(items)),
+            _("%(branch)s: %(count)s products in the file.",
+              branch=self.warehouse_id.name or company.name, count=len(items)),
             _("Created %(created)s new products, updated %(updated)s existing ones.", created=created_count, updated=updated),
-            _("On-hand stock set for %(count)s products, %(units)s pcs in total.", count=stock_set, units=f"{units:,.0f}"),
+            _("Variant codes: %(created)s added, %(updated)s updated.", created=codes_created, updated=codes_updated),
         ]
+        if codes_unmatched:
+            report.append(_("%s variant codes had a size/colour that could not be matched and select nothing.", codes_unmatched))
+        negatives = []
+        if set_stock:
+            stock_set, units, negatives = self._set_stock(items, existing)
+            report.append(_("On-hand stock set for %(count)s products, %(units)s pcs in total.",
+                            count=stock_set, units=f"{units:,.0f}"))
         if negatives:
             report.append(_("%(count)s products had negative stock in Disloq and were set to 0:", count=len(negatives)))
             report += ["  • %s (%s): %s" % n for n in negatives[:30]]
@@ -277,6 +295,37 @@ class DisloqImport(models.TransientModel):
         if barcode_skipped:
             report.append(_("%s products got no barcode because another product already uses that SKU.", barcode_skipped))
         return "\n".join(report)
+
+    def _load_variant_codes(self, items, templates):
+        """Store each Disloq variant SKU with the size/colour values it stands for."""
+        Code = self.env["trendy.overruns.variant.code"].sudo()
+        wanted = {}
+        unmatched = 0
+        for sku, item in items.items():
+            template = templates.get(sku)
+            if not template or not item["codes"]:
+                continue
+            values = {
+                (ptav.attribute_id.name, ptav.name.upper()): ptav.id
+                for ptav in template.attribute_line_ids.product_template_value_ids
+            }
+            for code, pairs in item["codes"].items():
+                value_ids = [values[p] for p in pairs if p in values]
+                unmatched += len(value_ids) != len(pairs)
+                wanted[code] = (template.id, sorted(value_ids))
+
+        existing = {c.code: c for c in Code.search([("code", "in", list(wanted))])}
+        to_create, updated = [], 0
+        for code, (template_id, value_ids) in wanted.items():
+            record = existing.get(code)
+            if not record:
+                to_create.append({"code": code, "product_tmpl_id": template_id, "value_ids": [(6, 0, value_ids)]})
+            elif record.product_tmpl_id.id != template_id or sorted(record.value_ids.ids) != value_ids:
+                record.write({"product_tmpl_id": template_id, "value_ids": [(6, 0, value_ids)]})
+                updated += 1
+        for start in range(0, len(to_create), 1000):
+            Code.create(to_create[start:start + 1000])
+        return len(to_create), updated, unmatched
 
     def _set_stock(self, items, templates):
         location = self.warehouse_id.lot_stock_id
