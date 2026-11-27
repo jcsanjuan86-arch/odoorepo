@@ -126,12 +126,14 @@ class DisloqImport(models.TransientModel):
         "stock.warehouse", string="Branch / Warehouse",
         help="The stock in the file is set as this branch's on-hand quantity.")
     company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company)
-    data_file = fields.Binary(string="Disloq export (.zip or .csv)", required=True)
+    data_file = fields.Binary(string="Disloq export (.zip or .csv)")
     filename = fields.Char()
     result = fields.Text(readonly=True)
 
     def action_import(self):
         self.ensure_one()
+        if not self.data_file:
+            raise UserError(_("Upload the Disloq export file first."))
         rows = read_rows(base64.b64decode(self.data_file), self.filename or "")
         if self.import_type == "products":
             if not self.warehouse_id:
