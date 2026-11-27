@@ -166,7 +166,7 @@
 
     <record id="page_home" model="website.page">
         <field name="name">Trendy Overruns Home</field>
-        <!-- The setup hook changes this to / after assigning the page to Overruns. -->
+        <!-- Served at / as the Overruns website's homepage (homepage_url, set by autoboutique_sync_websites). -->
         <field name="url">/trendy-overruns-home</field>
         <field name="type">qweb</field>
         <field name="is_published" eval="True"/>

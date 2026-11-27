@@ -123,9 +123,13 @@ class Website(models.Model):
         for xmlid in ("page_home", "page_branches", "page_about"):
             overruns_pages |= self.env.ref(f"trendy_overruns_website.{xmlid}", raise_if_not_found=False)
         overruns_pages.write({"website_id": overruns_site.id, "is_published": True})
+        # Like Autoboutique: Odoo's generic "/" page would win over a second page at "/",
+        # so the Overruns home keeps its own URL and is served at "/" as the homepage.
         overruns_home = self.env.ref("trendy_overruns_website.page_home", raise_if_not_found=False)
         if overruns_home:
-            overruns_home.write({"url": "/"})
+            if overruns_home.url != "/trendy-overruns-home":
+                overruns_home.url = "/trendy-overruns-home"
+            overruns_site.homepage_url = "/trendy-overruns-home"
         for xmlid in ("menu_branches", "menu_about"):
             menu = self.env.ref(f"trendy_overruns_website.{xmlid}", raise_if_not_found=False)
             if menu:
