@@ -84,18 +84,6 @@
         </xpath>
     </template>
 
-    <template id="contactus_thanks" inherit_id="website.contactus_thanks" name="Trendy Overruns Contact Thanks" priority="99">
-        <xpath expr="//h5[text()='My Company']/.." position="replace">
-            <t t-if="website._to_is_overruns()">
-                <div class="col-lg-4 offset-lg-1 to-contact-branches">
-                    <h5>Call or visit a branch</h5>
-                    <t t-call="trendy_overruns_website.contact_branch_list"/>
-                </div>
-            </t>
-            <t t-else="">$0</t>
-        </xpath>
-    </template>
-
     <template id="contact_branch_list" name="Trendy Overruns Contact Branch List">
         <ul class="list-unstyled mb-0">
             <li t-foreach="website._to_branches()" t-as="branch" class="to-contact-branch">

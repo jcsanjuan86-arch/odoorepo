@@ -47,7 +47,7 @@ class TestTrendyOverrunsPages(TransactionCase):
         self.assertTrue(self.site._to_is_overruns())
         self.assertFalse(self.other_site._to_is_overruns())
         # The Contact page, header and footer switch to the branch details on Overruns only.
-        for xmlid in ("website.contactus", "website.contactus_thanks", "website.layout", "website.placeholder_header_text_element"):
+        for xmlid in ("website.contactus", "website.layout", "website.placeholder_header_text_element"):
             arch = self.env.ref(xmlid).get_combined_arch()
             self.assertIn("_to_is_overruns()", arch, xmlid)
         branches = self.render("trendy_overruns_website.contact_branch_list")
