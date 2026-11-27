@@ -3,7 +3,71 @@
     <!--
         The homepage uses normal Odoo shop URLs. Products, prices, variants,
         inventory, cart, checkout, and payment remain managed by website_sale.
+        Branch details live in one place (branch_cards) and are shown on the
+        homepage and the Branches page.
     -->
+    <template id="branch_cards" name="Trendy Overruns Branch Cards">
+        <!-- Telephone/mobile marked "to follow" are left out until they are known. -->
+        <t t-set="branches" t-value="[
+            {'key': 'lilac', 'name': 'Lilac – Marikina', 'address': '106 Lilac St, Concepcion Dos, Marikina City, 1811 Metro Manila',
+             'oic': '', 'phone': '7720-5279', 'phone_href': '+63277205279', 'mobile': '', 'mobile_href': '',
+             'hours': '12:00 PM – 9:00 PM (Daily)'},
+            {'key': 'katipunan', 'name': 'Katipunan – Quezon City', 'address': 'Ext, 226 Katipunan Ave, Project 4, Quezon City, 1800 Metro Manila',
+             'oic': 'Anne Banadera', 'phone': '7791-1976', 'phone_href': '+63277911976', 'mobile': '0963-296-2332', 'mobile_href': '+639632962332',
+             'hours': '12:00 PM – 9:00 PM (Daily)'},
+            {'key': 'tomas-morato', 'name': 'Tomas Morato – Quezon City', 'address': 'Corner Tomas Morato Ave, Diliman, Quezon City, Metro Manila',
+             'oic': 'Chen Rongcales', 'phone': '7-944-6449', 'phone_href': '+63279446449', 'mobile': '0964-183-4408', 'mobile_href': '+639641834408',
+             'hours': '12:00 PM – 9:00 PM'},
+            {'key': 'fairview', 'name': 'Fairview – Quezon City', 'address': 'Lot 8, Blk 11, Dahlia Ave, West Fairview, Quezon City, Metro Manila',
+             'oic': 'Phi Divad', 'phone': '(02) 7254-0989', 'phone_href': '+63272540989', 'mobile': '0927-372-8172', 'mobile_href': '+639273728172',
+             'hours': '12:00 PM – 9:00 PM (Daily)'},
+            {'key': 'valenzuela', 'name': 'Valenzuela', 'address': 'Unit 17-B, 2/F Valtown Center, Valenzuela',
+             'oic': 'Amegin Suarez', 'phone': '8511-5559', 'phone_href': '+63285115559', 'mobile': '0946-799-6406', 'mobile_href': '+639467996406',
+             'hours': '11:00 AM – 8:00 PM (Daily)'},
+        ]"/>
+        <t t-set="img" t-value="'/trendy_overruns_website/static/src/img/branches/'"/>
+        <div class="row g-4">
+            <t t-foreach="branches" t-as="branch">
+                <div t-att-class="'col-md-6 col-lg-4' if compact else 'col-12'">
+                    <article t-att-id="branch['key']" t-att-class="'to-branch-card' + (' to-branch-card--full' if not compact else '')">
+                        <div class="to-branch-card__photos">
+                            <img class="to-branch-card__main" t-att-src="img + branch['key'] + '-1.jpg'"
+                                 t-att-alt="'Trendy Overruns Boutique ' + branch['name'] + ' storefront'" loading="lazy"/>
+                            <t t-if="not compact">
+                                <img t-att-src="img + branch['key'] + '-2.jpg'" t-att-alt="'Inside ' + branch['name']" loading="lazy"/>
+                                <img t-att-src="img + branch['key'] + '-3.jpg'" t-att-alt="'Inside ' + branch['name']" loading="lazy"/>
+                            </t>
+                        </div>
+                        <div class="to-branch-card__body">
+                            <h3 t-out="branch['name']"/>
+                            <p class="to-branch-card__address" t-out="branch['address']"/>
+                            <dl class="to-branch-card__details">
+                                <t t-if="branch['oic']"><dt>OIC</dt><dd t-out="branch['oic']"/></t>
+                                <dt>Telephone</dt><dd><a t-att-href="'tel:' + branch['phone_href']" t-out="branch['phone']"/></dd>
+                                <t t-if="branch['mobile']"><dt>Mobile</dt><dd><a t-att-href="'tel:' + branch['mobile_href']" t-out="branch['mobile']"/></dd></t>
+                                <dt>Store Hours</dt><dd t-out="branch['hours']"/>
+                            </dl>
+                            <a t-if="compact" class="to-text-link" t-att-href="'/branches#' + branch['key']">Branch details <span aria-hidden="true">→</span></a>
+                        </div>
+                    </article>
+                </div>
+            </t>
+        </div>
+    </template>
+
+    <template id="tiktok_cta" name="Trendy Overruns TikTok">
+        <section class="to-social">
+            <div class="container text-center">
+                <p class="to-eyebrow">FOLLOW US</p>
+                <h2>See the newest finds first.</h2>
+                <p class="to-social__lead">New arrivals, styling ideas and branch drops on TikTok.</p>
+                <a class="btn to-btn-gold" href="https://www.tiktok.com/@trendyoverruns_boutique" target="_blank" rel="noopener">
+                    @trendyoverruns_boutique on TikTok
+                </a>
+            </div>
+        </section>
+    </template>
+
     <template id="homepage_content" name="Trendy Overruns Homepage Content">
         <div id="wrap" class="oe_structure trendy-overruns-homepage">
                 <section class="to-hero">
@@ -11,23 +75,23 @@
                         <div class="to-hero__copy">
                             <img class="to-brand-logo" src="/trendy_overruns_website/static/src/img/trendy-overruns-logo.png" alt="Trendy Overruns Boutique"/>
                             <p class="to-eyebrow">TRENDY OVERRUNS BOUTIQUE</p>
-                            <h1>Curated fashion,<br/>within reach.</h1>
-                            <p class="to-lead">Fresh overrun finds, activewear, and everyday pieces selected for your style.</p>
+                            <h1>Fashion Finds.<br/>Great Style.<br/><em>Affordable Prices.</em></h1>
+                            <p class="to-lead">Stylish clothing and everyday wardrobe essentials at prices you'll love, in five branches across Metro Manila.</p>
                             <div class="to-hero__actions">
                                 <a class="btn to-btn-primary" href="/shop">Shop new arrivals</a>
-                                <a class="to-text-link" href="/shop">View all pieces <span aria-hidden="true">→</span></a>
+                                <a class="to-text-link" href="/branches">Find a branch <span aria-hidden="true">→</span></a>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="to-assurances" aria-label="Shop benefits">
+                <section class="to-assurances" aria-label="Why shop with us">
                     <div class="container">
                         <div class="row g-4">
-                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>01</span><div><strong>Curated finds</strong><small>Pieces selected with care</small></div></div></div>
-                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>02</span><div><strong>Style made easy</strong><small>Everyday looks, one shop</small></div></div></div>
-                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>03</span><div><strong>Affordable picks</strong><small>Fashion within reach</small></div></div></div>
-                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>04</span><div><strong>Shop with ease</strong><small>Order securely online</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>01</span><div><strong>Fashion finds</strong><small>Casual, special-occasion and everyday pieces</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>02</span><div><strong>Great style</strong><small>Express your own look</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>03</span><div><strong>Affordable prices</strong><small>Look good without overspending</small></div></div></div>
+                            <div class="col-6 col-lg-3"><div class="to-assurance"><span>04</span><div><strong>5 branches</strong><small>Across Metro Manila</small></div></div></div>
                         </div>
                     </div>
                 </section>
@@ -56,13 +120,37 @@
                     </div>
                 </section>
 
-                <section class="to-shop-cta">
-                    <div class="container text-center">
-                        <p class="to-eyebrow">YOUR NEXT LOOK STARTS HERE</p>
-                        <h2>Find something you will love.</h2>
-                        <a class="btn to-btn-primary" href="/shop">Shop Trendy Overruns</a>
+                <section class="to-about-teaser">
+                    <div class="container">
+                        <div class="row g-5 align-items-center">
+                            <div class="col-lg-6">
+                                <img class="to-about-teaser__img" src="/trendy_overruns_website/static/src/img/branches/lilac-2.jpg"
+                                     alt="Inside a Trendy Overruns Boutique branch" loading="lazy"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <p class="to-eyebrow">ABOUT US</p>
+                                <h2>Your style. Your choice. Your Trendy finds.</h2>
+                                <p>We believe that looking good and expressing your personal style shouldn't have to come with a high price tag. That's why we bring together a wide selection of fashionable clothing and everyday wardrobe essentials at prices you'll love.</p>
+                                <a class="to-text-link" href="/about-us">Our story <span aria-hidden="true">→</span></a>
+                            </div>
+                        </div>
                     </div>
                 </section>
+
+                <section class="to-branches-strip">
+                    <div class="container">
+                        <div class="to-section-heading">
+                            <div>
+                                <p class="to-eyebrow">OUR BRANCHES</p>
+                                <h2>Visit a branch near you.</h2>
+                            </div>
+                            <a class="to-text-link" href="/branches">All branch details <span aria-hidden="true">→</span></a>
+                        </div>
+                        <t t-call="trendy_overruns_website.branch_cards"><t t-set="compact" t-value="True"/></t>
+                    </div>
+                </section>
+
+                <t t-call="trendy_overruns_website.tiktok_cta"/>
         </div>
     </template>
 
@@ -92,6 +180,53 @@
         </field>
     </record>
 
+    <record id="page_about" model="website.page">
+        <field name="name">About Us</field>
+        <field name="url">/about-us</field>
+        <field name="type">qweb</field>
+        <field name="is_published" eval="True"/>
+        <field name="key">trendy_overruns_website.page_about</field>
+        <field name="arch" type="xml">
+            <t t-name="trendy_overruns_website.page_about">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure to-page to-about-page">
+                        <section class="to-page-hero">
+                            <div class="container">
+                                <p class="to-eyebrow">ABOUT US</p>
+                                <h1>Fashion Finds. Great Style. Affordable Prices.</h1>
+                            </div>
+                        </section>
+                        <section class="container to-about-body">
+                            <div class="row g-5">
+                                <div class="col-lg-7">
+                                    <p class="to-about-lead">Welcome to Trendy Overruns Boutique, your destination for stylish and affordable fashion finds!</p>
+                                    <p>We believe that looking good and expressing your personal style shouldn't have to come with a high price tag. That's why we bring together a wide selection of fashionable clothing and everyday wardrobe essentials at prices you'll love.</p>
+                                    <p>Our goal is to make shopping enjoyable, accessible, and rewarding for everyone. Whether you're looking for casual everyday outfits, stylish pieces for special occasions, or new additions to your wardrobe, we're here to help you find something that matches your style.</p>
+                                    <p>With multiple branches across Metro Manila, we continue to make great fashion finds more accessible to our growing community of shoppers.</p>
+                                    <p>At Trendy Overruns Boutique, we believe everyone deserves to look good, feel confident, and enjoy fashion without overspending.</p>
+                                    <p class="to-about-motto">Your style. Your choice. Your Trendy finds.</p>
+                                    <p>Thank you for making Trendy Overruns Boutique part of your shopping journey!</p>
+                                    <div class="to-hero__actions">
+                                        <a class="btn to-btn-primary" href="/shop">Shop now</a>
+                                        <a class="to-text-link" href="/branches">Visit a branch <span aria-hidden="true">→</span></a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="to-about-photos">
+                                        <img src="/trendy_overruns_website/static/src/img/branches/katipunan-2.jpg" alt="Inside the Katipunan branch" loading="lazy"/>
+                                        <img src="/trendy_overruns_website/static/src/img/branches/valenzuela-1.jpg" alt="Valenzuela branch storefront" loading="lazy"/>
+                                        <img src="/trendy_overruns_website/static/src/img/branches/tomas-morato-2.jpg" alt="Inside the Tomas Morato branch" loading="lazy"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <t t-call="trendy_overruns_website.tiktok_cta"/>
+                    </div>
+                </t>
+            </t>
+        </field>
+    </record>
+
     <record id="page_branches" model="website.page">
         <field name="name">Branches</field>
         <field name="url">/branches</field>
@@ -101,23 +236,18 @@
         <field name="arch" type="xml">
             <t t-name="trendy_overruns_website.page_branches">
                 <t t-call="website.layout">
-                    <div id="wrap" class="oe_structure to-branches-page">
-                        <section class="to-branches-hero">
+                    <div id="wrap" class="oe_structure to-page to-branches-page">
+                        <section class="to-page-hero">
                             <div class="container">
                                 <p class="to-eyebrow">TRENDY OVERRUNS BOUTIQUE</p>
                                 <h1>Visit a branch near you.</h1>
-                                <p>Find us across Metro Manila for your next overrun find.</p>
+                                <p>Five branches across Metro Manila. Call or drop by for your next Trendy find.</p>
                             </div>
                         </section>
                         <section class="container to-branches-list">
-                            <div class="row g-4">
-                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Fairview</h2><p>Lot 8, Blk 11, Dahlia Ave,<br/>West Fairview, Quezon City,<br/>Metro Manila</p></article></div>
-                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Katipunan</h2><p>Ext, 226 Katipunan Ave,<br/>Project 4, Quezon City,<br/>1800 Metro Manila</p></article></div>
-                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Lilac, Marikina City</h2><p>106 Lilac St, Concepcion Dos,<br/>Marikina City,<br/>1811 Metro Manila</p></article></div>
-                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Tomas Morato</h2><p>Corner Tomas Morato Ave,<br/>Diliman, Quezon City,<br/>Metro Manila</p></article></div>
-                                <div class="col-md-6 col-lg-4"><article class="to-branch-card"><h2>Valenzuela</h2><p>Unit 17-B, 2/F Valtown Center,<br/>Valenzuela</p></article></div>
-                            </div>
+                            <t t-call="trendy_overruns_website.branch_cards"><t t-set="compact" t-value="False"/></t>
                         </section>
+                        <t t-call="trendy_overruns_website.tiktok_cta"/>
                     </div>
                 </t>
             </t>
@@ -129,6 +259,13 @@
         <field name="url">/branches</field>
         <field name="parent_id" ref="website.main_menu"/>
         <field name="sequence" eval="35"/>
+    </record>
+
+    <record id="menu_about" model="website.menu">
+        <field name="name">About Us</field>
+        <field name="url">/about-us</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="40"/>
     </record>
 
 </odoo>

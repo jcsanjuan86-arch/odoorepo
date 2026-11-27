@@ -1,38 +1,43 @@
+// Trendy Overruns Boutique brand palette: Black #111111, Gold #D4AF37, White #FFFFFF.
 :root {
-    --to-ink: #1f1a19;
-    --to-stone: #f5f0e9;
-    --to-cream: #fbf9f5;
-    --to-sage: #87917b;
-    --to-rose: #be897c;
-    --to-gold: #b38955;
+    --to-black: #111111;
+    --to-gold: #D4AF37;
+    --to-white: #FFFFFF;
+    --to-gold-dark: #b8952a;   // gold for text on white (readable contrast)
+    --to-muted: #5c5c5c;
+    --to-line: #e8e2cf;
 }
 
-.trendy-overruns-homepage {
-    background: var(--to-cream);
-    color: var(--to-ink);
+.trendy-overruns-homepage, .to-page {
+    background: var(--to-white);
+    color: var(--to-black);
     font-family: "Helvetica Neue", Arial, sans-serif;
 
     .to-eyebrow {
-        color: #846f61;
-        font-size: .7rem;
+        color: var(--to-gold-dark);
+        font-size: .72rem;
         font-weight: 700;
-        letter-spacing: .18em;
+        letter-spacing: .2em;
         margin: 0 0 1rem;
     }
 
-    h1, h2 {
+    h1, h2, h3 {
         font-family: Georgia, "Times New Roman", serif;
         font-weight: 400;
-        letter-spacing: -.045em;
+        letter-spacing: -.03em;
     }
 
-    h1 { font-size: clamp(3rem, 6vw, 5.6rem); line-height: .94; }
-    h2 { font-size: clamp(2.35rem, 4vw, 4.2rem); line-height: 1; margin: 0; }
+    h1 { font-size: clamp(2.6rem, 5.5vw, 5.2rem); line-height: .98; }
+    h1 em { color: var(--to-gold-dark); font-style: italic; }
+    h2 { font-size: clamp(2.1rem, 3.8vw, 3.8rem); line-height: 1.05; margin: 0; }
 }
 
+// -- hero ---------------------------------------------------------------------------
 .to-hero {
     align-items: center;
-    background: linear-gradient(90deg, rgba(251,249,245,.98) 0%, rgba(251,249,245,.83) 38%, rgba(251,249,245,.08) 67%), url("/trendy_overruns_website/static/src/img/trendy-overruns-hero.png") center / cover no-repeat;
+    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.92) 40%, rgba(255,255,255,0) 68%),
+        url("/trendy_overruns_website/static/src/img/trendy-overruns-hero.png") center / cover no-repeat;
+    border-bottom: 4px solid var(--to-gold);
     display: flex;
     min-height: 690px;
 
@@ -42,49 +47,94 @@
     &__actions { align-items: center; display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem; }
 }
 
-.to-brand-logo { display: block; height: auto; margin: 0 0 1.25rem; max-width: 220px; mix-blend-mode: multiply; width: 100%; }
+.to-brand-logo { display: block; height: auto; margin: 0 0 1.25rem -.75rem; max-width: 260px; mix-blend-mode: multiply; width: 100%; }
 .o_brand_promotion { display: none !important; }
 #top .navbar-brand.logo { background: url("/trendy_overruns_website/static/src/img/trendy-overruns-logo.png") left center / contain no-repeat; height: 44px; min-width: 185px; }
 #top .navbar-brand.logo > span { display: none; }
 
-.to-branches-page { background: var(--to-cream); color: var(--to-ink); }
-.to-branches-hero { background: var(--to-stone); padding: 6rem 0 5rem; }
-.to-branches-hero h1, .to-branch-card h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.04em; }
-.to-branches-hero h1 { font-size: clamp(2.8rem, 5vw, 5rem); margin: 0 0 1rem; }
-.to-branches-hero p:last-child { font-size: 1.1rem; margin: 0; }
-.to-branches-list { padding-bottom: 6rem; padding-top: 4rem; }
-.to-branch-card { background: #fff; border-top: 3px solid var(--to-gold); box-shadow: 0 8px 25px rgba(31,26,25,.06); height: 100%; padding: 2rem; }
-.to-branch-card h2 { font-size: 2rem; margin: 0 0 1rem; }
-.to-branch-card p { color: #625b57; line-height: 1.7; margin: 0; }
+.to-lead { color: #333; font-size: 1.08rem; line-height: 1.7; max-width: 470px; }
 
-.to-lead { font-size: 1.08rem; line-height: 1.7; max-width: 460px; }
-.to-btn-primary { background: var(--to-ink); border: 1px solid var(--to-ink); border-radius: 0; color: #fff; font-weight: 700; padding: .85rem 1.35rem; text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
-.to-btn-primary:hover { background: var(--to-rose); border-color: var(--to-rose); color: #fff; }
-.to-text-link { color: var(--to-ink); font-size: .78rem; font-weight: 700; letter-spacing: .07em; text-decoration: none; text-transform: uppercase; }
-.to-text-link span { color: var(--to-rose); font-size: 1.2em; margin-left: .25rem; }
-.to-text-link:hover { color: var(--to-rose); }
+// -- buttons and links --------------------------------------------------------------
+.to-btn-primary, .to-btn-gold {
+    border-radius: 0; font-size: .74rem; font-weight: 700; letter-spacing: .1em; padding: .9rem 1.45rem; text-transform: uppercase;
+}
+.to-btn-primary { background: var(--to-black); border: 1px solid var(--to-black); color: var(--to-white); }
+.to-btn-primary:hover { background: var(--to-gold); border-color: var(--to-gold); color: var(--to-black); }
+.to-btn-gold { background: var(--to-gold); border: 1px solid var(--to-gold); color: var(--to-black); }
+.to-btn-gold:hover { background: var(--to-white); border-color: var(--to-white); color: var(--to-black); }
+.to-text-link { color: var(--to-black); font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
+.to-text-link span { color: var(--to-gold-dark); font-size: 1.2em; margin-left: .25rem; }
+.to-text-link:hover { color: var(--to-gold-dark); }
 
-.to-assurances { background: var(--to-stone); padding: 2.25rem 0; }
-.to-assurance { align-items: center; display: flex; gap: .8rem; }
-.to-assurance > span { color: var(--to-rose); font-family: Georgia, serif; font-size: 1.8rem; }
+// -- benefits band (black) ------------------------------------------------------------
+.to-assurances { background: var(--to-black); color: var(--to-white); padding: 2.4rem 0; }
+.to-assurance { align-items: center; display: flex; gap: .9rem; }
+.to-assurance > span { color: var(--to-gold); font-family: Georgia, serif; font-size: 1.9rem; }
 .to-assurance strong, .to-assurance small { display: block; }
-.to-assurance strong { font-size: .82rem; letter-spacing: .03em; text-transform: uppercase; }
-.to-assurance small { color: #756a64; font-size: .78rem; margin-top: .22rem; }
+.to-assurance strong { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; }
+.to-assurance small { color: #bdbdbd; font-size: .78rem; margin-top: .22rem; }
 
+// -- collection mosaic ----------------------------------------------------------------
 .to-collection { padding-bottom: 6rem; padding-top: 6rem; }
 .to-section-heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 2rem; }
 .to-mosaic { display: grid; gap: 1rem; grid-template-columns: 1.1fr 1fr 1fr; grid-template-rows: 260px 260px; }
 .to-card { display: block; min-height: 0; overflow: hidden; position: relative; text-decoration: none; }
-.to-card::after { background: linear-gradient(0deg, rgba(24,20,19,.58), transparent 45%); content: ""; inset: 0; position: absolute; }
+.to-card::after { background: linear-gradient(0deg, rgba(17,17,17,.7), transparent 45%); content: ""; inset: 0; position: absolute; }
 .to-card img { height: 100%; object-fit: cover; transition: transform .45s ease; width: 100%; }
 .to-card:hover img { transform: scale(1.045); }
-.to-card span { bottom: 1.15rem; color: white; font-size: .76rem; font-weight: 700; left: 1.15rem; letter-spacing: .1em; position: absolute; text-transform: uppercase; z-index: 1; }
+.to-card span { bottom: 1.15rem; color: var(--to-white); font-size: .76rem; font-weight: 700; left: 1.15rem; letter-spacing: .1em; position: absolute; text-transform: uppercase; z-index: 1; }
+.to-card span::before { background: var(--to-gold); content: ""; display: block; height: 2px; margin-bottom: .5rem; width: 28px; }
 .to-card--colors { grid-row: span 2; }
 .to-card--active { grid-row: span 2; }
 .to-card--flatlay { grid-column: 3; grid-row: span 2; }
 
-.to-shop-cta { background: #d9c3ad; padding: 6.5rem 0; }
-.to-shop-cta h2 { margin-bottom: 2rem; }
+// -- about ------------------------------------------------------------------------
+.to-about-teaser { background: #faf8f2; border-top: 1px solid var(--to-line); padding: 6rem 0; }
+.to-about-teaser h2 { margin-bottom: 1.5rem; }
+.to-about-teaser p:not(.to-eyebrow) { color: #333; font-size: 1.05rem; line-height: 1.75; margin-bottom: 1.75rem; }
+.to-about-teaser__img { aspect-ratio: 4 / 3; border-bottom: 4px solid var(--to-gold); object-fit: cover; width: 100%; }
+
+.to-page-hero { background: var(--to-black); color: var(--to-white); padding: 6rem 0 5rem; }
+.to-page-hero h1 { margin: 0 0 1rem; max-width: 900px; }
+.to-page-hero p:last-child:not(.to-eyebrow) { color: #cfcfcf; font-size: 1.1rem; margin: 0; }
+.to-page-hero .to-eyebrow { color: var(--to-gold) !important; }
+
+.to-about-body { padding: 5rem 0; }
+.to-about-body p { color: #333; font-size: 1.05rem; line-height: 1.8; }
+.to-about-lead { color: var(--to-black) !important; font-family: Georgia, serif; font-size: 1.5rem !important; line-height: 1.4 !important; }
+.to-about-motto { border-left: 3px solid var(--to-gold); color: var(--to-black) !important; font-family: Georgia, serif; font-size: 1.35rem !important; font-style: italic; padding-left: 1rem; }
+.to-about-photos { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.to-about-photos img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
+.to-about-photos img:first-child { grid-column: span 2; }
+
+// -- branches ---------------------------------------------------------------------
+.to-branches-strip { padding: 6rem 0; }
+.to-branches-list { padding-bottom: 6rem; padding-top: 4rem; }
+.to-branch-card { background: var(--to-white); border: 1px solid var(--to-line); border-top: 4px solid var(--to-gold); display: flex; flex-direction: column; height: 100%; }
+.to-branch-card h3 { font-size: 1.7rem; margin: 0 0 .6rem; }
+.to-branch-card__main { aspect-ratio: 3 / 2; display: block; object-fit: cover; width: 100%; }
+.to-branch-card__body { display: flex; flex: 1; flex-direction: column; padding: 1.6rem; }
+.to-branch-card__address { color: var(--to-muted); line-height: 1.6; margin: 0 0 1.1rem; }
+.to-branch-card__details { display: grid; gap: .35rem 1rem; grid-template-columns: max-content 1fr; margin: 0 0 1.25rem; }
+.to-branch-card__details dt { color: var(--to-gold-dark); font-size: .72rem; font-weight: 700; letter-spacing: .1em; padding-top: .15rem; text-transform: uppercase; }
+.to-branch-card__details dd { margin: 0; }
+.to-branch-card__details a { color: var(--to-black); font-weight: 600; text-decoration: none; }
+.to-branch-card__details a:hover { color: var(--to-gold-dark); }
+.to-branch-card .to-text-link { margin-top: auto; }
+
+// Branches page: one wide card per branch, three photos beside the details.
+.to-branch-card--full { flex-direction: row; scroll-margin-top: 110px; }
+.to-branch-card--full .to-branch-card__photos { display: grid; flex: 0 0 58%; gap: .5rem; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; padding: .5rem; }
+.to-branch-card--full .to-branch-card__photos img { aspect-ratio: 3 / 2; object-fit: cover; width: 100%; }
+.to-branch-card--full .to-branch-card__main { grid-column: span 2; }
+.to-branch-card--full .to-branch-card__body { justify-content: center; padding: 2.25rem; }
+.to-branch-card--full h3 { font-size: 2.2rem; }
+
+// -- TikTok -----------------------------------------------------------------------
+.to-social { background: var(--to-black); color: var(--to-white); padding: 5.5rem 0; }
+.to-social h2 { margin-bottom: 1rem !important; }
+.to-social .to-eyebrow { color: var(--to-gold) !important; }
+.to-social__lead { color: #cfcfcf; margin-bottom: 2rem; }
 
 @media (max-width: 991px) {
     .to-hero { background-position: 62% center; min-height: 620px; }
@@ -93,13 +143,17 @@
     .to-card--colors { grid-row: span 2; }
     .to-card--active { grid-row: span 2; }
     .to-card--flatlay { grid-column: span 2; grid-row: auto; }
+    .to-branch-card--full { flex-direction: column; }
+    .to-branch-card--full .to-branch-card__photos { flex: none; }
 }
 
 @media (max-width: 575px) {
-    .to-hero { align-items: end; background: linear-gradient(0deg, rgba(251,249,245,.96) 0%, rgba(251,249,245,.85) 47%, rgba(251,249,245,.1) 100%), url("/trendy_overruns_website/static/src/img/trendy-overruns-hero.png") 64% center / cover no-repeat; min-height: 640px; }
+    .to-hero { align-items: end; background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.9) 50%, rgba(255,255,255,.1) 100%), url("/trendy_overruns_website/static/src/img/trendy-overruns-hero.png") 64% center / cover no-repeat; min-height: 640px; }
     .to-hero__copy { padding: 3rem 0; }
     .to-section-heading { align-items: start; flex-direction: column; gap: 1.2rem; }
     .to-mosaic { grid-template-columns: 1fr; grid-template-rows: repeat(3, 290px); }
     .to-card--colors, .to-card--active, .to-card--flatlay { grid-column: auto; grid-row: auto; }
-    .to-collection { padding-bottom: 4rem; padding-top: 4rem; }
+    .to-collection, .to-branches-strip, .to-about-teaser { padding-bottom: 4rem; padding-top: 4rem; }
+    .to-page-hero { padding: 4rem 0 3rem; }
+    .to-branch-card--full .to-branch-card__body { padding: 1.5rem; }
 }

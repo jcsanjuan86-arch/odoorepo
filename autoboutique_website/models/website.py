@@ -120,18 +120,20 @@ class Website(models.Model):
     @api.model
     def _ab_sync_overruns(self, overruns_site):
         overruns_pages = self.env["website.page"]
-        for xmlid in ("page_home", "page_branches"):
+        for xmlid in ("page_home", "page_branches", "page_about"):
             overruns_pages |= self.env.ref(f"trendy_overruns_website.{xmlid}", raise_if_not_found=False)
         overruns_pages.write({"website_id": overruns_site.id, "is_published": True})
         overruns_home = self.env.ref("trendy_overruns_website.page_home", raise_if_not_found=False)
         if overruns_home:
             overruns_home.write({"url": "/"})
-        branches_menu = self.env.ref("trendy_overruns_website.menu_branches", raise_if_not_found=False)
-        if branches_menu:
-            branches_menu.write({"website_id": overruns_site.id, "parent_id": overruns_site.menu_id.id})
+        for xmlid in ("menu_branches", "menu_about"):
+            menu = self.env.ref(f"trendy_overruns_website.{xmlid}", raise_if_not_found=False)
+            if menu:
+                menu.write({"website_id": overruns_site.id, "parent_id": overruns_site.menu_id.id})
 
         # Older setup attempts attached Autoboutique entries to the Overruns menu.
         overruns_site.menu_id.child_id.filtered(lambda menu: menu.url in AUTOBOUTIQUE_URLS).unlink()
-        branch_items = overruns_site.menu_id.child_id.filtered(lambda menu: menu.url == "/branches").sorted("id")
-        if len(branch_items) > 1:
-            branch_items[1:].unlink()
+        for url in ("/branches", "/about-us"):
+            items = overruns_site.menu_id.child_id.filtered(lambda menu, url=url: menu.url == url).sorted("id")
+            if len(items) > 1:
+                items[1:].unlink()
