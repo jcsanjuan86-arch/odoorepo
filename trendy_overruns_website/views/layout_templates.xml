@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Odoo's header text, footer and Contact Us page ship with sample content
+        (+1 555-555-5556, "3575 Fake Buena Vista Avenue", info@yourcompany.example.com).
+        On the Trendy Overruns website they are replaced with the branches' real
+        numbers; every other website keeps its own content ($0 = the original).
+    -->
+
+    <!-- Header: "Call a branch" instead of the sample phone number. -->
+    <template id="header_text_element" inherit_id="website.header_text_element" name="Trendy Overruns Header Text" priority="99">
+        <xpath expr="//li" position="replace">
+            <t t-if="website._to_is_overruns()">
+                <li t-attf-class="to-header-call #{_item_class}">
+                    <div t-attf-class="s_text_block #{_div_class}" data-name="Text">
+                        <a href="/contactus" class="nav-link o_nav-link_secondary p-2">
+                            <i class="fa fa-1x fa-fw fa-phone me-1"/>
+                            <small>Call a branch</small>
+                        </a>
+                    </div>
+                </li>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </template>
+
+    <!-- Footer: brand, links, every branch's numbers and TikTok. -->
+    <template id="footer" inherit_id="website.layout" name="Trendy Overruns Footer" priority="99">
+        <xpath expr="//div[@id='footer']" position="replace">
+            <t t-if="website._to_is_overruns()">
+                <div id="footer" class="to-footer" t-if="not no_footer">
+                    <span class="to-site d-none"/>
+                    <div class="container">
+                        <div class="row g-5">
+                            <div class="col-lg-4">
+                                <p class="to-footer__brand">Trendy <strong>OVERRUNS</strong> <span>BOUTIQUE</span></p>
+                                <p class="to-footer__tagline">Fashion Finds. Great Style. Affordable Prices.</p>
+                                <p class="to-footer__motto">Your style. Your choice. Your Trendy finds.</p>
+                                <a class="to-footer__tiktok" t-att-href="website._to_tiktok_url()" target="_blank" rel="noopener">
+                                    <i class="fa fa-music me-2"/>@trendyoverruns_boutique
+                                </a>
+                            </div>
+                            <div class="col-6 col-lg-2">
+                                <h5>Shop</h5>
+                                <ul class="list-unstyled">
+                                    <li><a href="/">Home</a></li>
+                                    <li><a href="/shop">Shop</a></li>
+                                    <li><a href="/branches">Branches</a></li>
+                                    <li><a href="/about-us">About Us</a></li>
+                                    <li><a href="/contactus">Contact Us</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-6">
+                                <h5>Call a Branch</h5>
+                                <ul class="list-unstyled to-footer__branches">
+                                    <li t-foreach="website._to_branches()" t-as="branch">
+                                        <a t-att-href="'/branches#' + branch['key']" class="to-footer__branch" t-out="branch['name']"/>
+                                        <span>
+                                            <a t-att-href="branch['phone_href']" t-out="branch['phone']"/>
+                                            <t t-if="branch['mobile']"> · <a t-att-href="branch['mobile_href']" t-out="branch['mobile']"/></t>
+                                        </span>
+                                        <small t-out="branch['hours']"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </template>
+
+    <!-- Contact Us: the branches instead of "My Company" sample details. -->
+    <template id="contactus" inherit_id="website.contactus" name="Trendy Overruns Contact Us" priority="99">
+        <xpath expr="//h5[text()='My Company']/.." position="replace">
+            <t t-if="website._to_is_overruns()">
+                <div class="col-lg-4 offset-lg-1 mt-4 mt-lg-0 to-contact-branches">
+                    <h5>Call or visit a branch</h5>
+                    <t t-call="trendy_overruns_website.contact_branch_list"/>
+                </div>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </template>
+
+    <template id="contactus_thanks" inherit_id="website.contactus_thanks" name="Trendy Overruns Contact Thanks" priority="99">
+        <xpath expr="//h5[text()='My Company']/.." position="replace">
+            <t t-if="website._to_is_overruns()">
+                <div class="col-lg-4 offset-lg-1 to-contact-branches">
+                    <h5>Call or visit a branch</h5>
+                    <t t-call="trendy_overruns_website.contact_branch_list"/>
+                </div>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </template>
+
+    <template id="contact_branch_list" name="Trendy Overruns Contact Branch List">
+        <ul class="list-unstyled mb-0">
+            <li t-foreach="website._to_branches()" t-as="branch" class="to-contact-branch">
+                <strong t-out="branch['name']"/>
+                <div><i class="fa fa-phone fa-fw me-1"/><a t-att-href="branch['phone_href']" t-out="branch['phone']"/></div>
+                <div t-if="branch['mobile']"><i class="fa fa-mobile fa-fw me-1"/><a t-att-href="branch['mobile_href']" t-out="branch['mobile']"/></div>
+                <div class="text-muted small"><i class="fa fa-clock-o fa-fw me-1"/><t t-out="branch['hours']"/></div>
+            </li>
+        </ul>
+        <a class="to-text-link d-inline-block mt-3" href="/branches">Addresses and photos <span aria-hidden="true">→</span></a>
+    </template>
+</odoo>

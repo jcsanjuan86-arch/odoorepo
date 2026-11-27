@@ -157,3 +157,75 @@
     .to-page-hero { padding: 4rem 0 3rem; }
     .to-branch-card--full .to-branch-card__body { padding: 1.5rem; }
 }
+
+// -- whole Overruns website (header, shop, cart, checkout) ---------------------------
+// The Overruns footer carries a .to-site marker; these rules only apply on pages that have it,
+// so the Autoboutique website, which shares this CSS bundle, is untouched.
+html:has(.to-site) {
+    --o-color-1: #111111;
+    --o-color-2: #D4AF37;
+
+    body { color: #111111; }
+    a:not(.btn):not(.nav-link) { color: #111111; }
+    a:not(.btn):not(.nav-link):hover { color: #b8952a; }
+
+    .btn-primary, .btn-primary:focus {
+        background-color: #111111; border-color: #111111; border-radius: 0; color: #FFFFFF;
+        font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .btn-primary:hover, .btn-primary:active { background-color: #D4AF37 !important; border-color: #D4AF37 !important; color: #111111 !important; }
+    .btn-secondary { border-radius: 0; }
+    .badge.text-bg-primary, .o_wsale_my_cart .badge { background-color: #D4AF37 !important; color: #111111 !important; }
+
+    // Header: white, black text, gold active underline, black "Contact Us" button.
+    header#top {
+        border-bottom: 1px solid #ece6d2;
+        .navbar, .o_header_mobile, .navbar-nav { background-color: #FFFFFF; }
+        .nav-link { color: #111111 !important; font-weight: 500; }
+        .nav-link:hover { color: #b8952a !important; }
+        .nav-link.active { box-shadow: inset 0 -2px 0 #D4AF37; font-weight: 700; }
+        .btn-primary, a.btn[href="/contactus"] { background-color: #111111 !important; border-color: #111111 !important; color: #FFFFFF !important; }
+        .btn-primary:hover, a.btn[href="/contactus"]:hover { background-color: #D4AF37 !important; border-color: #D4AF37 !important; color: #111111 !important; }
+        .to-header-call .fa-phone { color: #b8952a; }
+    }
+
+    // Shop: product cards and prices.
+    .oe_product_cart, .o_wsale_product_grid_wrapper .card { border-radius: 0; }
+    .oe_product_cart .o_wsale_products_item_title a { color: #111111; }
+    .oe_currency_value, .product_price .oe_price { color: #111111; font-weight: 700; }
+    .o_wsale_products_main_row .o_wsale_filmstip_wrapper .active, .o_wsale_products_main_row .list-group-item.active {
+        background-color: #111111; border-color: #111111;
+    }
+    .o_footer_copyright { background: #000000 !important; border-top: 1px solid #2a2a2a; color: #9a9a9a !important; }
+    .o_footer_copyright a, .o_footer_copyright span { color: #9a9a9a !important; }
+}
+
+.to-footer {
+    background: #111111;
+    border-top: 4px solid #D4AF37;
+    color: #cfcfcf;
+    padding: 4.5rem 0 3.5rem;
+
+    h5 { color: #D4AF37; font-size: .78rem; font-weight: 700; letter-spacing: .18em; margin-bottom: 1.2rem; text-transform: uppercase; }
+    a { color: #FFFFFF; text-decoration: none; }
+    a:hover { color: #D4AF37; }
+    ul li { margin-bottom: .55rem; }
+    &__brand { color: #FFFFFF; font-family: Georgia, "Times New Roman", serif; font-size: 1.9rem; line-height: 1.1; margin-bottom: 1rem; }
+    &__brand strong { font-weight: 700; letter-spacing: .02em; }
+    &__brand span { color: #D4AF37; display: block; font-family: "Helvetica Neue", Arial, sans-serif; font-size: .8rem; letter-spacing: .35em; margin-top: .35rem; }
+    &__tagline { color: #FFFFFF; margin-bottom: .35rem; }
+    &__motto { color: #9a9a9a; font-style: italic; margin-bottom: 1.5rem; }
+    &__tiktok { border: 1px solid #D4AF37; display: inline-block; font-size: .8rem; font-weight: 700; letter-spacing: .06em; padding: .6rem 1rem; }
+    &__branches li { border-bottom: 1px solid #2a2a2a; display: grid; gap: .1rem 1rem; grid-template-columns: 1fr auto; padding-bottom: .55rem; }
+    &__branches small { color: #8f8f8f; grid-column: 1 / -1; }
+    &__branch { font-weight: 700; }
+}
+
+.to-contact-branches h5 { font-family: Georgia, "Times New Roman", serif; font-size: 1.5rem; margin-bottom: 1.25rem; }
+.to-contact-branch { border-left: 3px solid #D4AF37; margin-bottom: 1rem; padding-left: .85rem; }
+.to-contact-branch a { color: #111111; font-weight: 600; text-decoration: none; }
+.to-contact-branch a:hover { color: #b8952a; }
+
+@media (max-width: 575px) {
+    .to-footer__branches li { grid-template-columns: 1fr; }
+}

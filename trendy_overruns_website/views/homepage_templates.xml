@@ -7,24 +7,8 @@
         homepage and the Branches page.
     -->
     <template id="branch_cards" name="Trendy Overruns Branch Cards">
-        <!-- Telephone/mobile marked "to follow" are left out until they are known. -->
-        <t t-set="branches" t-value="[
-            {'key': 'lilac', 'name': 'Lilac – Marikina', 'address': '106 Lilac St, Concepcion Dos, Marikina City, 1811 Metro Manila',
-             'oic': '', 'phone': '7720-5279', 'phone_href': '+63277205279', 'mobile': '', 'mobile_href': '',
-             'hours': '12:00 PM – 9:00 PM (Daily)'},
-            {'key': 'katipunan', 'name': 'Katipunan – Quezon City', 'address': 'Ext, 226 Katipunan Ave, Project 4, Quezon City, 1800 Metro Manila',
-             'oic': 'Anne Banadera', 'phone': '7791-1976', 'phone_href': '+63277911976', 'mobile': '0963-296-2332', 'mobile_href': '+639632962332',
-             'hours': '12:00 PM – 9:00 PM (Daily)'},
-            {'key': 'tomas-morato', 'name': 'Tomas Morato – Quezon City', 'address': 'Corner Tomas Morato Ave, Diliman, Quezon City, Metro Manila',
-             'oic': 'Chen Rongcales', 'phone': '7-944-6449', 'phone_href': '+63279446449', 'mobile': '0964-183-4408', 'mobile_href': '+639641834408',
-             'hours': '12:00 PM – 9:00 PM'},
-            {'key': 'fairview', 'name': 'Fairview – Quezon City', 'address': 'Lot 8, Blk 11, Dahlia Ave, West Fairview, Quezon City, Metro Manila',
-             'oic': 'Phi Divad', 'phone': '(02) 7254-0989', 'phone_href': '+63272540989', 'mobile': '0927-372-8172', 'mobile_href': '+639273728172',
-             'hours': '12:00 PM – 9:00 PM (Daily)'},
-            {'key': 'valenzuela', 'name': 'Valenzuela', 'address': 'Unit 17-B, 2/F Valtown Center, Valenzuela',
-             'oic': 'Amegin Suarez', 'phone': '8511-5559', 'phone_href': '+63285115559', 'mobile': '0946-799-6406', 'mobile_href': '+639467996406',
-             'hours': '11:00 AM – 8:00 PM (Daily)'},
-        ]"/>
+        <!-- Branch details: Website._to_branches() (models/website.py). -->
+        <t t-set="branches" t-value="website._to_branches()"/>
         <t t-set="img" t-value="'/trendy_overruns_website/static/src/img/branches/'"/>
         <div class="row g-4">
             <t t-foreach="branches" t-as="branch">
@@ -43,8 +27,8 @@
                             <p class="to-branch-card__address" t-out="branch['address']"/>
                             <dl class="to-branch-card__details">
                                 <t t-if="branch['oic']"><dt>OIC</dt><dd t-out="branch['oic']"/></t>
-                                <dt>Telephone</dt><dd><a t-att-href="'tel:' + branch['phone_href']" t-out="branch['phone']"/></dd>
-                                <t t-if="branch['mobile']"><dt>Mobile</dt><dd><a t-att-href="'tel:' + branch['mobile_href']" t-out="branch['mobile']"/></dd></t>
+                                <dt>Telephone</dt><dd><a t-att-href="branch['phone_href']" t-out="branch['phone']"/></dd>
+                                <t t-if="branch['mobile']"><dt>Mobile</dt><dd><a t-att-href="branch['mobile_href']" t-out="branch['mobile']"/></dd></t>
                                 <dt>Store Hours</dt><dd t-out="branch['hours']"/>
                             </dl>
                             <a t-if="compact" class="to-text-link" t-att-href="'/branches#' + branch['key']">Branch details <span aria-hidden="true">→</span></a>
@@ -61,7 +45,7 @@
                 <p class="to-eyebrow">FOLLOW US</p>
                 <h2>See the newest finds first.</h2>
                 <p class="to-social__lead">New arrivals, styling ideas and branch drops on TikTok.</p>
-                <a class="btn to-btn-gold" href="https://www.tiktok.com/@trendyoverruns_boutique" target="_blank" rel="noopener">
+                <a class="btn to-btn-gold" t-att-href="website._to_tiktok_url()" target="_blank" rel="noopener">
                     @trendyoverruns_boutique on TikTok
                 </a>
             </div>
