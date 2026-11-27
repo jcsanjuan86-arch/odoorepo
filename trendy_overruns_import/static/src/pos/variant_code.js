@@ -25,8 +25,11 @@ patch(ProductScreen.prototype, {
             const text = input?.tagName === "INPUT" ? input.value.trim() : "";
             if (event.key === "Enter" && VARIANT_CODE.test(text) && input.closest(".pos-rightheader")) {
                 if (await this.addDisloqVariant(text)) {
-                    this.pos.searchProductWord = "";
-                    input.value = "";
+                    // The search box writes its text back after a 500 ms debounce; clear after that.
+                    setTimeout(() => {
+                        this.pos.searchProductWord = "";
+                        input.value = "";
+                    }, 600);
                 }
             }
         });
